@@ -100,6 +100,7 @@ clean: F += $(libasncodec_la_SOURCES)
 clean: F += $(libasncodec_la_OBJECTS)
 clean: F += $(lib_LTLIBRARIES)
 clean: F += $(ASN1_MAKEFILE)
+clean: F += nexoconf.o
 clean: D += $(ASN1_GENERATED_DIR)
 
 $(ASN1_MAKEFILE): $(wildcard asn1/*.asn1)
