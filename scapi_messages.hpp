@@ -14,16 +14,16 @@ extern "C" {
 namespace scapi {
 
     struct Nak {
-        enum NokReason nokReason;
-        ::std::optional<enum TerminalErrorReason> terminalErrorReason;
+        enum ::NokReason nokReason;
+        ::std::optional<enum ::TerminalErrorReason> terminalErrorReason;
     };
 
     struct UpdateInterfaces {
-        enum InterfaceStatus interfaceStatus;
+        enum ::InterfaceStatus interfaceStatus;
     };
 
     struct PrintMessage {
-        enum Receipt type;
+        enum ::PrintMessage type;
         void* extraData;
     };
 
@@ -31,7 +31,7 @@ namespace scapi {
     };
 
     struct ServiceSelection {
-        enum ServiceId serviceId;
+        enum ::ServiceId serviceId;
     };
 
     typedef ::std::variant<
@@ -40,8 +40,8 @@ namespace scapi {
     > Event;
 
     typedef ::std::variant<
-        enum CardholderMessage // msg
-      , enum CardholderMessage // ssn
+        enum ::CardholderMessage // msg
+      , enum ::CardholderMessage // ssn
     > Interaction;
 
     typedef ::std::variant<
