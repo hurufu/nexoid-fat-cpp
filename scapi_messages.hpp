@@ -6,7 +6,6 @@ extern "C" {
 }
 
 #include <memory>
-#include <set>
 #include <variant>
 #include <optional>
 #include <vector>
@@ -46,9 +45,9 @@ namespace scapi {
 
     typedef ::std::variant<
         UpdateInterfaces // updateInterfaces
-      , ::std::set<Interaction> // output
+      , ::std::vector<Interaction> // output
       , PrintMessage // print
-      , ::std::set<Interaction> // entry
+      , ::std::vector<Interaction> // entry
     > Request;
 
     typedef ::std::variant<
