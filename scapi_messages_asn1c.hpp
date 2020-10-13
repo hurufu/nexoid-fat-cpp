@@ -7,5 +7,5 @@
 ::std::vector<unsigned char>
 encode(const ::scapi::socket::Request&);
 
-const ::scapi::socket::Response&
+::scapi::socket::Response
 decode(const ::std::vector<unsigned char>&);
