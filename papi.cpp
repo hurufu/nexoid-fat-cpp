@@ -1,11 +1,37 @@
+#include "scapi_socket_session.hpp"
+#include "scapi_internal.hpp"
+
 extern "C" {
 #include <nexoid/papi.h>
 #include <nexoid/gtd.h>
 }
 
-enum PapiResult
-papi_Proprietary_Startup_Sequence(void) {
+#include <stdexcept>
+#include <iostream>
+
+using namespace std;
+
+static PapiResult
+papi_handle_exception(void) noexcept try {
+    ttd.terminalErrorIndicator = true;
+    throw;
+} catch (const exception& e) {
+    ttd.terminalErrorReason = TE_UNSPECIFIED;
     return PAPI_NOK;
+} catch (...) {
+    ttd.terminalErrorReason = TE_UNSPECIFIED;
+    return PAPI_NOK;
+}
+
+enum PapiResult
+papi_Proprietary_Startup_Sequence(void) noexcept try {
+    if (scapi_Initialize() != SCAPI_OK) {
+        cout << "SCAPI Initialization failed" << endl;
+        return PAPI_NOK;
+    }
+    return PAPI_OK;
+} catch (...) {
+    return papi_handle_exception();
 }
 
 enum ProcedureResult

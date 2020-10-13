@@ -1,5 +1,11 @@
 #include "scapi_socket_session.hpp"
 
+#include "scapi_internal.hpp"
+
+#include <ScapiNotification.h>
+#include <ScapiRequest.h>
+#include <ScapiResponse.h>
+
 extern "C" {
 #include <nexoid/scapi.h>
 #include <nexoid/gtd.h>
@@ -30,6 +36,16 @@ handle_exception(void) noexcept try {
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
     return SCAPI_NOK;
+}
+
+ScapiResult
+scapi_Initialize(void) {
+    return SCAPI_OK;
+}
+
+ScapiResult
+scapi_Finalize(void) {
+    return SCAPI_OK;
 }
 
 extern "C" ScapiResult

@@ -4,5 +4,5 @@ extern "C" {
 
 enum TmapiResult
 tmapi_Perform_Terminal_Managment_Session(void) {
-    return TMAPI_NOK;
+    return TMAPI_OK;
 }

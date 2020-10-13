@@ -40,7 +40,7 @@ hapi_SearchReservationsByRefData(void) {
 
 enum HapiResult
 hapi_Status(void) {
-    return HAPI_NOK;
+    return HAPI_OK;
 }
 
 enum HapiResult

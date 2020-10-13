@@ -39,10 +39,13 @@ include $(ASN1_MAKEFILE)
 
 .PHONY: all most_frequent FORCE
 most_frequent: run index
-all: $(EXECUTABLE) .syntastic_c_config
+all: $(EXECUTABLE) .syntastic_cpp_config
 
-$(EXECUTABLE): $(SOURCES) $(LIBNEXOID_PATH)
+$(EXECUTABLE): $(SOURCES) $(LIBNEXOID_PATH) nexoconf.o
 	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) $(LDFLAGS) $^ $(LDLIBS)
+
+nexoconf.o: nexoconf.c
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASMFLAGS) $^
 
 .PHONY: run
 run: $(EXECUTABLE)
@@ -81,7 +84,7 @@ trace: trace.log
 trace.log: $(EXECUTABLE) FORCE
 	-./$< >/dev/null
 
-.syntastic_c_config:
+.syntastic_cpp_config:
 	echo $(CPPFLAGS) $(CFLAGS) -fdiagnostics-color=never | tr ' ' '\n' > $@
 
 .PHONY: cg
