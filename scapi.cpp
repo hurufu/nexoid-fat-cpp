@@ -1,10 +1,6 @@
 #include "scapi_socket_session.hpp"
-
 #include "scapi_internal.hpp"
-
-#include <ScapiNotification.h>
-#include <ScapiRequest.h>
-#include <ScapiResponse.h>
+#include "scapi_messages_asn1c.hpp"
 
 extern "C" {
 #include <nexoid/scapi.h>
@@ -19,12 +15,7 @@ extern "C" {
 
 using namespace std;
 
-static unique_ptr<ScapiSocketSession> s_scapi;
-
-void*
-make_interaction_request(const size_t size, const CardholderMessage msg[]) {
-    return NULL;
-}
+static unique_ptr<::scapi::Session> s_scapi;
 
 static ScapiResult
 handle_exception(void) noexcept try {
@@ -40,16 +31,20 @@ handle_exception(void) noexcept try {
 
 ScapiResult
 scapi_Initialize(void) {
+    s_scapi = make_unique<scapi::socket::Session>();
     return SCAPI_OK;
 }
 
 ScapiResult
 scapi_Finalize(void) {
+    delete s_scapi.release();
     return SCAPI_OK;
 }
 
 extern "C" ScapiResult
 scapi_Update_Interfaces(const InterfaceStatus status) noexcept try {
+    const scapi::Request req;
+    const auto rsp = s_scapi->interaction(req);
     return SCAPI_OK;
 } catch (...) {
     return handle_exception();
@@ -64,7 +59,7 @@ scapi_Data_Entry_Interaction(size_t size, const CardholderMessage msg[]) noexcep
 
 extern "C" ScapiResult
 scapi_Data_Output_Interaction(const size_t size, const CardholderMessage msg[]) noexcept try {
-    const auto request = make_interaction_request(size, msg);
+    const scapi::Request request;
     const auto response = s_scapi->interaction(request);
     if (!response) {
         throw runtime_error("Unexpected reponse type");

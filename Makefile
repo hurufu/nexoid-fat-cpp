@@ -24,6 +24,7 @@ CPPFLAGS            += -I/usr/local/include/nexoid
 CPPFLAGS            += -I$(ASN1_GENERATED_DIR)
 CPPFLAGS            += -I/usr/share/asn1c
 CXXFLAGS              := -g$(DL) -O$(OL)
+CXXFLAGS              += -std=c++17
 CXXFLAGS              += $(addprefix -W,$(WARNINGS))
 CXXFLAGS              += $(addprefix -f,$(GCC_FEATURES))
 CXXFLAGS              += $(if $(USE_COLOR),-fdiagnostics-color=always,)

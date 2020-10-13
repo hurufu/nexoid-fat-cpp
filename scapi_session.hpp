@@ -1,10 +1,18 @@
 #pragma once
 
-class ScapiSession {
-public:
-    virtual ~ScapiSession(void) noexcept = default;
-    virtual void* interaction(void*) const = 0;
-    virtual void* notification(void) const = 0;
+#include "scapi_messages.hpp"
 
-    const ScapiSession& get(void) const;
-};
+namespace scapi {
+
+    class Session {
+    public:
+        virtual ~Session(void) noexcept = default;
+
+        virtual ::std::unique_ptr<::scapi::Response>
+        interaction(const ::scapi::Request&) const = 0;
+
+        virtual ::std::unique_ptr<::scapi::Notification>
+        notification(void) const = 0;
+    };
+
+}

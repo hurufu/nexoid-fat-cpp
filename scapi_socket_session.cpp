@@ -1,15 +1,20 @@
 #include "scapi_socket_session.hpp"
 
-ScapiSocketSession::ScapiSocketSession(void) {
+using namespace ::scapi::socket;
+
+Session::Session(void) {
 }
 
-ScapiSocketSession::~ScapiSocketSession(void) noexcept {
+Session::~Session(void) noexcept {
 }
 
-void* ScapiSocketSession::interaction(void*) const {
-    return nullptr;
+
+std::unique_ptr<::scapi::Response>
+Session::interaction(const ::scapi::Request&) const {
+    return std::make_unique<::scapi::Response>();
 }
 
-void* ScapiSocketSession::notification(void) const {
-    return nullptr;
+std::unique_ptr<::scapi::Notification>
+Session::notification(void) const {
+    return std::make_unique<::scapi::Notification>();
 }
