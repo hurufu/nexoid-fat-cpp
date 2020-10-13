@@ -218,8 +218,7 @@ scapi_Data_Print_Interaction(const PrintMessage m) noexcept try {
 
 extern "C" ScapiResult
 scapi_Data_Output_Interaction(const size_t size, const CardholderMessage msg[]) noexcept try {
-    scapi::Request req;
-    req.emplace<1>(create_interaction_vector(size, msg));
+    const scapi::Request req(std::in_place_index<1>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
     return (rsp->index() == 1) ? SCAPI_OK : handle_bad_response(*rsp);
 } catch (...) {
@@ -228,8 +227,7 @@ scapi_Data_Output_Interaction(const size_t size, const CardholderMessage msg[]) 
 
 extern "C" ScapiResult
 scapi_Data_Entry_Interaction(size_t size, const CardholderMessage msg[]) noexcept try {
-    scapi::Request req;
-    req.emplace<3>(create_interaction_vector(size, msg));
+    const scapi::Request req(std::in_place_index<3>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
     if (rsp->index() != 2) {
         return handle_bad_response(*rsp);
