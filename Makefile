@@ -43,7 +43,7 @@ include $(ASN1_MAKEFILE)
 most_frequent: run index
 all: $(EXECUTABLE) .syntastic_cpp_config
 
-$(EXECUTABLE): $(SOURCES) $(LIBNEXOID_PATH) nexoconf.o
+$(EXECUTABLE): $(SOURCES) $(LIBNEXOID_PATH) nexoconf.o $(lib_LTLIBRARIES)
 	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) $(LDFLAGS) $^ $(LDLIBS)
 
 nexoconf.o: nexoconf.c
@@ -95,8 +95,6 @@ cg.png:
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fdump-rtl-expand $(SOURCES) $(LIBNEXOID_PATH) $(LDLIBS)
 	egypt *.expand | sed '8irankdir="LR"' | dot -Tpng > callgraph.png
 
-clean: F += $(libasncodec_la_SOURCES)
-clean: F += $(libasncodec_la_OBJECTS)
 clean: F += $(libasncodec_la_SOURCES)
 clean: F += $(libasncodec_la_OBJECTS)
 clean: F += $(lib_LTLIBRARIES)
