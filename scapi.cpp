@@ -14,7 +14,6 @@ extern "C" {
 #include <vector>
 #include <iostream>
 #include <memory>
-#include <cstring>
 
 using namespace std;
 
@@ -30,7 +29,7 @@ handle_exception(void) noexcept try {
     return SCAPI_NOK;
 } catch (const libsocket::socket_exception& e) {
     ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " SCAP connectivity related exception suppressed: " << strerror(e.err) << '\n' << e.mesg << endl;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " SCAP connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
     return SCAPI_NOK;
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
