@@ -8,10 +8,13 @@ extern "C" {
 #include <nexoid/dmapi.h>
 }
 
+#include <libsocket/exception.hpp>
+
 #include <stdexcept>
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <cstring>
 
 using namespace std;
 
@@ -23,9 +26,15 @@ handle_exception(void) noexcept try {
     throw;
 } catch (const exception& e) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
+    return SCAPI_NOK;
+} catch (const libsocket::socket_exception& e) {
+    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " SCAP connectivity related exception suppressed: " << strerror(e.err) << '\n' << e.mesg << endl;
     return SCAPI_NOK;
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
     return SCAPI_NOK;
 }
 

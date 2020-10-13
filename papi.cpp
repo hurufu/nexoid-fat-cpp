@@ -6,6 +6,7 @@ extern "C" {
 #include <nexoid/gtd.h>
 }
 
+#include <cstring>
 #include <stdexcept>
 #include <iostream>
 
@@ -17,9 +18,15 @@ papi_handle_exception(void) noexcept try {
     throw;
 } catch (const exception& e) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
+    return PAPI_NOK;
+} catch (const libsocket::socket_exception& e) {
+    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Connectivity related exception suppressed: " << strerror(e.err) << '\n' << e.mesg << endl;
     return PAPI_NOK;
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
+    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
     return PAPI_NOK;
 }
 
