@@ -31,6 +31,7 @@ CXXFLAGS              += $(if $(USE_COLOR),-fdiagnostics-color=always,)
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
+LDLIBS              := -lsocket++
 
 # Commands ####################################################################
 MIMEOPEN            := mimeopen

@@ -2,12 +2,13 @@
 
 using namespace ::scapi::socket;
 
-Session::Session(void) {
+Session::Session(void)
+    : stream("localhost", "50153", LIBSOCKET_BOTH) {
 }
 
 Session::~Session(void) noexcept {
+    stream.shutdown(LIBSOCKET_READ | LIBSOCKET_WRITE);
 }
-
 
 std::unique_ptr<::scapi::Response>
 Session::interaction(const ::scapi::Request&) const {
