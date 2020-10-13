@@ -73,5 +73,10 @@ namespace scapi {
           , NotificationRequest
         > Request;
 
+        typedef ::std::variant<
+            ::scapi::Response
+          , ::scapi::Notification
+        > Response;
+
     }
 }

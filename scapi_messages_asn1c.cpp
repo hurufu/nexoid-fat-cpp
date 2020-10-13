@@ -4,9 +4,16 @@
 #include <ScapiRequest.h>
 #include <ScapiResponse.h>
 
-void encode() {
+#include <stdexcept>
 
+using namespace std;
+
+vector<unsigned char>
+encode(const ::scapi::socket::Request&) {
+    throw runtime_error("Not implemented");
 }
 
-void decode() {
+const ::scapi::socket::Response&
+decode(const vector<unsigned char>&) {
+    throw runtime_error("Not implemented");
 }
