@@ -1,0 +1,427 @@
+Scapi
+
+DEFINITIONS IMPLICIT TAGS ::= BEGIN
+
+    -- Notification from SCAP to nexoid core
+    ScapiNotification ::= SEQUENCE {
+        events [2] ScapiEventSequence
+    }
+
+    -- Request from nexoid core to SCAP
+    ScapiRequest ::= CHOICE {
+        updateInterfaces [0] ScapiUpdateInterfaces,
+        output [1] SET OF ScapiInteraction,
+        print [2] ScapiPrintMessage,
+        entry [3] SET OF ScapiInteraction,
+        authoriseService [4] NULL
+    }
+
+    -- Response to the request
+    ScapiResponse ::= CHOICE {
+        nak [0] ScapiNak,
+        ack [1] NULL,
+        ackEntry [2] SEQUENCE OF ScapiDataEntryIntercation,
+        ackServiceAuthorised [3] BOOLEAN
+    }
+
+    ScapiNak ::= SEQUENCE {
+        nokReason [0] NexoNokReason OPTIONAL,
+        terminalErrorReason [1] NexoTerminalErrorReason OPTIONAL
+    }
+
+    ScapiEventSequence ::= SEQUENCE OF ScapiEvent
+
+    ScapiUpdateInterfaces ::= SEQUENCE {
+        interfaceStatus [0] ScapiInterfaceStatus
+    }
+
+    ScapiInterfaceStatus ::= BIT STRING {
+        interfaceDisableAll(0),
+        interfaceChipReader(1),
+        interfaceMagneticStripeReader(2),
+        interfaceAttendantNumericKeypad(3),
+        interfaceAttendantFKeyManualEntry(4),
+        interfaceAttendantFKeyReferenceEntry(5),
+        interfaceAttendantFKeyAccept(6),
+        interfaceContactlessReader(7),
+        interfaceCardholderDetect(8)
+    }
+
+    ScapiEvent ::= CHOICE {
+        languageSelection [3] ScapiEventLanguageSelection,
+        serviceSelection [4] ScapiEventServiceSelection,
+        manualEntry [5] ScapiEventManualEntry
+    }
+
+    ScapiEventLanguageSelection ::= SEQUENCE {
+        language [13] Iso639
+    }
+
+    ScapiEventServiceSelection ::= SEQUENCE {
+        serviceId [PRIVATE 14] ServiceIdentifier
+    }
+
+    ScapiPrintMessage ::= SEQUENCE {
+        type ScapiReceiptType,
+        extraData SEQUENCE OF ANY OPTIONAL -- Based on Receipt DOL
+    }
+
+    ScapiReceiptType ::= ENUMERATED {
+        merchantReceipt(0),
+        cardholderReceipt(1)
+    }
+
+    ScapiInteraction ::= CHOICE {
+        msg [0] ScapiCardholderMesage,
+        ssn [1] ScapiSaleSystemNotification,
+        uiParametersForOutcome [128] ScapiUiParameters,
+        uiParametersForRestart [129] ScapiUiParameters,
+        uiParametersForCompletion [130] ScapiUiParameters,
+        uiParametersForOutcomeStatusOnly [135] ScapiUiParameters,
+        declineDisplayMessage [131] UTF8String (SIZE(0..40)),
+        cardholderMessage [133] UTF8String, -- FIXME: Probably should be removed
+        applicationLabelDisplayed [136] UTF8String (SIZE(1..16)), -- TODO: Only 'space' should be allowed as a special character
+        commandKeyEnterLabel [138] NexoCommandKey,
+        commandKeyChangeApplicationLabel [141] NexoCommandKey,
+        commandKeyPinBypassLabel [144] NexoCommandKey,
+        paymentAmount [137] NexoAmount,
+        trxAmount [140] NexoAmount,
+        cashbackAmount [142] NexoAmount,
+        supplementaryAmount [143] NexoAmount,
+        trxCurrencyAlpha3 [139] Iso4217,
+        selectedService [132] ServiceIdentifier,
+        nokReason [134] NexoNokReason,
+        searchTrxResultList [145] SEQUENCE OF ScapiSearchTrxResult,
+        updatePreAuthTotalAmount [146] NexoAmount,
+        minus [147] BOOLEAN
+    }
+
+    ScapiUiParameters ::= SET {
+        msg [0] ScapiCardholderMesage,
+        status [1] ScapiCtlsIndicatorStatus,
+        holdTime [2] INTEGER (0..999999),
+        languagePreference [3] Iso639 OPTIONAL,
+        valueQualifier [4] ScapiValueQualifier,
+        value [5] NexoAmount,
+        currencyCode [6] Iso4217
+    }
+
+    ScapiSearchTrxResult ::= SEQUENCE {
+        entryReference [1] INTEGER (0..99),
+        selectedService [2] ServiceIdentifier,
+        trxAmount [3] NexoAmount,
+        transactionDate [4] NexoDate,
+        transactionTime [5] NexoTime,
+        transactionResult [6] NexoTransactionResult,
+        panMasked [7] PanMasked,
+        applicationPanSequenceNumber [8] INTEGER (0..99) OPTIONAL,
+        authorisationCode [9] OCTET STRING (SIZE(6)) OPTIONAL,
+        preAuthValidityNumberOfDays [10] INTEGER (0..999) OPTIONAL,
+        cancellationHasToBePerformedOnline [11] BOOLEAN OPTIONAL,
+        applicationProfileNumber [12] INTEGER (0..99),
+        entryExpired [13] BOOLEAN OPTIONAL,
+        updatePreAuthTotalAmount [14] NexoAmount OPTIONAL
+    }
+
+    ScapiValueQualifier ::= ENUMERATED {
+        uiValueQualifierNone,
+        uiValueQualifierAmount,
+        uiValueQualifierBalance
+    }
+
+    ScapiCtlsIndicatorStatus ::= ENUMERATED {
+        ctlsStatusNone,
+        ctlsStatusNotReady,
+        ctlsStatusIdle,
+        ctlsStatusReadyToRead,
+        ctlsStatusProcessing,
+        ctlsStatusCardReadSuccessfully,
+        ctlsStatusProcessingError
+    }
+
+    ScapiCardholderMesage ::= ENUMERATED {
+        crdhldrActNone(0),
+        crdhldrEmvApproved(3),
+        crdhldrEmvVoiceAuthRequired(4),
+        crdhldrEmvCardError(6),
+        crdhldrEmvDeclined(7),
+        crdhldrEmvIncorrectPin(10),
+        crdhldrEmvInsertCard(11),
+        crdhldrEmvPleaseWait(14),
+        crdhldrEmvProcessingError(15),
+        crdhldrEmvRemoveCard(16),
+        crdhldrEmvUseChipReader(17),
+        crdhldrEmvUseMagStripe(18),
+        crdhldrEmvTryAgain(19),
+        crdhldrMsgWelcome(20),
+        crdhldrMsgPresentCard(21),
+        crdhldrMsgProcessing(22),
+        crdhldrMsgCardReadOkRemoveCard(23),
+        crdhldrMsgPleaseInsertOrSwipeCard(24),
+        crdhldrMsgPleaseInsertOneCardOnly(25),
+        crdhldrMsgApprovedPleaseSign(26),
+        crdhldrMsgAuthorisingPleaseWait(27),
+        crdhldrMsgInsertSwipeOrTryAnotherCard(28),
+        crdhldrMsgPleaseInsertCard(29),
+        crdhldrActClear(30),
+        crdhldrMsgSeePhoneForInstructions(32),
+        crdhldrMsgPresentCardAgain(33),
+        crdhldrEntEnterPan(176),
+        crdhldrEntEnterExpiryDate(177),
+        crdhldrEntCvdPresence(178),
+        crdhldrEntCvd(179),
+        crdhldrEntDccConfirmation(180),
+        crdhldrMsgEnterPin(196),
+        crdhldrMsgCardWrongWayOrNoChip(192),
+        crdhldrMsgReadError(193),
+        crdhldrMsgAmount(194),
+        crdhldrMsgMaxAmount(195),
+        crdhldrMsgEnter(197),
+        crdhldrMsgAmountAuthorised(198),
+        crdhldrMsgLeftToBePaid(199),
+        crdhldrMsgTransactionAborted(201),
+        crdhldrMsgPaymentApprovedCashbackDeclined(209),
+        crdhldrMsgChipErrorReEnterPin(211),
+        crdhldrMsgPresentCardOrUseMagstripe(212),
+        crdhldrMsgInsertOrPresentCard(213),
+        crdhldrMsgInsertOrSwipeCard(217),
+        crdhldrMsgNoPin(218),
+        crdhldrMsgDifferentChoice(219),
+        crdhldrMsgChooseApplication(220),
+        crdhldrMsgAmountEstimated(221),
+        crdhldrMsgFinalAmount(222),
+        crdhldrMsgAmountIncrement(223),
+        crdhldrMsgAmountDecrement(224),
+        crdhldrMsgPrinterOutOfOrder(225),
+        crdhldrMsgTip(226),
+        crdhldrMsgCashback(227),
+        crdhldrMsgPayment(228),
+        crdhldrMsgTotal(229),
+        crdhldrMsgRequestSignature(50),
+        crdhldrMsgReceiptPrintingFailed(51),
+        crdhldrMsgTerminalManagmentInProgress(52),
+        crdhldrMsgForceTransactionApproval(53)
+    }
+
+    ScapiSaleSystemNotification ::= ENUMERATED {
+        crdhldrSsnCardRemovalRequested(160),
+        crdhldrSsnCardRemoved(161),
+        crdhldrSsnRequestSignature(162),
+        crdhldrSsnReceiptPrintingFailed(163)
+    }
+
+    ScapiDataEntryIntercation ::= CHOICE {
+        pan [0] Pan,
+        cvd [1] Cvd,
+        cvdPresence [2] ScapiCvdPresence,
+        pin [10] ScapiCardholderEnterPin,
+        expirationDate [36] ScapiExpirationDate
+    }
+
+    ScapiCardholderEnterPin ::= SEQUENCE {
+        pinPadNotWorking BOOLEAN,
+        pinEntryBypassed BOOLEAN,
+        cardholderRequestedChangeOfApplication BOOLEAN,
+        pinData ScapiPinData
+    }
+
+    ScapiPinData ::= CHOICE {
+        plainTextPin [0] NumericString (SIZE(4..12)),
+        opaquePinData [1] OCTET STRING
+    }
+
+    ServiceIdentifier ::= ENUMERATED {
+        none(0),
+        payment(1),
+        refund(2),
+        cancellation(3),
+        preauth(4),
+        updatePreauth(5),
+        completion(6),
+        cashAdvance(7),
+        deferredPayment(8),
+        deferredPaymentCompletion(9),
+        voiceAuthorisation(16),
+        cardholderDetection(17),
+        cardValidityCheck(18),
+        noShow(19)
+    }
+
+    ScapiEventManualEntry ::= SEQUENCE {
+        pan [90] Pan,
+        expirationDate [89] ScapiExpirationDate,
+        cvdData [1] CvdData OPTIONAL
+    }
+
+    CvdData ::= CHOICE {
+        cvd [0] Cvd,
+        cvdPresence [1] ScapiCvdPresence
+    }
+
+    Pan ::= UTF8String (SIZE(16..19))
+
+    PanMasked ::= OCTET STRING (SIZE(0..10))
+
+    ScapiExpirationDate ::= SEQUENCE {
+        year INTEGER (0..99),
+        month INTEGER (0..99)
+    }
+
+    NexoDate ::= SEQUENCE {
+        year INTEGER (0..99),
+        month INTEGER (1..12),
+        day INTEGER (1..31)
+    }
+
+    NexoTime ::= SEQUENCE {
+        hours INTEGER (0..23),
+        minutes INTEGER (0..59),
+        seconds INTEGER (0..59)
+    }
+
+--  Enum `cvdPresent(1) isn't needed, because presence of cvd field implies
+--  that it's present :)
+    ScapiCvdPresence ::= ENUMERATED {
+        cvdEntryBypassed(0),
+        cvdIllegible(2),
+        cvdNotPresent(3)
+    }
+
+    NexoAmount ::= INTEGER(0..999999999999)
+
+    Cvd ::= CBCD (SIZE(2))
+
+    -- Common types
+
+    CBCD ::= OCTET STRING
+
+    BCD ::= OCTET STRING
+
+    Iso4217 ::= UTF8String (SIZE(3))
+
+    Iso639 ::= UTF8String
+     (SIZE(2))
+--      (
+-- "aa" | "ab" | "af" | "ak" | "am" | "an" | "ar" | "as" | "av" | "ay" | "az" | "ba" | "be" | "bg" | "bh" | "bi" |
+-- "bm" | "bn" | "bo" | "br" | "bs" | "ca" | "ce" | "ch" | "co" | "cr" | "cs" | "cu" | "cv" | "cy" | "da" | "de" |
+-- "dv" | "dz" | "ee" | "el" | "en" | "eo" | "es" | "et" | "eu" | "fa" | "ff" | "fi" | "fj" | "fo" | "fr" | "fy" |
+-- "ga" | "gd" | "gl" | "gn" | "gu" | "gv" | "ha" | "he" | "hi" | "ho" | "hr" | "ht" | "hu" | "hy" | "hz" | "ia" |
+-- "id" | "ie" | "ig" | "ii" | "ik" | "io" | "is" | "it" | "iu" | "ja" | "jv" | "ka" | "kg" | "ki" | "kj" | "kk" |
+-- "kl" | "km" | "kn" | "ko" | "kr" | "ks" | "ku" | "kv" | "kw" | "ky" | "la" | "lb" | "lg" | "li" | "ln" | "lo" |
+-- "lt" | "lu" | "lv" | "mg" | "mh" | "mi" | "mk" | "ml" | "mn" | "mo" | "mr" | "ms" | "mt" | "my" | "na" | "no" |
+-- "nb" | "nn" | "ne" | "ng" | "nl" | "nd" | "nr" | "nv" | "ny" | "oc" | "oj" | "om" | "or" | "os" | "pa" | "pi" |
+-- "pl" | "ps" | "pt" | "qu" | "rm" | "rn" | "ro" | "ru" | "rw" | "sa" | "sc" | "sd" | "se" | "sg" | "sh" | "si" |
+-- "sk" | "sl" | "sm" | "sn" | "so" | "sq" | "sr" | "ss" | "st" | "su" | "sv" | "sw" | "ta" | "te" | "tg" | "th" |
+-- "ti" | "tk" | "tl" | "tn" | "to" | "tr" | "ts" | "tt" | "tw" | "ty" | "ug" | "uk" | "ur" | "uz" | "ve" | "vi" |
+-- "vo" | "wa" | "wo" | "xh" | "yi" | "yo" | "za" | "zh" | "zu"
+--      )
+
+    NexoNokReason ::= ENUMERATED {
+        none,
+        notImplemented,
+        originalTrxNotFound,
+        technicalError,
+        missingData,
+        confError,
+        noPermission,
+        configurationError,
+        amountError,
+        kernelError,
+        dataError,
+        noCardInserted,
+        cancelled,
+        aborted,
+        timeout,
+        cardMissing,
+        chipError,
+        noProfile,
+        fallbackProhibited,
+        technologyNotSupported,
+        gpo6985,
+        cardBlocked,
+        emptyList
+    }
+
+    NexoTerminalErrorReason ::= ENUMERATED {
+        -- Specified in NEXO
+        none,
+        hardwareError,
+        memoryFailure,
+        configurationError,
+        cryptographicKeysMissing,
+        logLimitExceeded,
+        communicationError,
+        unspecified,
+        nexoFastFailure,
+        interactionError,
+        overspend,
+
+        -- Not specified in NEXO
+        notImplemented,
+        interfaceContractViolation,
+        internalError
+    }
+
+    NexoTransactionResult ::= ENUMERATED {
+        none(153),
+        approved(0),
+        declined(1),
+        aborted(2),
+        voiceAuthorisation(3),
+        paymentPartOnly(4),
+        partiallyApproved(5)
+    }
+
+    NexoCommandKey ::= UTF8String (SIZE(0..5))
+
+    example1 ScapiNotification ::= {
+        events {
+            languageSelection: {
+                language "pl"
+            }
+        }
+    }
+
+    example2 ScapiNotification ::= {
+        events {
+            languageSelection: {
+                language "pl"
+            },
+            serviceSelection: {
+                serviceId cardValidityCheck
+            },
+            manualEntry: {
+                panData {
+                    pan "1234567812345678123",
+                    expirationDate {
+                        year 22,
+                        month 12
+                    }
+                },
+                cvdData cvd: '888F'H
+            }
+        }
+    }
+
+    example3 ScapiNotification ::= {
+        events {
+            languageSelection: {
+                language "pl"
+            },
+            serviceSelection: {
+                serviceId cardValidityCheck
+            },
+            manualEntry: {
+                panData {
+                    pan "1234567812345678123",
+                    expirationDate {
+                        year 22,
+                        month 12
+                    }
+                },
+                cvdData cvdPresence: cvdEntryBypassed
+            }
+        }
+    }
+
+END
