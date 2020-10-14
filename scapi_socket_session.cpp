@@ -2,11 +2,26 @@
 #include "scapi_messages_asn1c.hpp"
 #include "utils.hpp"
 
+#include <libsocket/exception.hpp>
 #include <vector>
 #include <stdexcept>
+#include <iostream>
 
 using namespace ::std;
 using namespace ::scapi::socket;
+
+inet_stream::inet_stream(const char* const host, const char* port)
+    : ::libsocket::inet_stream(host, port, LIBSOCKET_BOTH) {
+}
+
+inet_stream::~inet_stream(void) noexcept {
+    try {
+        shutdown(LIBSOCKET_READ | LIBSOCKET_WRITE);
+    } catch (const ::libsocket::socket_exception& e) {
+        cerr <<  __FILE__ << ':' << __LINE__ << '@' << __func__ << " Internal exception suppressed (errno: " << e.err << ")\n" << e.mesg << endl;
+    }
+    destroy();
+}
 
 vector<unsigned char>
 Session::exch(const vector<unsigned char> req) {
@@ -23,19 +38,8 @@ Session::exch(const vector<unsigned char> req) {
 }
 
 Session::Session(void)
-    : stream("localhost", "50153", LIBSOCKET_BOTH) {
-    try {
+    : stream("localhost", "50153") {
         decode(exch(encode(RegistrationRequest{})));
-    } catch (...) {
-        stream.shutdown(LIBSOCKET_READ | LIBSOCKET_WRITE);
-        stream.destroy();
-        throw;
-    }
-}
-
-Session::~Session(void) noexcept {
-    stream.shutdown(LIBSOCKET_READ | LIBSOCKET_WRITE);
-    stream.destroy();
 }
 
 unique_ptr<::scapi::Response>

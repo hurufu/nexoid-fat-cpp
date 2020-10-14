@@ -7,12 +7,18 @@
 
 namespace scapi::socket {
 
+    class inet_stream : public ::libsocket::inet_stream {
+    public:
+        inet_stream(const char* host, const char* port);
+        ~inet_stream(void) noexcept;
+    };
+
     class Session : public ::scapi::Session {
-        ::libsocket::inet_stream stream;
+        inet_stream stream;
         ::std::vector<unsigned char> exch(const ::std::vector<unsigned char>);
     public:
         Session(void);
-        ~Session(void) noexcept override;
+        ~Session(void) noexcept override = default;
 
         ::std::unique_ptr<::scapi::Response>
         interaction(const ::scapi::Request&) override;
