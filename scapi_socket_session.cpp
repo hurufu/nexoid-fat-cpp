@@ -25,7 +25,8 @@ inet_stream::~inet_stream(void) noexcept {
 
 vector<unsigned char>
 Session::exch(const vector<unsigned char> req) {
-    if (stream.snd(req.data(), req.size(), 0) != integer_cast<ssize_t>(req.size())) {
+    const int sf = MSG_NOSIGNAL;
+    if (stream.snd(req.data(), req.size(), sf) != integer_cast<ssize_t>(req.size())) {
         throw runtime_error("Couldn't send full message");
     }
     vector<unsigned char> buf(2 * 1024);
