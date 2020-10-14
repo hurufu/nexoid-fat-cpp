@@ -1,4 +1,3 @@
-#include "scapi_socket_session.hpp"
 #include "scapi_internal.hpp"
 
 extern "C" {
@@ -16,9 +15,6 @@ papi_handle_exception(void) noexcept try {
     throw;
 } catch (const exception& e) {
     cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
-    return PAPI_NOK;
-} catch (const libsocket::socket_exception& e) {
-    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
     return PAPI_NOK;
 } catch (...) {
     cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;

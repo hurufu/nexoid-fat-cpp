@@ -190,15 +190,19 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 }
 
 ScapiResult
-scapi_Initialize(void) {
+scapi_Initialize(void) noexcept try {
     s_scapi = make_unique<scapi::socket::Session>();
     return SCAPI_OK;
+} catch (...) {
+    return handle_exception();
 }
 
 ScapiResult
-scapi_Finalize(void) {
+scapi_Finalize(void) noexcept try {
     delete s_scapi.release();
     return SCAPI_OK;
+} catch (...) {
+    return handle_exception();
 }
 
 extern "C" ScapiResult
