@@ -28,6 +28,10 @@ CXXFLAGS              += -std=c++17
 CXXFLAGS              += $(addprefix -W,$(WARNINGS))
 CXXFLAGS              += $(addprefix -f,$(GCC_FEATURES))
 CXXFLAGS              += $(if $(USE_COLOR),-fdiagnostics-color=always,)
+CFLAGS              := -g$(DL) -O$(OL)
+CFLAGS              += $(addprefix -W,$(WARNINGS))
+#CFLAGS              += -DASN_EMIT_DEBUG=1
+#CFLAGS              += -DASN_THREAD_SAFE
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
