@@ -10,9 +10,9 @@ DEFINITIONS IMPLICIT TAGS ::= BEGIN
     -- Request from nexoid core to SCAP
     ScapiRequest ::= CHOICE {
         updateInterfaces [0] ScapiUpdateInterfaces,
-        output [1] SET OF ScapiInteraction,
+        output [1] SEQUENCE OF ScapiInteraction,
         print [2] ScapiPrintMessage,
-        entry [3] SET OF ScapiInteraction,
+        entry [3] SEQUENCE OF ScapiInteraction,
         authoriseService [4] NULL
     }
 
