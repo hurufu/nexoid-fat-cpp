@@ -9,9 +9,11 @@
 
 using namespace std;
 
-struct free_delete
-{
-    void operator()(void* x) { free(x); }
+template <asn_TYPE_descriptor_t* AsnType>
+struct asn1c_deleter {
+    void operator()(void* x) {
+        ASN_STRUCT_FREE(*AsnType, x);
+    }
 };
 
 static const char*
@@ -24,7 +26,7 @@ asn_dec_rval_code_e_tostring(const asn_dec_rval_code_e code) {
     return NULL;
 }
 
-static unique_ptr<ScapiSocketRequest, free_delete>
+static unique_ptr<ScapiSocketRequest, asn1c_deleter<&asn_DEF_ScapiSocketRequest>>
 map_to_asn1c(const ::scapi::socket::Request& r) {
     ScapiSocketRequest* const c = reinterpret_cast<ScapiSocketRequest*>(malloc(sizeof(ScapiSocketRequest)));
     switch (r.index()) {
@@ -40,7 +42,7 @@ map_to_asn1c(const ::scapi::socket::Request& r) {
     default:
         throw runtime_error("Can't encode not supported request type");
     }
-    unique_ptr<ScapiSocketRequest, free_delete> ret(c);
+    unique_ptr<ScapiSocketRequest, asn1c_deleter<&asn_DEF_ScapiSocketRequest>> ret(c);
     return ret;
 }
 
@@ -86,20 +88,19 @@ encode(const ::scapi::socket::Request& r) {
 ::scapi::socket::Response
 decode(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
-    ScapiSocketResponse* rsp = NULL;
+    ScapiSocketResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketResponse;
-    const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&rsp), buf.data(), buf.size());
+    const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+    unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> rsp(tmp);
     if (RC_OK != r.code) {
         char buf[255];
         snprintf(buf, sizeof(buf), "xer_decode returned: { code: %s, consumed: %zu }", asn_dec_rval_code_e_tostring(r.code), r.consumed);
         throw runtime_error(buf);
     }
     if (r.consumed != buf.size()) {
-        ASN_STRUCT_FREE(*tp, rsp);
         throw runtime_error("Received too much data");
     }
-    validate(tp, rsp);
+    validate(tp, rsp.get());
     // TODO: Convert ScapiSocketResponse to Response
-    ASN_STRUCT_FREE(*tp, rsp);
     return {};
 }
