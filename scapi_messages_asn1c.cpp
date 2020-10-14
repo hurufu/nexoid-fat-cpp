@@ -46,6 +46,24 @@ map_to_asn1c(const ::scapi::socket::Request& r) {
     return ret;
 }
 
+static ::scapi::socket::Response
+map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>>& rsp) {
+    const auto ptr = rsp.get();
+    ::scapi::socket::Response ret;
+    switch (ptr->rsp.present) {
+    case rsp_PR_registration:
+        ret.emplace<1>();
+        break;
+    case rsp_PR_interaction:
+    case rsp_PR_notification:
+        throw runtime_error("Not implemented");
+    case rsp_PR_NOTHING:
+    default:
+        throw runtime_error("Unexpected response, can't map it internally");
+    }
+    return ret;
+}
+
 static void
 validate(const asn_TYPE_descriptor_t* const tp, const void* const rsp) {
     char errbuf[255];
@@ -101,6 +119,5 @@ decode(const vector<unsigned char>& buf) {
         throw runtime_error("Received too much data");
     }
     validate(tp, rsp.get());
-    // TODO: Convert ScapiSocketResponse to Response
-    return {};
+    return map_from_asn1c(rsp);
 }
