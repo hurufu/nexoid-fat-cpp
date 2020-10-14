@@ -34,6 +34,7 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 
 enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) {
+    cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__ << endl;
     return PR_NOK;
 }
 
