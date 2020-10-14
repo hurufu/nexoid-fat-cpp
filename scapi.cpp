@@ -197,14 +197,6 @@ scapi_Initialize(void) noexcept try {
     return handle_exception();
 }
 
-ScapiResult
-scapi_Finalize(void) noexcept try {
-    delete s_scapi.release();
-    return SCAPI_OK;
-} catch (...) {
-    return handle_exception();
-}
-
 extern "C" ScapiResult
 scapi_Update_Interfaces(const InterfaceStatus status) noexcept try {
     const scapi::Request req = (scapi::UpdateInterfaces){
