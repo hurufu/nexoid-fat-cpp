@@ -1,18 +1,23 @@
 #include "scapi_messages_asn1c.hpp"
 
+#include "utils.hpp"
+
 #include <ScapiSocketRequest.h>
 #include <ScapiSocketResponse.h>
 
 #include <stdexcept>
 #include <memory>
 #include <cstring>
+#include <cstdlib>
 
 using namespace std;
 
 template <asn_TYPE_descriptor_t* AsnType>
 struct asn1c_deleter {
     void operator()(void* x) {
+#       if 0
         ASN_STRUCT_FREE(*AsnType, x);
+#       endif
     }
 };
 
@@ -26,12 +31,61 @@ asn_dec_rval_code_e_tostring(const asn_dec_rval_code_e code) {
     return NULL;
 }
 
+static ScapiRequest
+map_scapi_request(const ::scapi::Request& r) {
+    ScapiRequest ret;
+    switch (r.index()) {
+    case 0:
+        ret.present = ScapiRequest_PR_updateInterfaces;
+        break;
+    case 1: {
+        ret.present = ScapiRequest_PR_output;
+        const size_t ct = get<1>(r).size();
+        const size_t sz = ct * sizeof(ScapiInteraction*);
+        ret.output.list = {
+            .array = reinterpret_cast<ScapiInteraction**>(malloc(sz)),
+            .count = integer_cast<int>(ct),
+            .size = integer_cast<int>(sz),
+            .free = reinterpret_cast<void (*)(ScapiInteraction*&) noexcept>(&free)
+        };
+        int j = 0;
+        for (const auto& e : get<1>(r)) {
+            ScapiInteraction* const tmp = reinterpret_cast<ScapiInteraction*>(malloc(sizeof(ScapiInteraction)));
+            switch (e.index()) {
+            case 0:
+                tmp->present = ScapiInteraction_PR_msg;
+                tmp->msg = get<0>(e);
+                break;
+            case 1:
+                tmp->present = ScapiInteraction_PR_ssn;
+                tmp->msg = get<0>(e);
+                break;
+            default:
+                throw runtime_error("Omg");
+            }
+            ret.output.list.array[j++] = tmp;
+        }
+        break;
+    }
+    case 2:
+        ret.present = ScapiRequest_PR_print;
+        break;
+    case 3:
+        ret.present = ScapiRequest_PR_entry;
+        break;
+    default:
+        throw runtime_error("Can't encode SCAPI request");
+    }
+    return ret;
+}
+
 static unique_ptr<ScapiSocketRequest, asn1c_deleter<&asn_DEF_ScapiSocketRequest>>
 map_to_asn1c(const ::scapi::socket::Request& r) {
     ScapiSocketRequest* const c = reinterpret_cast<ScapiSocketRequest*>(malloc(sizeof(ScapiSocketRequest)));
     switch (r.index()) {
     case 0:
         c->req.present = req_PR_interaction;
+        c->req.interaction = map_scapi_request(get<0>(r));
         break;
     case 1:
         c->req.present = req_PR_registration;
