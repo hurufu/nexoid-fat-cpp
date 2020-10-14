@@ -115,9 +115,11 @@ decode(const vector<unsigned char>& buf) {
         snprintf(buf, sizeof(buf), "xer_decode returned: { code: %s, consumed: %zu }", asn_dec_rval_code_e_tostring(r.code), r.consumed);
         throw runtime_error(buf);
     }
+#   if 0
     if (r.consumed != buf.size()) {
         throw runtime_error("Received too much data");
     }
+#   endif
     validate(tp, rsp.get());
     return map_from_asn1c(rsp);
 }
