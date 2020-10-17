@@ -9,6 +9,8 @@
 #include <memory>
 #include <cstring>
 #include <cstdlib>
+#include <iostream>
+#include <string>
 
 using namespace std;
 
@@ -88,6 +90,9 @@ map_to_asn1c(const ::scapi::socket::Request& r) {
         throw runtime_error("Can't encode not supported request type");
     }
     unique_ptr<ScapiSocketRequest, asn1c_deleter<&asn_DEF_ScapiSocketRequest>> ret(c);
+    if (asn_fprint(stdout, &asn_DEF_ScapiSocketRequest, c) != 0) {
+        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+    }
     return ret;
 }
 
@@ -155,6 +160,10 @@ decode(const vector<unsigned char>& buf) {
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketResponse;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> rsp(tmp);
+    cout << "Received: \"" << string(buf.begin(), buf.end()) << '"' << endl;
+    if (asn_fprint(stdout, tp, tmp) != 0) {
+        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+    }
     if (RC_OK != r.code) {
         char buf[255];
         snprintf(buf, sizeof(buf), "xer_decode returned: { code: %s, consumed: %zu }", asn_dec_rval_code_e_tostring(r.code), r.consumed);
