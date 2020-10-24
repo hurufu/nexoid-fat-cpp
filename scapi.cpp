@@ -1,4 +1,5 @@
 #include "scapi_socket_session.hpp"
+#include "scapi_nngpp_session.hpp"
 #include "scapi_internal.hpp"
 #include "scapi_messages_asn1c.hpp"
 
@@ -191,7 +192,7 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 
 ScapiResult
 scapi_Initialize(void) noexcept try {
-    s_scapi = make_unique<scapi::socket::Session>();
+    s_scapi = make_unique<scapi::nngpp::Session>();
     return SCAPI_OK;
 } catch (...) {
     return handle_exception();
