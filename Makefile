@@ -35,7 +35,7 @@ CFLAGS              += $(addprefix -W,$(WARNINGS))
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
-LDLIBS              := -lsocket++
+LDLIBS              := -lsocket++ -lnng
 
 # Commands ####################################################################
 MIMEOPEN            := mimeopen
