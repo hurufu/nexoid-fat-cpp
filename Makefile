@@ -35,7 +35,9 @@ CFLAGS              += $(addprefix -W,$(WARNINGS))
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
-LDLIBS              := -lsocket++
+LDLIBS              := -lsocket++ -lnng
+
+VALGRIND_FLAGS := --leak-check=full --track-origins=yes --show-error-list=yes
 
 # Commands ####################################################################
 MIMEOPEN            := mimeopen
@@ -98,6 +100,12 @@ cg: cg.png
 cg.png:
 	$(CXX) -c $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -fdump-rtl-expand $(SOURCES) $(LIBNEXOID_PATH) $(LDLIBS)
 	egypt *.expand | sed '8irankdir="LR"' | dot -Tpng > callgraph.png
+
+%.valgrind: % %.supp
+	valgrind $(VALGRIND_FLAGS) --suppressions=$*.supp ./$* 2>$@
+
+.PHONY: valgrind
+valgrind: $(EXECUTABLE).valgrind
 
 clean: F += $(libasncodec_la_SOURCES)
 clean: F += $(libasncodec_la_OBJECTS)

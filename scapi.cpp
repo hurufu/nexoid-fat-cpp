@@ -1,4 +1,5 @@
 #include "scapi_socket_session.hpp"
+#include "scapi_nngpp_session.hpp"
 #include "scapi_internal.hpp"
 #include "scapi_messages_asn1c.hpp"
 
@@ -25,15 +26,15 @@ handle_exception(void) noexcept try {
     throw;
 } catch (const exception& e) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
     return SCAPI_NOK;
 } catch (const libsocket::socket_exception& e) {
     ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " SCAP connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " SCAP connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
     return SCAPI_NOK;
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cerr << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
     return SCAPI_NOK;
 }
 
@@ -191,7 +192,7 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 
 ScapiResult
 scapi_Initialize(void) noexcept try {
-    s_scapi = make_unique<scapi::socket::Session>();
+    s_scapi = make_unique<scapi::nngpp::Session>();
     return SCAPI_OK;
 } catch (...) {
     return handle_exception();
