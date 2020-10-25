@@ -244,6 +244,7 @@ scapi_Data_Entry_Interaction(size_t size, const CardholderMessage msg[]) noexcep
 
 extern "C" ScapiResult
 scapi_Wait_For_Event(void) noexcept try {
+    cout << __PRETTY_FUNCTION__ << endl;
     const auto ntf = s_scapi->notification();
     if (ntf->events.size() == 0) {
         throw runtime_error("Empty event list in SCAP notification isn't supported");
