@@ -15,3 +15,6 @@ decode_nng(const ::std::vector<unsigned char>& buf);
 
 ::std::vector<unsigned char>
 encode_nng(const ::scapi::Request& r);
+
+::scapi::Notification
+decode_nng_ntf(const ::std::vector<unsigned char>& buf);

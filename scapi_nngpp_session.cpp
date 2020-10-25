@@ -3,6 +3,7 @@
 
 #include <nngpp/nngpp.h>
 #include <nngpp/protocol/req0.h>
+#include <nngpp/protocol/pull0.h>
 
 using namespace ::std;
 using namespace ::scapi::nngpp;
@@ -13,6 +14,7 @@ using ::scapi::Notification;
 
 struct Session::Impl {
     ::socket interaction_socket;
+    ::socket notification_socket;
 
     Impl(void);
     ~Impl(void) = default;
@@ -23,8 +25,10 @@ struct Session::Impl {
 };
 
 Session::Impl::Impl(void) :
-    interaction_socket(req::open()) {
+    interaction_socket(req::open()),
+    notification_socket(pull::open()) {
     interaction_socket.dial("tcp://localhost:50153");
+    notification_socket.dial("tcp://localhost:50154");
 }
 
 vector<unsigned char>
@@ -45,7 +49,10 @@ Session::Impl::interaction(const Request& r) {
 
 unique_ptr<Notification>
 Session::Impl::notification(void) {
-    return make_unique<Notification>();
+    buffer nntf = notification_socket.recv();
+    vector<unsigned char> ntf(nntf.data<unsigned char>(), nntf.data<unsigned char>() + nntf.size());
+    Notification ret = decode_nng_ntf(ntf);
+    return make_unique<Notification>(ret);
 }
 
 Session::Session(void) :

@@ -4,6 +4,7 @@
 
 #include <ScapiSocketRequest.h>
 #include <ScapiSocketResponse.h>
+#include <ScapiNotification.h>
 
 #include <stdexcept>
 #include <memory>
@@ -136,6 +137,31 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
     return ret;
 }
 
+static ::scapi::Notification
+map_nng_ntf_from_asn1c(const unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>>& rsp) {
+    ::scapi::Notification ret;
+    for (int i = 0; i < rsp->events.list.count; i++) {
+        const auto tmp = rsp->events.list.array[i];
+        ::scapi::Event evt;
+        switch (tmp->present) {
+        case ScapiEvent_PR_languageSelection:
+            ///
+            evt.emplace<0>();
+            break;
+        case ScapiEvent_PR_serviceSelection:
+            evt.emplace<1>();
+            break;
+        case ScapiEvent_PR_manualEntry:
+            throw runtime_error("Not implemented");
+        case ScapiEvent_PR_NOTHING:
+        default:
+            throw runtime_error("Unsupported");
+        }
+        ret.events.push_back(evt);
+    }
+    return ret;
+}
+
 static void
 validate(const asn_TYPE_descriptor_t* const tp, const void* const rsp) {
     char errbuf[255];
@@ -235,4 +261,24 @@ decode_nng(const vector<unsigned char>& buf) {
     }
     validate(tp, rsp.get());
     return map_nng_from_asn1c(rsp);
+}
+
+::scapi::Notification
+decode_nng_ntf(const vector<unsigned char>& buf) {
+    asn_codec_ctx_t ctx = { };
+    ScapiNotification* tmp = NULL;
+    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNotification;
+    const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+    unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>> rsp(tmp);
+    if (asn_fprint(stdout, tp, tmp) != 0) {
+        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+    }
+    if (RC_OK != r.code) {
+        char err[255];
+        snprintf(err, sizeof(err), "xer_decode returned: { code: %s, consumed: %zu, up-to: \"%.*s\" }",
+                asn_dec_rval_code_e_tostring(r.code), r.consumed, integer_cast<int>(r.consumed), buf.data());
+        throw runtime_error(err);
+    }
+    validate(tp, rsp.get());
+    return map_nng_ntf_from_asn1c(rsp);
 }
