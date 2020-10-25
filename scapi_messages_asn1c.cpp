@@ -114,6 +114,11 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
     return ret;
 }
 
+static ::scapi::Response
+map_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
+    throw runtime_error("Not implemented");
+}
+
 static void
 validate(const asn_TYPE_descriptor_t* const tp, const void* const rsp) {
     char errbuf[255];
@@ -153,6 +158,20 @@ encode(const ::scapi::socket::Request& r) {
     return ret;
 }
 
+nng::buffer
+encode_nng(const ::scapi::Request& r) {
+    static const auto tp = &asn_DEF_ScapiRequest;
+    const auto c = map_scapi_request(r);
+    validate(tp, &c);
+    vector<unsigned char> ret;
+    const auto res = xer_encode(tp, &c, XER_F_CANONICAL, &consume_bytes_cb, &ret);
+    if (res.encoded < 0) {
+        throw runtime_error("Can't encode using XER");
+    }
+    nng::buffer nret(ret.data(), ret.size());
+    return nret;
+}
+
 ::scapi::socket::Response
 decode(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
@@ -174,6 +193,25 @@ decode(const vector<unsigned char>& buf) {
         throw runtime_error("Received too much data");
     }
 #   endif
+    validate(tp, rsp.get());
+    return map_from_asn1c(rsp);
+}
+
+::scapi::Response
+decode_nng(const nng::buffer& buf) {
+    asn_codec_ctx_t ctx = { };
+    ScapiResponse* tmp = NULL;
+    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiResponse;
+    const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+    unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>> rsp(tmp);
+    if (asn_fprint(stdout, tp, tmp) != 0) {
+        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+    }
+    if (RC_OK != r.code) {
+        char buf[255];
+        snprintf(buf, sizeof(buf), "xer_decode returned: { code: %s, consumed: %zu }", asn_dec_rval_code_e_tostring(r.code), r.consumed);
+        throw runtime_error(buf);
+    }
     validate(tp, rsp.get());
     return map_from_asn1c(rsp);
 }

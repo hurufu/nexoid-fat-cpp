@@ -1,28 +1,48 @@
 #include "scapi_nngpp_session.hpp"
+#include "scapi_messages_asn1c.hpp"
 
 #include <nngpp/nngpp.h>
 #include <nngpp/protocol/req0.h>
 
 using namespace ::std;
 using namespace ::scapi::nngpp;
+using namespace ::nng;
+using ::scapi::Response;
+using ::scapi::Request;
+using ::scapi::Notification;
 
 struct Session::Impl {
-    nng::socket socket;
+    ::socket interaction_socket;
 
     Impl(void);
     ~Impl(void) = default;
-    nng::buffer exch(const nng::buffer);
+
+    buffer exch(const buffer&);
+    unique_ptr<Response> interaction(const Request& r);
+    unique_ptr<Notification> notification(void);
 };
 
 Session::Impl::Impl(void) :
-    socket(nng::req::open()) {
-    socket.dial("tcp://localhost:50153");
+    interaction_socket(req::open()) {
+    interaction_socket.dial("tcp://localhost:50153");
 }
 
-nng::buffer
-Session::Impl::exch(const nng::buffer b) {
-    socket.send(b);
-    return socket.recv();
+buffer
+Session::Impl::exch(const buffer& b) {
+    interaction_socket.send(b);
+    return interaction_socket.recv();
+}
+
+unique_ptr<Response>
+Session::Impl::interaction(const Request& r) {
+    const auto rq = encode_nng(r);
+    const auto rs = exch(rq);
+    return make_unique<Response>(decode_nng(rs));
+}
+
+unique_ptr<Notification>
+Session::Impl::notification(void) {
+    return make_unique<Notification>();
 }
 
 Session::Session(void) :
@@ -31,12 +51,12 @@ Session::Session(void) :
 
 Session::~Session(void) = default;
 
-unique_ptr<::scapi::Response>
-Session::interaction(const ::scapi::Request& r) {
-    return make_unique<::scapi::Response>();
+unique_ptr<Response>
+Session::interaction(const Request& r) {
+    return pimpl->interaction(r);
 }
 
-unique_ptr<::scapi::Notification>
+unique_ptr<Notification>
 Session::notification(void) {
-    return make_unique<::scapi::Notification>();
+    return pimpl->notification();
 }
