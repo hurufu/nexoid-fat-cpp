@@ -27,6 +27,7 @@ namespace scapi {
     };
 
     struct LanguageSelection {
+        union ::Iso639_1 selectedLanguage;
     };
 
     struct ServiceSelection {

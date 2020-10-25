@@ -244,7 +244,25 @@ scapi_Data_Entry_Interaction(size_t size, const CardholderMessage msg[]) noexcep
 
 extern "C" ScapiResult
 scapi_Wait_For_Event(void) noexcept try {
-    return SCAPI_OK;
+    const auto ntf = s_scapi->notification();
+    if (ntf->events.size() == 0) {
+        throw runtime_error("Empty event list in SCAP notification isn't supported");
+    }
+    for (const auto& e : ntf->events) {
+        switch (e.index()) {
+        case 0:
+            ttd.event.Table[E_LANGUAGE_SELECTION] = true;
+            ttd.selectedLanguage = get<0>(e).selectedLanguage;
+            break;
+        case 1:
+            ttd.event.Table[E_SERVICE_SELECTION] = true;
+            ttd.selectedService = get<1>(e).serviceId;
+            break;
+        default:
+            throw runtime_error("Unexpected event");
+        }
+    }
+    return SCAPI_NEW_EVENT;
 } catch (...) {
     return handle_exception();
 }
