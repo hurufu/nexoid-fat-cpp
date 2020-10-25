@@ -37,6 +37,9 @@ map_scapi_request(const ::scapi::Request& r) {
     switch (r.index()) {
     case 0:
         ret.present = ScapiRequest_PR_updateInterfaces;
+        ret.updateInterfaces.interfaceStatus.buf = reinterpret_cast<uint8_t*>(calloc(1, 1));
+        ret.updateInterfaces.interfaceStatus.size = 1;
+        ret.updateInterfaces.interfaceStatus.buf[0] = get<0>(r).interfaceStatus;
         break;
     case 1: {
         ret.present = ScapiRequest_PR_output;
@@ -116,7 +119,21 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
 
 static ::scapi::Response
 map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
-    throw runtime_error("Not implemented");
+    const auto ptr = rsp.get();
+    ::scapi::Response ret;
+    switch (ptr->present) {
+    case ScapiResponse_PR_ack:
+        ret.emplace<1>();
+        break;
+    case ScapiResponse_PR_nak:
+    case ScapiResponse_PR_ackEntry:
+    case ScapiResponse_PR_ackServiceAuthorised:
+        throw runtime_error("Not implemented");
+    case ScapiResponse_PR_NOTHING:
+    default:
+        throw runtime_error("Unexpected response, can't map it internally");
+    }
+    return ret;
 }
 
 static void
