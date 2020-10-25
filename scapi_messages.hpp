@@ -34,9 +34,15 @@ namespace scapi {
         enum ::ServiceId serviceId;
     };
 
+    struct ManualEntry {
+    };
+
     typedef ::std::variant<
         LanguageSelection
       , ServiceSelection
+      , ManualEntry
+      , ::std::monostate // Terminate
+      , ::std::monostate // Reboot
     > Event;
 
     typedef ::std::variant<

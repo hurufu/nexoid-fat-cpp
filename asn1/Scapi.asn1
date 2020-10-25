@@ -50,8 +50,14 @@ DEFINITIONS IMPLICIT TAGS ::= BEGIN
     ScapiEvent ::= CHOICE {
         languageSelection [3] ScapiEventLanguageSelection,
         serviceSelection [4] ScapiEventServiceSelection,
-        manualEntry [5] ScapiEventManualEntry
+        manualEntry [5] ScapiEventManualEntry,
+        terminate [6] ScapiEventTermination,
+        reboot [7] ScapiEventReboot
     }
+
+    ScapiEventTermination ::= NULL
+
+    ScapiEventReboot ::= NULL
 
     ScapiEventLanguageSelection ::= SEQUENCE {
         language [13] Iso639

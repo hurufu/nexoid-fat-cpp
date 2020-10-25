@@ -259,6 +259,12 @@ scapi_Wait_For_Event(void) noexcept try {
             ttd.event.Table[E_SERVICE_SELECTION] = true;
             ttd.selectedService = get<1>(e).serviceId;
             break;
+        case 3:
+            ttd.event.Table[E_TERMINATION_REQUESTED] = true;
+            break;
+        case 4:
+            ttd.event.Table[E_REBOOT_REQUESTED] = true;
+            break;
         default:
             throw runtime_error("Unexpected event");
         }

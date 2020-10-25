@@ -153,6 +153,12 @@ map_nng_ntf_from_asn1c(const unique_ptr<ScapiNotification, asn1c_deleter<&asn_DE
             break;
         case ScapiEvent_PR_manualEntry:
             throw runtime_error("Not implemented");
+        case ScapiEvent_PR_terminate:
+            evt.emplace<3>();
+            break;
+        case ScapiEvent_PR_reboot:
+            evt.emplace<4>();
+            break;
         case ScapiEvent_PR_NOTHING:
         default:
             throw runtime_error("Unsupported");
