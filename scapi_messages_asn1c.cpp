@@ -165,6 +165,9 @@ encode_nng(const ::scapi::Request& r) {
     validate(tp, &c);
     vector<unsigned char> ret;
     const auto res = xer_encode(tp, &c, XER_F_CANONICAL, &consume_bytes_cb, &ret);
+    if (asn_fprint(stdout, &asn_DEF_ScapiRequest, &c) != 0) {
+        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+    }
     ASN_STRUCT_RESET(*tp, &c);
     if (res.encoded < 0) {
         throw runtime_error("Can't encode using XER");
@@ -208,9 +211,10 @@ decode_nng(const vector<unsigned char>& buf) {
         throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
     }
     if (RC_OK != r.code) {
-        char buf[255];
-        snprintf(buf, sizeof(buf), "xer_decode returned: { code: %s, consumed: %zu }", asn_dec_rval_code_e_tostring(r.code), r.consumed);
-        throw runtime_error(buf);
+        char err[255];
+        snprintf(err, sizeof(err), "xer_decode returned: { code: %s, consumed: %zu, up-to: \"%.*s\" }",
+                asn_dec_rval_code_e_tostring(r.code), r.consumed, integer_cast<int>(r.consumed), buf.data());
+        throw runtime_error(err);
     }
     validate(tp, rsp.get());
     return map_nng_from_asn1c(rsp);
