@@ -29,8 +29,8 @@ Session::Impl::Impl(void) :
 
 vector<unsigned char>
 Session::Impl::exch(const vector<unsigned char>& b) {
-    const buffer nreq(b.data(), b.size());
-    interaction_socket.send(nreq);
+    const view vreq(b.data(), b.size());
+    interaction_socket.send(vreq);
     buffer nrsp = interaction_socket.recv();
     vector<unsigned char> rsp(nrsp.data<unsigned char>(), nrsp.data<unsigned char>() + nrsp.size());
     return rsp;

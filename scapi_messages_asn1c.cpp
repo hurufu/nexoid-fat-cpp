@@ -161,10 +161,11 @@ encode(const ::scapi::socket::Request& r) {
 vector<unsigned char>
 encode_nng(const ::scapi::Request& r) {
     static const auto tp = &asn_DEF_ScapiRequest;
-    const auto c = map_scapi_request(r);
+    auto c = map_scapi_request(r);
     validate(tp, &c);
     vector<unsigned char> ret;
     const auto res = xer_encode(tp, &c, XER_F_CANONICAL, &consume_bytes_cb, &ret);
+    ASN_STRUCT_RESET(*tp, &c);
     if (res.encoded < 0) {
         throw runtime_error("Can't encode using XER");
     }
