@@ -17,7 +17,7 @@ struct Session::Impl {
     Impl(void);
     ~Impl(void) = default;
 
-    buffer exch(const buffer&);
+    vector<unsigned char> exch(const vector<unsigned char>&);
     unique_ptr<Response> interaction(const Request& r);
     unique_ptr<Notification> notification(void);
 };
@@ -27,10 +27,13 @@ Session::Impl::Impl(void) :
     interaction_socket.dial("tcp://localhost:50153");
 }
 
-buffer
-Session::Impl::exch(const buffer& b) {
-    interaction_socket.send(b);
-    return interaction_socket.recv();
+vector<unsigned char>
+Session::Impl::exch(const vector<unsigned char>& b) {
+    const buffer nreq(b.data(), b.size());
+    interaction_socket.send(nreq);
+    buffer nrsp = interaction_socket.recv();
+    vector<unsigned char> rsp(nrsp.data<unsigned char>(), nrsp.data<unsigned char>() + nrsp.size());
+    return rsp;
 }
 
 unique_ptr<Response>

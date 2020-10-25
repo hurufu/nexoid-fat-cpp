@@ -2,7 +2,6 @@
 
 #include "scapi_messages.hpp"
 
-#include <nngpp/buffer.h>
 #include <vector>
 
 ::std::vector<unsigned char>
@@ -12,7 +11,7 @@ encode(const ::scapi::socket::Request&);
 decode(const ::std::vector<unsigned char>&);
 
 ::scapi::Response
-decode_nng(const nng::buffer& buf);
+decode_nng(const ::std::vector<unsigned char>& buf);
 
-nng::buffer
+::std::vector<unsigned char>
 encode_nng(const ::scapi::Request& r);

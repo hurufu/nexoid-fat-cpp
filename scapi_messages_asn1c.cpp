@@ -115,7 +115,7 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
 }
 
 static ::scapi::Response
-map_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
+map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
     throw runtime_error("Not implemented");
 }
 
@@ -158,7 +158,7 @@ encode(const ::scapi::socket::Request& r) {
     return ret;
 }
 
-nng::buffer
+vector<unsigned char>
 encode_nng(const ::scapi::Request& r) {
     static const auto tp = &asn_DEF_ScapiRequest;
     const auto c = map_scapi_request(r);
@@ -168,8 +168,7 @@ encode_nng(const ::scapi::Request& r) {
     if (res.encoded < 0) {
         throw runtime_error("Can't encode using XER");
     }
-    nng::buffer nret(ret.data(), ret.size());
-    return nret;
+    return ret;
 }
 
 ::scapi::socket::Response
@@ -198,7 +197,7 @@ decode(const vector<unsigned char>& buf) {
 }
 
 ::scapi::Response
-decode_nng(const nng::buffer& buf) {
+decode_nng(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
     ScapiResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiResponse;
@@ -213,5 +212,5 @@ decode_nng(const nng::buffer& buf) {
         throw runtime_error(buf);
     }
     validate(tp, rsp.get());
-    return map_from_asn1c(rsp);
+    return map_nng_from_asn1c(rsp);
 }
