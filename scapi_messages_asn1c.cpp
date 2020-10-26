@@ -137,32 +137,40 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
     return ret;
 }
 
+static scapi::Event
+map_event_from_asn1c(const struct ScapiEvent* const e) {
+    switch (e->present) {
+    case ScapiEvent_PR_languageSelection: {
+        const auto l = reinterpret_cast<char*>(e->languageSelection.language.buf);
+        const scapi::LanguageSelection ls{
+            .selectedLanguage = { .c = { l[0], l[1] } }
+        };
+        return {ls};
+    }
+    case ScapiEvent_PR_serviceSelection: {
+        const scapi::ServiceSelection ss{
+            .serviceId = static_cast<enum ServiceId>(e->serviceSelection.serviceId)
+        };
+        return {ss};
+    }
+    case ScapiEvent_PR_manualEntry:
+        throw runtime_error("Not implemented");
+    case ScapiEvent_PR_terminate:
+        return scapi::Event(in_place_index<3>);
+    case ScapiEvent_PR_reboot:
+        return scapi::Event(in_place_index<4>);
+    case ScapiEvent_PR_NOTHING:
+    default:
+        throw runtime_error("Unsupported");
+    }
+}
+
 static ::scapi::Notification
 map_nng_ntf_from_asn1c(const unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>>& rsp) {
     ::scapi::Notification ret;
     for (int i = 0; i < rsp->events.list.count; i++) {
         const auto tmp = rsp->events.list.array[i];
-        ::scapi::Event evt;
-        switch (tmp->present) {
-        case ScapiEvent_PR_languageSelection:
-            ///
-            evt.emplace<0>();
-            break;
-        case ScapiEvent_PR_serviceSelection:
-            evt.emplace<1>();
-            break;
-        case ScapiEvent_PR_manualEntry:
-            throw runtime_error("Not implemented");
-        case ScapiEvent_PR_terminate:
-            evt.emplace<3>();
-            break;
-        case ScapiEvent_PR_reboot:
-            evt.emplace<4>();
-            break;
-        case ScapiEvent_PR_NOTHING:
-        default:
-            throw runtime_error("Unsupported");
-        }
+        const auto evt = map_event_from_asn1c(tmp);
         ret.events.push_back(evt);
     }
     return ret;
