@@ -187,9 +187,9 @@ map_to_interaction(const CardholderMessage m) {
     return ret;
 }
 
-static std::vector<scapi::Interaction>
+static vector<scapi::Interaction>
 create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
-    std::vector<scapi::Interaction> ret;
+    vector<scapi::Interaction> ret;
     for (size_t i = 0; i < size; i++) {
         ret.push_back(map_to_interaction(msg[0]));
     }
