@@ -8,10 +8,10 @@ namespace scapi {
     public:
         virtual ~Session(void) noexcept = default;
 
-        virtual ::std::unique_ptr<::scapi::Response>
+        virtual ::scapi::Response
         interaction(const ::scapi::Request&) = 0;
 
-        virtual ::std::unique_ptr<::scapi::Notification>
+        virtual ::scapi::Notification
         notification(void) = 0;
     };
 

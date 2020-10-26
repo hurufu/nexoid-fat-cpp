@@ -12,10 +12,10 @@ namespace scapi::nngpp {
         Session(void);
         ~Session(void) noexcept override;
 
-        ::std::unique_ptr<::scapi::Response>
+        ::scapi::Response
         interaction(const ::scapi::Request&) override;
 
-        ::std::unique_ptr<::scapi::Notification>
+        ::scapi::Notification
         notification(void) override;
     };
 

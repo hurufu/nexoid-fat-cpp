@@ -43,12 +43,12 @@ Session::Session(void)
         decode(exch(encode(RegistrationRequest{})));
 }
 
-unique_ptr<::scapi::Response>
+::scapi::Response
 Session::interaction(const ::scapi::Request& r) {
-    return make_unique<::scapi::Response>(get<0>(decode(exch(encode(Request(r))))));
+    return get<0>(decode(exch(encode(Request(r)))));
 }
 
-unique_ptr<::scapi::Notification>
+::scapi::Notification
 Session::notification(void) {
-    return make_unique<::scapi::Notification>(get<1>(decode(exch(encode(NotificationRequest{})))));
+    return get<1>(decode(exch(encode(NotificationRequest{}))));
 }

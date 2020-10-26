@@ -20,8 +20,8 @@ struct Session::Impl {
     ~Impl(void) = default;
 
     vector<unsigned char> exch(const vector<unsigned char>&);
-    unique_ptr<Response> interaction(const Request& r);
-    unique_ptr<Notification> notification(void);
+    Response interaction(const Request& r);
+    Notification notification(void);
 };
 
 Session::Impl::Impl(void) :
@@ -41,19 +41,18 @@ Session::Impl::exch(const vector<unsigned char>& b) {
     return rsp;
 }
 
-unique_ptr<Response>
+Response
 Session::Impl::interaction(const Request& r) {
     const auto rq = encode_nng(r);
     const auto rs = exch(rq);
-    return make_unique<Response>(decode_nng(rs));
+    return decode_nng(rs);
 }
 
-unique_ptr<Notification>
+Notification
 Session::Impl::notification(void) {
     buffer nntf = notification_socket.recv();
     vector<unsigned char> ntf(nntf.data<unsigned char>(), nntf.data<unsigned char>() + nntf.size());
-    Notification ret = decode_nng_ntf(ntf);
-    return make_unique<Notification>(ret);
+    return decode_nng_ntf(ntf);
 }
 
 Session::Session(void) :
@@ -62,12 +61,12 @@ Session::Session(void) :
 
 Session::~Session(void) = default;
 
-unique_ptr<Response>
+Response
 Session::interaction(const Request& r) {
     return pimpl->interaction(r);
 }
 
-unique_ptr<Notification>
+Notification
 Session::notification(void) {
     return pimpl->notification();
 }

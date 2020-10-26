@@ -204,7 +204,7 @@ scapi_Update_Interfaces(const InterfaceStatus status) noexcept try {
         .interfaceStatus = status
     };
     const auto rsp = s_scapi->interaction(req);
-    return (rsp->index() == 1) ? SCAPI_OK : handle_bad_response(*rsp);
+    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
 } catch (...) {
     return handle_exception();
 }
@@ -216,7 +216,7 @@ scapi_Data_Print_Interaction(const PrintMessage m) noexcept try {
         .extraData = nullptr
     };
     const auto rsp = s_scapi->interaction(req);
-    return (rsp->index() == 1) ? SCAPI_OK : handle_bad_response(*rsp);
+    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
 } catch (...) {
     return handle_exception();
 }
@@ -225,7 +225,7 @@ extern "C" ScapiResult
 scapi_Data_Output_Interaction(const size_t size, const CardholderMessage msg[]) noexcept try {
     const scapi::Request req(in_place_index<1>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
-    return (rsp->index() == 1) ? SCAPI_OK : handle_bad_response(*rsp);
+    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
 } catch (...) {
     return handle_exception();
 }
@@ -234,8 +234,8 @@ extern "C" ScapiResult
 scapi_Data_Entry_Interaction(size_t size, const CardholderMessage msg[]) noexcept try {
     const scapi::Request req(in_place_index<3>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
-    if (rsp->index() != 2) {
-        return handle_bad_response(*rsp);
+    if (rsp.index() != 2) {
+        return handle_bad_response(rsp);
     }
     return SCAPI_OK;
 } catch (...) {
@@ -246,10 +246,10 @@ extern "C" ScapiResult
 scapi_Wait_For_Event(void) noexcept try {
     cout << __func__ << " ..." << endl;
     const auto ntf = s_scapi->notification();
-    if (ntf->events.size() == 0) {
+    if (ntf.events.size() == 0) {
         throw runtime_error("Empty event list in SCAP notification isn't supported");
     }
-    for (const auto& e : ntf->events) {
+    for (const auto& e : ntf.events) {
         switch (e.index()) {
         case 0:
             ttd.event.Table[E_LANGUAGE_SELECTION] = true;
