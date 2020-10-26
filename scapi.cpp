@@ -9,7 +9,9 @@ extern "C" {
 #include <nexoid/dmapi.h>
 }
 
+// FIXME: Remove external dependencies and map exceptions to some internal type
 #include <libsocket/exception.hpp>
+#include <nngpp/error.h>
 
 #include <stdexcept>
 #include <vector>
@@ -24,13 +26,17 @@ static ScapiResult
 handle_exception(void) noexcept try {
     ttd.terminalErrorIndicator = true;
     throw;
+} catch (const nng::exception& e) {
+    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Messaging related exception originated at '" << e.who() << "' suppressed: " << e.what() << endl;
+    return SCAPI_NOK;
 } catch (const exception& e) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
     cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
     return SCAPI_NOK;
 } catch (const libsocket::socket_exception& e) {
     ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " SCAP connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
     return SCAPI_NOK;
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
