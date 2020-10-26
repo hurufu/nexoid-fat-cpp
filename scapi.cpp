@@ -19,8 +19,15 @@ extern "C" {
 #include <memory>
 
 using namespace std;
+using scapi::Session,
+      scapi::Request,
+      scapi::Response,
+      scapi::Interaction,
+      scapi::Nak,
+      scapi::Event,
+      scapi::UpdateInterfaces;
 
-static unique_ptr<::scapi::Session> s_scapi;
+static unique_ptr<Session> s_scapi;
 
 static ScapiResult
 handle_exception(void) noexcept try {
@@ -45,11 +52,11 @@ handle_exception(void) noexcept try {
 }
 
 static ScapiResult
-handle_bad_response(const scapi::Response& rsp) {
+handle_bad_response(const Response& rsp) {
     if (rsp.index() != 0) {
         throw runtime_error("Bad response");
     }
-    const auto& nak = get<scapi::Nak>(rsp);
+    const auto& nak = get<Nak>(rsp);
     ttd.nokReason = nak.nokReason;
     if (nak.terminalErrorReason) {
         ttd.terminalErrorIndicator = true;
@@ -171,9 +178,9 @@ classify_to_variant_index(const CardholderMessage m) {
     return -1;
 }
 
-static scapi::Interaction
+static Interaction
 map_to_interaction(const CardholderMessage m) {
-    scapi::Interaction ret;
+    Interaction ret;
     switch (classify_to_variant_index(m)) {
     case 0:
         ret.emplace<0>(m);
@@ -187,9 +194,9 @@ map_to_interaction(const CardholderMessage m) {
     return ret;
 }
 
-static vector<scapi::Interaction>
+static vector<Interaction>
 create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
-    vector<scapi::Interaction> ret;
+    vector<Interaction> ret;
     for (size_t i = 0; i < size; i++) {
         ret.push_back(map_to_interaction(msg[0]));
     }
@@ -197,7 +204,7 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 }
 
 static void
-set_event_in_ttd(const scapi::Event& e) {
+set_event_in_ttd(const Event& e) {
     switch (e.index()) {
     case 0:
         ttd.event.Table[E_LANGUAGE_SELECTION] = true;
@@ -228,7 +235,7 @@ scapi_Initialize(void) noexcept try {
 
 extern "C" ScapiResult
 scapi_Update_Interfaces(const InterfaceStatus status) noexcept try {
-    const scapi::Request req = (scapi::UpdateInterfaces){
+    const Request req = (UpdateInterfaces){
         .interfaceStatus = status
     };
     const auto rsp = s_scapi->interaction(req);
@@ -238,8 +245,8 @@ scapi_Update_Interfaces(const InterfaceStatus status) noexcept try {
 }
 
 extern "C" ScapiResult
-scapi_Data_Print_Interaction(const PrintMessage m) noexcept try {
-    const scapi::Request req = (scapi::PrintMessage){
+scapi_Data_Print_Interaction(const enum PrintMessage m) noexcept try {
+    const Request req = (scapi::PrintMessage){
         .type = m,
         .extraData = nullptr
     };
@@ -251,7 +258,7 @@ scapi_Data_Print_Interaction(const PrintMessage m) noexcept try {
 
 extern "C" ScapiResult
 scapi_Data_Output_Interaction(const size_t size, const CardholderMessage msg[]) noexcept try {
-    const scapi::Request req(in_place_index<1>, create_interaction_vector(size, msg));
+    const Request req(in_place_index<1>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
     return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
 } catch (...) {
@@ -260,7 +267,7 @@ scapi_Data_Output_Interaction(const size_t size, const CardholderMessage msg[]) 
 
 extern "C" ScapiResult
 scapi_Data_Entry_Interaction(size_t size, const CardholderMessage msg[]) noexcept try {
-    const scapi::Request req(in_place_index<3>, create_interaction_vector(size, msg));
+    const Request req(in_place_index<3>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
     if (rsp.index() != 2) {
         return handle_bad_response(rsp);
