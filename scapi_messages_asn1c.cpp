@@ -214,13 +214,11 @@ encode_nng(const ::scapi::Request& r) {
     validate(tp, &c);
     vector<unsigned char> ret;
     const auto res = xer_encode(tp, &c, XER_F_CANONICAL, &consume_bytes_cb, &ret);
-    if (asn_fprint(stdout, &asn_DEF_ScapiRequest, &c) != 0) {
-        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
-    }
     ASN_STRUCT_RESET(*tp, &c);
     if (res.encoded < 0) {
         throw runtime_error("Can't encode using XER");
     }
+    cout << "enc: " << string(ret.begin(), ret.end()) << endl;
     return ret;
 }
 
@@ -251,14 +249,12 @@ decode(const vector<unsigned char>& buf) {
 
 ::scapi::Response
 decode_nng(const vector<unsigned char>& buf) {
+    cout << "dec: " << string(buf.begin(), buf.end()) << endl;
     asn_codec_ctx_t ctx = { };
     ScapiResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiResponse;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>> rsp(tmp);
-    if (asn_fprint(stdout, tp, tmp) != 0) {
-        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
-    }
     if (RC_OK != r.code) {
         char err[255];
         snprintf(err, sizeof(err), "xer_decode returned: { code: %s, consumed: %zu, up-to: \"%.*s\" }",
@@ -271,14 +267,12 @@ decode_nng(const vector<unsigned char>& buf) {
 
 ::scapi::Notification
 decode_nng_ntf(const vector<unsigned char>& buf) {
+    cout << "dec: " << string(buf.begin(), buf.end()) << endl;
     asn_codec_ctx_t ctx = { };
     ScapiNotification* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNotification;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>> rsp(tmp);
-    if (asn_fprint(stdout, tp, tmp) != 0) {
-        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
-    }
     if (RC_OK != r.code) {
         char err[255];
         snprintf(err, sizeof(err), "xer_decode returned: { code: %s, consumed: %zu, up-to: \"%.*s\" }",
