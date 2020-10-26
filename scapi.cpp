@@ -190,6 +190,28 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
     return ret;
 }
 
+static void
+set_event_in_ttd(const scapi::Event& e) {
+    switch (e.index()) {
+    case 0:
+        ttd.event.Table[E_LANGUAGE_SELECTION] = true;
+        ttd.selectedLanguage = get<0>(e).selectedLanguage;
+        break;
+    case 1:
+        ttd.event.Table[E_SERVICE_SELECTION] = true;
+        ttd.selectedService = get<1>(e).serviceId;
+        break;
+    case 3:
+        ttd.event.Table[E_TERMINATION_REQUESTED] = true;
+        break;
+    case 4:
+        ttd.event.Table[E_REBOOT_REQUESTED] = true;
+        break;
+    default:
+        throw runtime_error("Unexpected event");
+    }
+}
+
 ScapiResult
 scapi_Initialize(void) noexcept try {
     s_scapi = make_unique<scapi::nngpp::Session>();
@@ -250,24 +272,7 @@ scapi_Wait_For_Event(void) noexcept try {
         throw runtime_error("Empty event list in SCAP notification isn't supported");
     }
     for (const auto& e : ntf.events) {
-        switch (e.index()) {
-        case 0:
-            ttd.event.Table[E_LANGUAGE_SELECTION] = true;
-            ttd.selectedLanguage = get<0>(e).selectedLanguage;
-            break;
-        case 1:
-            ttd.event.Table[E_SERVICE_SELECTION] = true;
-            ttd.selectedService = get<1>(e).serviceId;
-            break;
-        case 3:
-            ttd.event.Table[E_TERMINATION_REQUESTED] = true;
-            break;
-        case 4:
-            ttd.event.Table[E_REBOOT_REQUESTED] = true;
-            break;
-        default:
-            throw runtime_error("Unexpected event");
-        }
+        set_event_in_ttd(e);
     }
     return SCAPI_NEW_EVENT;
 } catch (...) {
