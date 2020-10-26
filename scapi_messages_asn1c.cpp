@@ -13,6 +13,8 @@
 #include <iostream>
 #include <string>
 
+// TODO: Redesign module scapi_messages_asn1c to be more universal
+
 using namespace std;
 
 template <asn_TYPE_descriptor_t* AsnType>
