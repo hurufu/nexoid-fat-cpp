@@ -107,6 +107,12 @@ cg.png:
 .PHONY: valgrind
 valgrind: $(EXECUTABLE).valgrind
 
+%.s: %.cpp
+	$(CXX) -S $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) -o $@ $<
+
+%.s: %.c
+	$(CC) -S $(CPPFLAGS) $(CFLAGS) $(ASMFLAGS) -o $@ $<
+
 clean: F += $(libasncodec_la_SOURCES)
 clean: F += $(libasncodec_la_OBJECTS)
 clean: F += $(lib_LTLIBRARIES)
