@@ -1,9 +1,9 @@
 #include "scapi_internal.hpp"
 #include "tostring.hpp"
+#include "ttd_keeper.hpp"
 
 extern "C" {
 #include <nexoid/papi.h>
-#include <nexoid/gtd.h>
 }
 
 #include <stdexcept>
@@ -35,7 +35,10 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 
 enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) {
-    cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__ << " " << ttd.nokReason << " " << ttd.terminalErrorReason << endl;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__
+         << ' ' << TtdKeeper::instance().fetch<enum NokReason>()
+         << ' ' << TtdKeeper::instance().fetch<enum TerminalErrorReason>()
+         << endl;
     return PR_NOK;
 }
 
