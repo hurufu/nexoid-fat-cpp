@@ -139,6 +139,43 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
     return ret;
 }
 
+static union ExpirationDate
+map_expiration_date_from_asn1c(const struct ScapiExpirationDate& d) {
+    char f[5];
+    if (snprintf(f, sizeof(f), "%02ld%02ld", d.year, d.month) >= integer_cast<int>(sizeof(f))) {
+        throw runtime_error("Expiration date doesn't fit into it's type");
+    }
+    return { .full = { f[0], f[1], f[2], f[3] } };
+}
+
+static optional<scapi::CvdData>
+map_cvd_data_from_asn1c(const struct CvdData* const c) {
+    if (!c) {
+        return {};
+    }
+    switch (c->present) {
+        case CvdData_PR_cvd:
+            if (c->choice.cvd.size != 2) {
+                throw runtime_error("CVD has incorrect length");
+            }
+            return (struct cn2){ c->choice.cvd.buf[0], c->choice.cvd.buf[1] };
+        case CvdData_PR_cvdPresence:
+            return static_cast<enum CvdPresence>(c->choice.cvdPresence);
+        case CvdData_PR_NOTHING:
+        default:
+            throw runtime_error("Unexpected CvdData component");
+    }
+}
+
+static scapi::ManualEntry
+map_manual_entry_from_asn1c(const struct ScapiEventManualEntry& m) {
+    return {
+        .pan = string(reinterpret_cast<char*>(m.pan.buf), m.pan.size),
+        .expirationDate = map_expiration_date_from_asn1c(m.expirationDate),
+        .cvdData = map_cvd_data_from_asn1c(m.cvdData)
+    };
+}
+
 static scapi::Event
 map_event_from_asn1c(const struct ScapiEvent* const e) {
     switch (e->present) {
@@ -156,7 +193,7 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
         return {ss};
     }
     case ScapiEvent_PR_manualEntry:
-        throw runtime_error("Not implemented");
+        return map_manual_entry_from_asn1c(e->choice.manualEntry);
     case ScapiEvent_PR_terminate:
         return scapi::Event(in_place_index<3>);
     case ScapiEvent_PR_reboot:

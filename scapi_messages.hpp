@@ -9,8 +9,14 @@ extern "C" {
 #include <variant>
 #include <optional>
 #include <vector>
+#include <string>
 
 namespace scapi {
+
+    typedef ::std::variant<
+        enum CvdPresence
+      , struct cn2
+    > CvdData;
 
     struct Nak {
         enum ::NokReason nokReason;
@@ -35,6 +41,9 @@ namespace scapi {
     };
 
     struct ManualEntry {
+        ::std::string pan;
+        union ExpirationDate expirationDate;
+        ::std::optional<CvdData> cvdData;
     };
 
     typedef ::std::variant<

@@ -17,6 +17,7 @@ extern "C" {
 #include <vector>
 #include <iostream>
 #include <memory>
+#include <cstring>
 
 using namespace std;
 using scapi::Session,
@@ -204,6 +205,54 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 }
 
 static void
+set_pan_in_ttd(const string& p) {
+    ttd.pan = reinterpret_cast<decltype(ttd.pan)>(dmapi_malloc(sizeof(*ttd.pan)));
+    strncpy(*ttd.pan, p.c_str(), sizeof(*ttd.pan));
+}
+
+static void
+set_expiration_date_in_ttd(const union ExpirationDate& d) {
+    ttd.expirationDate = reinterpret_cast<decltype(ttd.expirationDate)>(dmapi_malloc(sizeof(*ttd.expirationDate)));
+    *ttd.expirationDate = d;
+}
+
+static void
+set_cvd_presence_in_ttd(const enum CvdPresence c) {
+    ttd.cvdPresence = reinterpret_cast<decltype(ttd.cvdPresence)>(dmapi_malloc(sizeof(*ttd.cvdPresence)));
+    *ttd.cvdPresence = c;
+}
+
+static void
+set_cvd_in_ttd(const struct cn2 c) {
+    ttd.cvd = reinterpret_cast<decltype(ttd.cvd)>(dmapi_malloc(sizeof(*ttd.cvd)));
+    *ttd.cvd = c;
+    set_cvd_presence_in_ttd(CVD_PRESENT);
+}
+
+static void
+set_cvd_in_ttd(const scapi::CvdData& d) {
+    switch (d.index()) {
+    case 0:
+        set_cvd_presence_in_ttd(get<0>(d));
+        break;
+    case 1:
+        set_cvd_in_ttd(get<1>(d));
+        break;
+    default:
+        throw runtime_error("_");
+    }
+}
+
+static void
+set_manual_entry_in_ttd(const scapi::ManualEntry& m) {
+    set_pan_in_ttd(m.pan);
+    set_expiration_date_in_ttd(m.expirationDate);
+    if (m.cvdData) {
+        set_cvd_in_ttd(*m.cvdData);
+    }
+}
+
+static void
 set_event_in_ttd(const Event& e) {
     switch (e.index()) {
     case 0:
@@ -213,6 +262,10 @@ set_event_in_ttd(const Event& e) {
     case 1:
         ttd.event.Table[E_SERVICE_SELECTION] = true;
         ttd.selectedService = get<1>(e).serviceId;
+        break;
+    case 2:
+        ttd.event.Table[E_MANUAL_ENTRY] = true;
+        set_manual_entry_in_ttd(get<2>(e));
         break;
     case 3:
         ttd.event.Table[E_TERMINATION_REQUESTED] = true;
