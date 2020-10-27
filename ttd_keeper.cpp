@@ -123,15 +123,17 @@ TtdKeeper::update(const enum TransactionResult r) {
 }
 
 void
-TtdKeeper::handle_bad_response(const scapi::Response& rsp) {
-    if (rsp.index() != 0) {
-        throw runtime_error("Bad response");
-    }
-    const auto& nak = get<scapi::Nak>(rsp);
-    ttd.nokReason = nak.nokReason;
-    if (nak.terminalErrorReason) {
+TtdKeeper::handle_bad_response(const scapi::Response& rsp) noexcept {
+    if (rsp.index() == 0) { // Nak
+        const auto& nak = get<0>(rsp);
+        ttd.nokReason = nak.nokReason;
+        if (nak.terminalErrorReason) {
+            ttd.terminalErrorIndicator = true;
+            ttd.terminalErrorReason = *nak.terminalErrorReason;
+        }
+    } else {
         ttd.terminalErrorIndicator = true;
-        ttd.terminalErrorReason = *nak.terminalErrorReason;
+        ttd.terminalErrorReason = TE_INTERACTION_ERROR;
     }
 }
 

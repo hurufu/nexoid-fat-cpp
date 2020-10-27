@@ -20,7 +20,7 @@ public:
 
     /** Should be called when wrong kind of response was received
      */
-    void handle_bad_response(const scapi::Response&);
+    void handle_bad_response(const scapi::Response&) noexcept;
 
     enum NokReason fetch_nok_reason(void);
     enum TerminalErrorReason fetch_ter_reason(void);
