@@ -147,6 +147,9 @@ map_to_interaction(const CardholderMessage m) {
     case 1:
         ret.emplace<1>(m);
         break;
+    case 18:
+        ret.emplace<18>(TtdKeeper::instance().fetch<enum NokReason>());
+        break;
     default:
         throw runtime_error("Not implemented");
     }

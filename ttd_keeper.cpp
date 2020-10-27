@@ -121,6 +121,11 @@ TtdKeeper::handle_exception(void) noexcept try {
     cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
 }
 
+template <>
+enum NokReason& TtdKeeper::fetch<enum NokReason>(void) {
+    return ttd.nokReason;
+}
+
 void
 TtdKeeper::reset(void) noexcept {
     // FIXME: Implement better clearing method, eg. release ptmalloc arena

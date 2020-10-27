@@ -24,6 +24,38 @@ struct asn1c_deleter {
     }
 };
 
+static enum NexoNokReason
+map_nok_reason_to_asn1c(const enum NokReason n) {
+    switch (n) {
+        case N_NONE: return NexoNokReason_none;
+        case N_NOT_IMPLEMENTED: return NexoNokReason_notImplemented;
+        case N_ORIGINAL_TRX_NOT_FOUND: return NexoNokReason_originalTrxNotFound;
+        case N_TECHNICAL_ERROR: return NexoNokReason_technicalError;
+        case N_MISSING_DATA: return NexoNokReason_missingData;
+        case N_CONF_ERROR: return NexoNokReason_confError;
+        case N_NO_PERMISSION: return NexoNokReason_noPermission;
+        case N_CONFIGURATION_ERROR: return NexoNokReason_confError;
+        case N_AMOUNT_ERROR: return NexoNokReason_amountError;
+        case N_KERNEL_ERROR: return NexoNokReason_kernelError;
+        case N_DATA_ERROR: return NexoNokReason_dataError;
+        case N_NO_CARD_INSERTED: return NexoNokReason_noCardInserted;
+        case N_CANCELLED: return NexoNokReason_cancelled;
+        case N_ABORTED: return NexoNokReason_aborted;
+        case N_TIMEOUT: return NexoNokReason_timeout;
+        case N_CARD_MISSING: return NexoNokReason_cardMissing;
+        case N_CHIP_ERROR: return NexoNokReason_chipError;
+        case N_NO_PROFILE: return NexoNokReason_noProfile;
+        case N_FALLBACK_PROHIBITED: return NexoNokReason_fallbackProhibited;
+        case N_TECHNOLOGY_NOT_SUPPORTED: return NexoNokReason_technologyNotSupported;
+        case N_GPO6985: return NexoNokReason_gpo6985;
+        case N_CARD_BLOCKED: return NexoNokReason_cardBlocked;
+        case N_EMPTY_LIST: return NexoNokReason_emptyList;
+        case N_MAX:
+            break;
+    }
+    throw runtime_error("Invalid NokReason conversion");
+}
+
 static const char*
 asn_dec_rval_code_e_tostring(const asn_dec_rval_code_e code) {
     switch (code) {
@@ -56,6 +88,10 @@ map_scapi_request(const ::scapi::Request& r) {
             case 1:
                 tmp->present = ScapiInteraction_PR_ssn;
                 tmp->choice.ssn = get<1>(e);
+                break;
+            case 18:
+                tmp->present = ScapiInteraction_PR_nokReason;
+                tmp->choice.nokReason = map_nok_reason_to_asn1c(get<18>(e));
                 break;
             default:
                 throw runtime_error("Omg"); // FIXME: Memory leak
