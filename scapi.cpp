@@ -157,7 +157,7 @@ static vector<Interaction>
 create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
     vector<Interaction> ret;
     for (size_t i = 0; i < size; i++) {
-        ret.push_back(map_to_interaction(msg[0]));
+        ret.push_back(map_to_interaction(msg[i]));
     }
     return ret;
 }
