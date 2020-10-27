@@ -2,16 +2,11 @@
 #include "scapi_nngpp_session.hpp"
 #include "scapi_internal.hpp"
 #include "scapi_messages_asn1c.hpp"
+#include "ttd_keeper.hpp"
 
 extern "C" {
 #include <nexoid/scapi.h>
-#include <nexoid/gtd.h>
-#include <nexoid/dmapi.h>
 }
-
-// FIXME: Remove external dependencies and map exceptions to some internal type
-#include <libsocket/exception.hpp>
-#include <nngpp/error.h>
 
 #include <stdexcept>
 #include <vector>
@@ -22,49 +17,10 @@ extern "C" {
 using namespace std;
 using scapi::Session,
       scapi::Request,
-      scapi::Response,
       scapi::Interaction,
-      scapi::Nak,
-      scapi::Event,
       scapi::UpdateInterfaces;
 
 static unique_ptr<Session> s_scapi;
-
-static enum ScapiResult
-handle_exception_in_ttd(void) noexcept try {
-    ttd.terminalErrorIndicator = true;
-    throw;
-} catch (const nng::exception& e) {
-    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Messaging related exception originated at '" << e.who() << "' suppressed: " << e.what() << endl;
-    return SCAPI_NOK;
-} catch (const exception& e) {
-    ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
-    return SCAPI_NOK;
-} catch (const libsocket::socket_exception& e) {
-    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
-    return SCAPI_NOK;
-} catch (...) {
-    ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
-    return SCAPI_NOK;
-}
-
-static enum ScapiResult
-handle_bad_response_in_ttd(const Response& rsp) {
-    if (rsp.index() != 0) {
-        throw runtime_error("Bad response");
-    }
-    const auto& nak = get<Nak>(rsp);
-    ttd.nokReason = nak.nokReason;
-    if (nak.terminalErrorReason) {
-        ttd.terminalErrorIndicator = true;
-        ttd.terminalErrorReason = *nak.terminalErrorReason;
-    }
-    return SCAPI_NOK;
-}
 
 static int
 classify_to_variant_index(const CardholderMessage m) {
@@ -204,86 +160,13 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
     return ret;
 }
 
-static void
-set_pan_in_ttd(const string& p) {
-    ttd.pan = reinterpret_cast<decltype(ttd.pan)>(dmapi_malloc(sizeof(*ttd.pan)));
-    strncpy(*ttd.pan, p.c_str(), sizeof(*ttd.pan));
-}
-
-static void
-set_expiration_date_in_ttd(const union ExpirationDate& d) {
-    ttd.expirationDate = reinterpret_cast<decltype(ttd.expirationDate)>(dmapi_malloc(sizeof(*ttd.expirationDate)));
-    *ttd.expirationDate = d;
-}
-
-static void
-set_cvd_presence_in_ttd(const enum CvdPresence c) {
-    ttd.cvdPresence = reinterpret_cast<decltype(ttd.cvdPresence)>(dmapi_malloc(sizeof(*ttd.cvdPresence)));
-    *ttd.cvdPresence = c;
-}
-
-static void
-set_cvd_in_ttd(const struct cn2 c) {
-    ttd.cvd = reinterpret_cast<decltype(ttd.cvd)>(dmapi_malloc(sizeof(*ttd.cvd)));
-    *ttd.cvd = c;
-    set_cvd_presence_in_ttd(CVD_PRESENT);
-}
-
-static void
-set_cvd_in_ttd(const scapi::CvdData& d) {
-    switch (d.index()) {
-    case 0:
-        set_cvd_presence_in_ttd(get<0>(d));
-        break;
-    case 1:
-        set_cvd_in_ttd(get<1>(d));
-        break;
-    default:
-        throw runtime_error("_");
-    }
-}
-
-static void
-set_manual_entry_in_ttd(const scapi::ManualEntry& m) {
-    set_pan_in_ttd(m.pan);
-    set_expiration_date_in_ttd(m.expirationDate);
-    if (m.cvdData) {
-        set_cvd_in_ttd(*m.cvdData);
-    }
-}
-
-static void
-set_event_in_ttd(const Event& e) {
-    switch (e.index()) {
-    case 0:
-        ttd.event.Table[E_LANGUAGE_SELECTION] = true;
-        ttd.selectedLanguage = get<0>(e).selectedLanguage;
-        break;
-    case 1:
-        ttd.event.Table[E_SERVICE_SELECTION] = true;
-        ttd.selectedService = get<1>(e).serviceId;
-        break;
-    case 2:
-        ttd.event.Table[E_MANUAL_ENTRY] = true;
-        set_manual_entry_in_ttd(get<2>(e));
-        break;
-    case 3:
-        ttd.event.Table[E_TERMINATION_REQUESTED] = true;
-        break;
-    case 4:
-        ttd.event.Table[E_REBOOT_REQUESTED] = true;
-        break;
-    default:
-        throw runtime_error("Unexpected event");
-    }
-}
-
 enum ScapiResult
 scapi_Initialize(void) noexcept try {
     s_scapi = make_unique<scapi::nngpp::Session>();
     return SCAPI_OK;
 } catch (...) {
-    return handle_exception_in_ttd();
+    TtdKeeper::instance().handle_exception();
+    return SCAPI_NOK;
 }
 
 extern "C" enum ScapiResult
@@ -292,9 +175,15 @@ scapi_Update_Interfaces(const enum InterfaceStatus status) noexcept try {
         .interfaceStatus = status
     };
     const auto rsp = s_scapi->interaction(req);
-    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response_in_ttd(rsp);
+    if (rsp.index() == 1) {
+        return SCAPI_OK;
+    } else {
+        TtdKeeper::instance().handle_bad_response(rsp);
+        return SCAPI_NOK;
+    }
 } catch (...) {
-    return handle_exception_in_ttd();
+    TtdKeeper::instance().handle_exception();
+    return SCAPI_NOK;
 }
 
 extern "C" enum ScapiResult
@@ -304,18 +193,30 @@ scapi_Data_Print_Interaction(const enum PrintMessage m) noexcept try {
         .extraData = nullptr
     };
     const auto rsp = s_scapi->interaction(req);
-    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response_in_ttd(rsp);
+    if (rsp.index() == 1) {
+        return SCAPI_OK;
+    } else {
+        TtdKeeper::instance().handle_bad_response(rsp);
+        return SCAPI_NOK;
+    }
 } catch (...) {
-    return handle_exception_in_ttd();
+    TtdKeeper::instance().handle_exception();
+    return SCAPI_NOK;
 }
 
 extern "C" enum ScapiResult
 scapi_Data_Output_Interaction(const size_t size, const enum CardholderMessage msg[]) noexcept try {
     const Request req(in_place_index<1>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
-    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response_in_ttd(rsp);
+    if (rsp.index() == 1) {
+        return SCAPI_OK;
+    } else {
+        TtdKeeper::instance().handle_bad_response(rsp);
+        return SCAPI_NOK;
+    }
 } catch (...) {
-    return handle_exception_in_ttd();
+    TtdKeeper::instance().handle_exception();
+    return SCAPI_NOK;
 }
 
 extern "C" enum ScapiResult
@@ -323,11 +224,13 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
     const Request req(in_place_index<3>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
     if (rsp.index() != 2) {
-        return handle_bad_response_in_ttd(rsp);
+        TtdKeeper::instance().handle_bad_response(rsp);
+        return SCAPI_NOK;
     }
     return SCAPI_OK;
 } catch (...) {
-    return handle_exception_in_ttd();
+    TtdKeeper::instance().handle_exception();
+    return SCAPI_NOK;
 }
 
 extern "C" enum ScapiResult
@@ -338,11 +241,12 @@ scapi_Wait_For_Event(void) noexcept try {
         throw runtime_error("Empty event list in SCAP notification isn't supported");
     }
     for (const auto& e : ntf.events) {
-        set_event_in_ttd(e);
+        TtdKeeper::instance().update(e);
     }
     return SCAPI_NEW_EVENT;
 } catch (...) {
-    return handle_exception_in_ttd();
+    TtdKeeper::instance().handle_exception();
+    return SCAPI_NOK;
 }
 
 extern "C" bool
