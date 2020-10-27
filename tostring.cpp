@@ -434,3 +434,19 @@ tostring(const enum CvdPresence p) {
     }
     throw runtime_error(__PRETTY_FUNCTION__);
 }
+
+const char*
+tostring(const enum TransactionResult r) {
+    switch (r) {
+        case T_NONE: return "T_NONE";
+        case T_ABORTED: return "T_ABORTED";
+        case T_NOT_SUPPORTED: return "T_NOT_SUPPORTED";
+        case T_APPROVED: return "T_APPROVED";
+        case T_PARTIALLY_APPROVED: return "T_PARTIALLY_APPROVED";
+        case T_VOICE_AUTHORISATION: return "T_VOICE_AUTHORISATION";
+        case T_PAYMENT_PART_ONLY: return "T_PAYMENT_PART_ONLY";
+        case T_DECLINED: return "T_DECLINED";
+        case T_MAX: break;
+    }
+    throw runtime_error(__PRETTY_FUNCTION__);
+}

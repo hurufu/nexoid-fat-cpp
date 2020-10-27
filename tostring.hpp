@@ -14,6 +14,7 @@ const char* tostring(enum TerminalErrorReason);
 const char* tostring(enum LanguageAlpha2);
 const char* tostring(enum ServiceId);
 const char* tostring(enum CvdPresence);
+const char* tostring(enum TransactionResult);
 
 // TODO: Check if there is a way to avoid repetitios 'operator <<' overloading
 static inline ::std::ostream& operator << (::std::ostream& os, const enum ProcedureResult& x) { return os << tostring(x); }
@@ -23,3 +24,4 @@ static inline ::std::ostream& operator << (::std::ostream& os, const enum Termin
 static inline ::std::ostream& operator << (::std::ostream& os, const enum LanguageAlpha2& x) { return os << tostring(x); }
 static inline ::std::ostream& operator << (::std::ostream& os, const enum ServiceId& x) { return os << tostring(x); }
 static inline ::std::ostream& operator << (::std::ostream& os, const enum CvdPresence& x) { return os << tostring(x); }
+static inline ::std::ostream& operator << (::std::ostream& os, const enum TransactionResult& x) { return os << tostring(x); }
