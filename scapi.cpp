@@ -237,9 +237,6 @@ extern "C" enum ScapiResult
 scapi_Wait_For_Event(void) noexcept try {
     cout << __func__ << " ..." << endl;
     const auto ntf = s_scapi->notification();
-    if (ntf.events.size() == 0) {
-        throw runtime_error("Empty event list in SCAP notification isn't supported");
-    }
     for (const auto& e : ntf.events) {
         TtdKeeper::instance().update(e);
     }
