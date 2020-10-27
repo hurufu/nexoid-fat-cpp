@@ -40,9 +40,9 @@ map_scapi_request(const ::scapi::Request& r) {
     switch (r.index()) {
     case 0:
         ret.present = ScapiRequest_PR_updateInterfaces;
-        ret.updateInterfaces.interfaceStatus.buf = reinterpret_cast<uint8_t*>(calloc(1, 1));
-        ret.updateInterfaces.interfaceStatus.size = 1;
-        ret.updateInterfaces.interfaceStatus.buf[0] = get<0>(r).interfaceStatus;
+        ret.choice.updateInterfaces.interfaceStatus.buf = reinterpret_cast<uint8_t*>(calloc(1, 1));
+        ret.choice.updateInterfaces.interfaceStatus.size = 1;
+        ret.choice.updateInterfaces.interfaceStatus.buf[0] = get<0>(r).interfaceStatus;
         break;
     case 1: {
         ret.present = ScapiRequest_PR_output;
@@ -51,16 +51,16 @@ map_scapi_request(const ::scapi::Request& r) {
             switch (e.index()) {
             case 0:
                 tmp->present = ScapiInteraction_PR_msg;
-                tmp->msg = get<0>(e);
+                tmp->choice.msg = get<0>(e);
                 break;
             case 1:
                 tmp->present = ScapiInteraction_PR_ssn;
-                tmp->ssn = get<1>(e);
+                tmp->choice.ssn = get<1>(e);
                 break;
             default:
                 throw runtime_error("Omg"); // FIXME: Memory leak
             }
-            if (ASN_SEQUENCE_ADD(&ret.output, tmp) != 0) {
+            if (ASN_SEQUENCE_ADD(&ret.choice.output, tmp) != 0) {
                 throw runtime_error("ASN_SEQUENCE_ADD failed"); // FIXME: Memory leak
             }
         }
@@ -84,7 +84,7 @@ map_to_asn1c(const ::scapi::socket::Request& r) {
     switch (r.index()) {
     case 0:
         c->req.present = req_PR_interaction;
-        c->req.interaction = map_scapi_request(get<0>(r));
+        c->req.choice.interaction = map_scapi_request(get<0>(r));
         break;
     case 1:
         c->req.present = req_PR_registration;
@@ -143,7 +143,7 @@ static scapi::Event
 map_event_from_asn1c(const struct ScapiEvent* const e) {
     switch (e->present) {
     case ScapiEvent_PR_languageSelection: {
-        const auto l = reinterpret_cast<char*>(e->languageSelection.language.buf);
+        const auto l = reinterpret_cast<char*>(e->choice.languageSelection.language.buf);
         const scapi::LanguageSelection ls{
             .selectedLanguage = { .c = { l[0], l[1] } }
         };
@@ -151,7 +151,7 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
     }
     case ScapiEvent_PR_serviceSelection: {
         const scapi::ServiceSelection ss{
-            .serviceId = static_cast<enum ServiceId>(e->serviceSelection.serviceId)
+            .serviceId = static_cast<enum ServiceId>(e->choice.serviceSelection.serviceId)
         };
         return {ss};
     }

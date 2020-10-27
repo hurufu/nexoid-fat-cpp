@@ -122,7 +122,7 @@ clean: D += $(ASN1_GENERATED_DIR)
 
 $(ASN1_MAKEFILE): $(wildcard asn1/*.asn1)
 	mkdir -p $(ASN1_GENERATED_DIR)
-	asn1c -funnamed-unions -fincludes-quoted -pdu=auto -D $(ASN1_GENERATED_DIR) -no-gen-example -no-gen-OER -no-gen-PER $^
+	asn1c -fincludes-quoted -pdu=auto -D $(ASN1_GENERATED_DIR) -no-gen-example -no-gen-OER -no-gen-PER $^
 
 libasncodec_la_OBJECTS := $(libasncodec_la_SOURCES:.c=.o)
 $(lib_LTLIBRARIES)($(libasncodec_la_OBJECTS)): $(libasncodec_la_OBJECTS)
