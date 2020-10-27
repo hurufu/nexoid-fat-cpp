@@ -19,7 +19,7 @@ namespace scapi {
     > CvdData;
 
     struct Nak {
-        enum ::NokReason nokReason;
+        ::std::optional<enum ::NokReason> nokReason;
         ::std::optional<enum ::TerminalErrorReason> terminalErrorReason;
     };
 

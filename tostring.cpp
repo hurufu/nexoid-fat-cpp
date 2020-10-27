@@ -182,7 +182,9 @@ tostring(const enum NokReason n) {
         case N_MAX:
             break;
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    char buf[255];
+    snprintf(buf, sizeof(buf), "%s %d", __PRETTY_FUNCTION__, n);
+    throw runtime_error(buf);
 }
 
 const char*

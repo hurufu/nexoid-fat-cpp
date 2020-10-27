@@ -65,6 +65,30 @@ set_manual_entry_in_ttd(const scapi::ManualEntry& m) {
     }
 }
 
+static void
+set_error_reason_in_ttd(const enum TerminalErrorReason r) {
+    if (ttd.terminalErrorIndicator) {
+        if (ttd.terminalErrorReason == TE_NONE) {
+            throw runtime_error("Inconsitent error indication 1");
+        }
+        throw runtime_error("Terminal Error is already set");
+    } else {
+        ttd.terminalErrorIndicator = true;
+        if (ttd.terminalErrorReason != TE_NONE) {
+            throw runtime_error("Inconsitent error indication 2");
+        }
+    }
+    ttd.terminalErrorReason = r;
+}
+
+static void
+set_nok_reason(const enum NokReason n) {
+    if (ttd.nokReason != N_NONE) {
+        throw runtime_error("Avoided overwritting of nok reason");
+    }
+    ttd.nokReason = n;
+}
+
 static enum IdleEvent
 map_event_to_ttd_event_index(const scapi::Event& e) {
     switch (e.index()) {
@@ -126,14 +150,14 @@ void
 TtdKeeper::handle_bad_response(const scapi::Response& rsp) noexcept {
     if (rsp.index() == 0) { // Nak
         const auto& nak = get<0>(rsp);
-        ttd.nokReason = nak.nokReason;
+        if (nak.nokReason) {
+            set_nok_reason(*nak.nokReason);
+        }
         if (nak.terminalErrorReason) {
-            ttd.terminalErrorIndicator = true;
-            ttd.terminalErrorReason = *nak.terminalErrorReason;
+            set_error_reason_in_ttd(*nak.terminalErrorReason);
         }
     } else {
-        ttd.terminalErrorIndicator = true;
-        ttd.terminalErrorReason = TE_INTERACTION_ERROR;
+        set_error_reason_in_ttd(TE_INTERACTION_ERROR);
     }
 }
 

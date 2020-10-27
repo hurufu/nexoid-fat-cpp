@@ -56,6 +56,63 @@ map_nok_reason_to_asn1c(const enum NokReason n) {
     throw runtime_error("Invalid NokReason conversion");
 }
 
+static optional<enum NokReason>
+map_nok_reason_from_asn1c(const long int* const n) {
+    if (!n) {
+        return {};
+    }
+    switch (*n) {
+        case NexoNokReason_none: return N_NONE;
+        case NexoNokReason_notImplemented: return N_NOT_IMPLEMENTED;
+        case NexoNokReason_originalTrxNotFound: return N_ORIGINAL_TRX_NOT_FOUND;
+        case NexoNokReason_technicalError: return N_TECHNICAL_ERROR;
+        case NexoNokReason_missingData: return N_MISSING_DATA;
+        case NexoNokReason_confError: return N_CONF_ERROR;
+        case NexoNokReason_noPermission: return N_NO_PERMISSION;
+        case NexoNokReason_configurationError: return N_CONFIGURATION_ERROR;
+        case NexoNokReason_amountError: return N_AMOUNT_ERROR;
+        case NexoNokReason_kernelError: return N_KERNEL_ERROR;
+        case NexoNokReason_dataError: return N_DATA_ERROR;
+        case NexoNokReason_noCardInserted: return N_NO_CARD_INSERTED;
+        case NexoNokReason_cancelled: return N_CANCELLED;
+        case NexoNokReason_aborted: return N_ABORTED;
+        case NexoNokReason_timeout: return N_TIMEOUT;
+        case NexoNokReason_cardMissing: return N_CARD_MISSING;
+        case NexoNokReason_chipError: return N_CHIP_ERROR;
+        case NexoNokReason_noProfile: return N_NO_PROFILE;
+        case NexoNokReason_fallbackProhibited: return N_FALLBACK_PROHIBITED;
+        case NexoNokReason_technologyNotSupported: return N_TECHNOLOGY_NOT_SUPPORTED;
+        case NexoNokReason_gpo6985: return N_GPO6985;
+        case NexoNokReason_cardBlocked: return N_CARD_BLOCKED;
+        case NexoNokReason_emptyList: return N_EMPTY_LIST;
+    }
+    throw runtime_error(__PRETTY_FUNCTION__);
+}
+
+static optional<enum TerminalErrorReason>
+map_error_reason_from_asn1c(const long int* const e) {
+    if (!e) {
+        return {};
+    }
+    switch (*e) {
+        case NexoTerminalErrorReason_none: return TE_NONE;
+        case NexoTerminalErrorReason_hardwareError: return TE_HARDWARE_ERROR;
+        case NexoTerminalErrorReason_memoryFailure: return TE_MEMORY_FAILURE;
+        case NexoTerminalErrorReason_configurationError: return TE_CONFIGURATION_ERROR;
+        case NexoTerminalErrorReason_cryptographicKeysMissing: return TE_CRYPTOGRAPHIC_KEYS_MISSING;
+        case NexoTerminalErrorReason_logLimitExceeded: return TE_LOG_LIMIT_EXCEEDED;
+        case NexoTerminalErrorReason_communicationError: return TE_COMMUNICATION_ERROR;
+        case NexoTerminalErrorReason_unspecified: return TE_UNSPECIFIED;
+        case NexoTerminalErrorReason_nexoFastFailure: return TE_NEXO_FAST_FAILURE;
+        case NexoTerminalErrorReason_interactionError: return TE_INTERACTION_ERROR;
+        case NexoTerminalErrorReason_overspend: return TE_OVERSPEND;
+        case NexoTerminalErrorReason_notImplemented: return TER_NOT_IMPLEMENTED;
+        case NexoTerminalErrorReason_interfaceContractViolation: return TER_INTERFACE_CONTRACT_VIOLATION;
+        case NexoTerminalErrorReason_internalError: return TER_INTERNAL_ERROR;
+    }
+    throw runtime_error(__PRETTY_FUNCTION__);
+}
+
 static const char*
 asn_dec_rval_code_e_tostring(const asn_dec_rval_code_e code) {
     switch (code) {
@@ -160,23 +217,29 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
     return ret;
 }
 
+static scapi::Nak
+map_nak_from_asn1c(const struct ScapiNak& n) {
+    return {
+        .nokReason = map_nok_reason_from_asn1c(n.nokReason),
+        .terminalErrorReason = map_error_reason_from_asn1c(n.terminalErrorReason)
+    };
+}
+
 static ::scapi::Response
 map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
     const auto ptr = rsp.get();
-    ::scapi::Response ret;
     switch (ptr->present) {
     case ScapiResponse_PR_ack:
-        ret.emplace<1>();
-        break;
+        return scapi::Response(in_place_index<1>);
     case ScapiResponse_PR_nak:
+        return map_nak_from_asn1c(ptr->choice.nak);
     case ScapiResponse_PR_ackEntry:
     case ScapiResponse_PR_ackServiceAuthorised:
         throw runtime_error("Not implemented 3");
     case ScapiResponse_PR_NOTHING:
-    default:
-        throw runtime_error("Unexpected response, can't map it internally");
+        break;
     }
-    return ret;
+    throw runtime_error("Unexpected response, can't map it internally");
 }
 
 static union ExpirationDate
