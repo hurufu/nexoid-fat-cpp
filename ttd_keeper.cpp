@@ -126,6 +126,11 @@ enum NokReason& TtdKeeper::fetch<enum NokReason>(void) {
     return ttd.nokReason;
 }
 
+template <>
+enum TerminalErrorReason& TtdKeeper::fetch<enum TerminalErrorReason>(void) {
+    return ttd.terminalErrorReason;
+}
+
 void
 TtdKeeper::reset(void) noexcept {
     // FIXME: Implement better clearing method, eg. release ptmalloc arena
