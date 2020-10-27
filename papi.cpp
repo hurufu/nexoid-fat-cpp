@@ -1,4 +1,5 @@
 #include "scapi_internal.hpp"
+#include "tostring.hpp"
 
 extern "C" {
 #include <nexoid/papi.h>
@@ -34,7 +35,7 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 
 enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) {
-    cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__ << endl;
+    cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__ << " " << ttd.nokReason << " " << ttd.terminalErrorReason << endl;
     return PR_NOK;
 }
 
