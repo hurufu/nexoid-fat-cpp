@@ -20,7 +20,6 @@ public:
     void handle_bad_response(const scapi::Response&);
 
     /** Used for fetching any data from TTD
-     *  TODO: Not implemented, yet
      */
     template <typename T>
     T& fetch(void);
