@@ -10,6 +10,9 @@ class TtdKeeper final : public Singleton<TtdKeeper> {
     TtdKeeper(void) = default;
 public:
     void update(const scapi::Event&);
+    void update(enum NokReason);
+    void update(enum AuthorisationResponseCode);
+    void update(enum TransactionResult);
 
     /** Exception handler, should be used on a boundary between C and C++
      */
@@ -21,6 +24,7 @@ public:
 
     enum NokReason fetch_nok_reason(void);
     enum TerminalErrorReason fetch_ter_reason(void);
+    enum ServiceId fetch_selected_service(void);
 
     /** Unconditionaly clears TTD. Useful for testing
      */

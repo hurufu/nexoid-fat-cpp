@@ -1,5 +1,6 @@
 #include "ttd_keeper.hpp"
 #include "scapi_messages.hpp"
+#include "tostring.hpp"
 
 extern "C" {
 #include <nexoid/gtd.h>
@@ -91,6 +92,26 @@ TtdKeeper::update(const scapi::Event& e) {
 }
 
 void
+TtdKeeper::update(const enum NokReason n) {
+    ttd.nokReason = n;
+}
+
+void
+TtdKeeper::update(const enum AuthorisationResponseCode arc) {
+    ttd.authorisationResponseCode = arc;
+}
+
+void
+TtdKeeper::update(const enum TransactionResult r) {
+    if (ttd.transactionResult == T_ABORTED && r != T_ABORTED) {
+        char buf[255];
+        snprintf(buf, sizeof(buf), "TransactionResult update to %s tried to introduce inconsistency", tostring(r));
+        throw runtime_error(buf);
+    }
+    ttd.transactionResult = r;
+}
+
+void
 TtdKeeper::handle_bad_response(const scapi::Response& rsp) {
     if (rsp.index() != 0) {
         throw runtime_error("Bad response");
@@ -127,6 +148,10 @@ enum NokReason TtdKeeper::fetch_nok_reason(void) {
 
 enum TerminalErrorReason TtdKeeper::fetch_ter_reason(void) {
     return ttd.terminalErrorReason;
+}
+
+enum ServiceId TtdKeeper::fetch_selected_service(void) {
+    return ttd.selectedService;
 }
 
 void

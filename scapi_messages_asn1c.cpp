@@ -89,6 +89,10 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = ScapiInteraction_PR_ssn;
                 tmp->choice.ssn = get<1>(e);
                 break;
+            case 17:
+                tmp->present = ScapiInteraction_PR_selectedService;
+                tmp->choice.selectedService = get<17>(e);
+                break;
             case 18:
                 tmp->present = ScapiInteraction_PR_nokReason;
                 tmp->choice.nokReason = map_nok_reason_to_asn1c(get<18>(e));

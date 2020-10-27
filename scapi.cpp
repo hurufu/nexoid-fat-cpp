@@ -148,6 +148,9 @@ map_to_interaction(const CardholderMessage m) {
     case 1:
         ret.emplace<1>(m);
         break;
+    case 17:
+        ret.emplace<17>(TtdKeeper::instance().fetch_selected_service());
+        break;
     case 18:
         ret.emplace<18>(TtdKeeper::instance().fetch_nok_reason());
         break;
