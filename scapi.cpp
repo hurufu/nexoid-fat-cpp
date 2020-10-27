@@ -135,7 +135,7 @@ classify_to_variant_index(const CardholderMessage m) {
         case CRDHLDR_SSN_RECEIPT_PRINTING_FAILED:
             return 1;
     }
-    return -1;
+    throw runtime_error("Not supported CardholderMessage mapping");
 }
 
 static Interaction
