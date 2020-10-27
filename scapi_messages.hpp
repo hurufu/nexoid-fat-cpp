@@ -57,6 +57,26 @@ namespace scapi {
     typedef ::std::variant<
         enum ::CardholderMessage // msg
       , enum ::CardholderMessage // ssn
+      , struct ::UiParameters // uiParametersForOutcome
+      , struct ::UiParameters // uiParametersForRestart
+      , struct ::UiParameters // uiParametersForCompletion
+      , struct ::UiParameters // uiParametersForOutcomeStatusOnly
+      , ::std::string // declineDisplayMessage
+      , ::std::string // cardholderMessage - FIXME: See Scapi.asn1
+      , ::std::string // applicationLabelDisplayed
+      , struct ::string5 // commandKeyEnterLabel
+      , struct ::string5 // commandKeyChangeApplicationLabel
+      , struct ::string5 // commandKeyPinBypassLabel
+      , union ::bcd6 // paymentAmount
+      , union ::bcd6 // trxAmount
+      , union ::bcd6 // cashbackAmount
+      , union ::bcd6 // supplementaryAmount
+      , union ::CurrencyCode // trxCurrencyAlpha3 - FIXME: Check if type is correct
+      , enum ::ServiceId // selectedService
+      , enum ::NokReason // nokReason
+      , ::std::monostate // FIXME: Implement searchTrxResultList
+      , union ::bcd6 // updatePreAuthTotalAmount
+      , bool // minus
     > Interaction;
 
     typedef ::std::variant<

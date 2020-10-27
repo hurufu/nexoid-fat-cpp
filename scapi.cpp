@@ -89,43 +89,45 @@ classify_to_variant_index(const CardholderMessage m) {
             return 0;
 
         case CRDHLDR_SRC_UI_PARAMETERS_FOR_OUTCOME:
-            return -1;
+            return 2;
         case CRDHLDR_SRC_UI_PARAMETERS_FOR_RESTART:
-            return -1;
+            return 3;
         case CRDHLDR_SRC_UI_PARAMETERS_FOR_COMPLETION:
-            return -1;
+            return 4;
         case CRDHLDR_SRC_DECLINE_DISPLAY_MESSAGE:
-            return -1;
+            return 6;
         case CRDHLDR_SRC_SELECTED_SERVICE:
-            return -1;
+            return 17;
         case CRDHLDR_SRC_CARDHOLDER_MESSAGE:
-            return -1;
+            return 7;
         case CRDHLDR_SRC_NOK_REASON:
-            return -1;
+            return 18;
         case CRDHLDR_SRC_UI_PARAMETERS_FOR_OUTCOME_STATUS_ONLY:
-            return -1;
+            return 5;
         case CRDHLDR_SRC_APPLICATION_LABEL_DISPLAYED:
-            return -1;
+            return 8;
         case CRDHLDR_SRC_PAYMENT_AMOUNT:
-            return -1;
+            return 12;
         case CRDHLDR_SRC_COMMAND_KEY_ENTER_LABEL:
-            return -1;
+            return 9;
         case CRDHLDR_SRC_TRX_CURRENCY_ALPHA3:
-            return -1;
+            return 16;
         case CRDHLDR_SRC_TRX_AMOUNT:
-            return -1;
+            return 13;
         case CRDHLDR_SRC_COMMAND_KEY_CHANGE_APPLICATION_LABEL:
-            return -1;
+            return 10;
         case CRDHLDR_SRC_CASHBACK_AMOUNT:
-            return -1;
+            return 14;
         case CRDHLDR_SRC_SUPPLEMENTARY_AMOUNT:
-            return -1;
+            return 15;
         case CRDHLDR_SRC_COMMAND_KEY_PIN_BYPASS_LABEL:
-            return -1;
-
+            return 11;
         case CRDHLDR_SRC_SEARCH_TRX_RESULT_LIST:
+            return 19;
         case CRDHLDR_SRC_UPDATE_PRE_AUTH_TOTAL_AMOUNT:
+            return 20;
         case CRDHLDR_SRC_MINUS:
+            return 21;
         case CRDHLDR_SSN_CARD_REMOVAL_REQUESTED:
         case CRDHLDR_SSN_CARD_REMOVED:
         case CRDHLDR_SSN_REQUEST_SIGNATURE:
