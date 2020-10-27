@@ -31,7 +31,7 @@ using scapi::Session,
 static unique_ptr<Session> s_scapi;
 
 static enum ScapiResult
-handle_exception(void) noexcept try {
+handle_exception_in_ttd(void) noexcept try {
     ttd.terminalErrorIndicator = true;
     throw;
 } catch (const nng::exception& e) {
@@ -53,7 +53,7 @@ handle_exception(void) noexcept try {
 }
 
 static enum ScapiResult
-handle_bad_response(const Response& rsp) {
+handle_bad_response_in_ttd(const Response& rsp) {
     if (rsp.index() != 0) {
         throw runtime_error("Bad response");
     }
@@ -283,7 +283,7 @@ scapi_Initialize(void) noexcept try {
     s_scapi = make_unique<scapi::nngpp::Session>();
     return SCAPI_OK;
 } catch (...) {
-    return handle_exception();
+    return handle_exception_in_ttd();
 }
 
 extern "C" enum ScapiResult
@@ -292,9 +292,9 @@ scapi_Update_Interfaces(const enum InterfaceStatus status) noexcept try {
         .interfaceStatus = status
     };
     const auto rsp = s_scapi->interaction(req);
-    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
+    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response_in_ttd(rsp);
 } catch (...) {
-    return handle_exception();
+    return handle_exception_in_ttd();
 }
 
 extern "C" enum ScapiResult
@@ -304,18 +304,18 @@ scapi_Data_Print_Interaction(const enum PrintMessage m) noexcept try {
         .extraData = nullptr
     };
     const auto rsp = s_scapi->interaction(req);
-    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
+    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response_in_ttd(rsp);
 } catch (...) {
-    return handle_exception();
+    return handle_exception_in_ttd();
 }
 
 extern "C" enum ScapiResult
 scapi_Data_Output_Interaction(const size_t size, const enum CardholderMessage msg[]) noexcept try {
     const Request req(in_place_index<1>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
-    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response(rsp);
+    return (rsp.index() == 1) ? SCAPI_OK : handle_bad_response_in_ttd(rsp);
 } catch (...) {
-    return handle_exception();
+    return handle_exception_in_ttd();
 }
 
 extern "C" enum ScapiResult
@@ -323,11 +323,11 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
     const Request req(in_place_index<3>, create_interaction_vector(size, msg));
     const auto rsp = s_scapi->interaction(req);
     if (rsp.index() != 2) {
-        return handle_bad_response(rsp);
+        return handle_bad_response_in_ttd(rsp);
     }
     return SCAPI_OK;
 } catch (...) {
-    return handle_exception();
+    return handle_exception_in_ttd();
 }
 
 extern "C" enum ScapiResult
@@ -342,7 +342,7 @@ scapi_Wait_For_Event(void) noexcept try {
     }
     return SCAPI_NEW_EVENT;
 } catch (...) {
-    return handle_exception();
+    return handle_exception_in_ttd();
 }
 
 extern "C" bool
