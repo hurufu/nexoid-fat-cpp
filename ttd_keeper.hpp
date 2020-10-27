@@ -19,10 +19,8 @@ public:
      */
     void handle_bad_response(const scapi::Response&);
 
-    /** Used for fetching any data from TTD
-     */
-    template <typename T>
-    T& fetch(void);
+    enum NokReason fetch_nok_reason(void);
+    enum TerminalErrorReason fetch_ter_reason(void);
 
     /** Unconditionaly clears TTD. Useful for testing
      */

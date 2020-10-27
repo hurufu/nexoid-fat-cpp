@@ -121,13 +121,11 @@ TtdKeeper::handle_exception(void) noexcept try {
     cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
 }
 
-template <>
-enum NokReason& TtdKeeper::fetch<enum NokReason>(void) {
+enum NokReason TtdKeeper::fetch_nok_reason(void) {
     return ttd.nokReason;
 }
 
-template <>
-enum TerminalErrorReason& TtdKeeper::fetch<enum TerminalErrorReason>(void) {
+enum TerminalErrorReason TtdKeeper::fetch_ter_reason(void) {
     return ttd.terminalErrorReason;
 }
 

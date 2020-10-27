@@ -36,8 +36,8 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) {
     cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__
-         << ' ' << TtdKeeper::instance().fetch<enum NokReason>()
-         << ' ' << TtdKeeper::instance().fetch<enum TerminalErrorReason>()
+         << ' ' << TtdKeeper::instance().fetch_nok_reason()
+         << ' ' << TtdKeeper::instance().fetch_ter_reason()
          << endl;
     return PR_NOK;
 }
