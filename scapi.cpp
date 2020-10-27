@@ -140,26 +140,19 @@ classify_to_variant_index(const CardholderMessage m) {
 
 static Interaction
 map_to_interaction(const CardholderMessage m) {
-    Interaction ret;
     switch (classify_to_variant_index(m)) {
     case 0:
-        ret.emplace<0>(m);
-        break;
+        return Interaction(in_place_index<0>, m);
     case 1:
-        ret.emplace<1>(m);
-        break;
+        return Interaction(in_place_index<1>, m);
     case 17:
-        ret.emplace<17>(TtdKeeper::instance().fetch_selected_service());
-        break;
+        return TtdKeeper::instance().fetch_selected_service();
     case 18:
-        ret.emplace<18>(TtdKeeper::instance().fetch_nok_reason());
-        break;
-    default: {
-        char buf[255];
-        snprintf(buf, sizeof(buf), "Not implemented mapping [%x] %s", m, tostring(m));
-        throw runtime_error(buf);
-    }}
-    return ret;
+        return TtdKeeper::instance().fetch_nok_reason();
+    }
+    char buf[255];
+    snprintf(buf, sizeof(buf), "Not implemented mapping [%x] %s", m, tostring(m));
+    throw runtime_error(buf);
 }
 
 static vector<Interaction>

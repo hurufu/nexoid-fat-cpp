@@ -65,26 +65,37 @@ set_manual_entry_in_ttd(const scapi::ManualEntry& m) {
     }
 }
 
+static enum IdleEvent
+map_event_to_ttd_event_index(const scapi::Event& e) {
+    switch (e.index()) {
+        case 0: return E_LANGUAGE_SELECTION;
+        case 1: return E_SERVICE_SELECTION;
+        case 2: return E_MANUAL_ENTRY;
+        case 3: return E_TERMINATION_REQUESTED;
+        case 4: return E_REBOOT_REQUESTED;
+    }
+    throw runtime_error("Event can't be mapped");
+}
+
 void
 TtdKeeper::update(const scapi::Event& e) {
-    switch (e.index()) {
-    case 0:
-        ttd.event.Table[E_LANGUAGE_SELECTION] = true;
+    const auto index = map_event_to_ttd_event_index(e);
+    if (ttd.event.Table[index]) {
+        throw runtime_error("Event duplicated");
+    }
+    ttd.event.Table[index] = true;
+    switch (index) {
+    case E_LANGUAGE_SELECTION:
         ttd.selectedLanguage = get<0>(e).selectedLanguage;
         break;
-    case 1:
-        ttd.event.Table[E_SERVICE_SELECTION] = true;
+    case E_SERVICE_SELECTION:
         ttd.selectedService = get<1>(e).serviceId;
         break;
-    case 2:
-        ttd.event.Table[E_MANUAL_ENTRY] = true;
+    case E_MANUAL_ENTRY:
         set_manual_entry_in_ttd(get<2>(e));
         break;
-    case 3:
-        ttd.event.Table[E_TERMINATION_REQUESTED] = true;
-        break;
-    case 4:
-        ttd.event.Table[E_REBOOT_REQUESTED] = true;
+    case E_TERMINATION_REQUESTED:
+    case E_REBOOT_REQUESTED:
         break;
     default:
         throw runtime_error("Unexpected event");
