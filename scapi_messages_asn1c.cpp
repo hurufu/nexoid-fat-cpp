@@ -148,7 +148,7 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
         break;
     case rsp_PR_interaction:
     case rsp_PR_notification:
-        throw runtime_error("Not implemented");
+        throw runtime_error("Not implemented 2");
     case rsp_PR_NOTHING:
     default:
         throw runtime_error("Unexpected response, can't map it internally");
@@ -167,7 +167,7 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
     case ScapiResponse_PR_nak:
     case ScapiResponse_PR_ackEntry:
     case ScapiResponse_PR_ackServiceAuthorised:
-        throw runtime_error("Not implemented");
+        throw runtime_error("Not implemented 3");
     case ScapiResponse_PR_NOTHING:
     default:
         throw runtime_error("Unexpected response, can't map it internally");

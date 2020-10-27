@@ -3,6 +3,7 @@
 #include "scapi_internal.hpp"
 #include "scapi_messages_asn1c.hpp"
 #include "ttd_keeper.hpp"
+#include "tostring.hpp"
 
 extern "C" {
 #include <nexoid/scapi.h>
@@ -150,9 +151,11 @@ map_to_interaction(const CardholderMessage m) {
     case 18:
         ret.emplace<18>(TtdKeeper::instance().fetch_nok_reason());
         break;
-    default:
-        throw runtime_error("Not implemented");
-    }
+    default: {
+        char buf[255];
+        snprintf(buf, sizeof(buf), "Not implemented mapping [%x] %s", m, tostring(m));
+        throw runtime_error(buf);
+    }}
     return ret;
 }
 
