@@ -27,7 +27,7 @@ struct Session::Impl {
 Session::Impl::Impl(void) :
     interaction_socket(req::open()),
     notification_socket(pull::open()) {
-    set_opt_recv_timeout(interaction_socket, 1000);
+    set_opt_recv_timeout(interaction_socket, 3 * 1000);
     interaction_socket.dial("tcp://localhost:50153");
     notification_socket.dial("tcp://localhost:50154");
 }
