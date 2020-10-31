@@ -22,7 +22,7 @@ papi_handle_exception(void) noexcept try {
     return PAPI_NOK;
 }
 
-enum PapiResult
+extern "C" enum PapiResult
 papi_Proprietary_Startup_Sequence(void) noexcept try {
     if (scapi_Initialize() != SCAPI_OK) {
         cout << "SCAPI Initialization failed" << endl;
@@ -33,7 +33,7 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
     return papi_handle_exception();
 }
 
-enum ProcedureResult
+extern "C" enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
     cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__
          << ' ' << TtdKeeper::instance().fetch_nok_reason()
@@ -45,25 +45,17 @@ papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
     return PR_NOK;
 }
 
-void
-papi_Force_Reboot(void) {
-}
-
-void
-papi_Force_Termination(void) {
-}
-
-enum PapiResult
+extern "C" enum PapiResult
 papi_Specific_Processing_Based_On_Pan(void) {
     return PAPI_NOK;
 }
 
-enum PapiCvmResult
+extern "C" enum PapiCvmResult
 papi_Proprietary_Cvm_Condition_Code_Processing(const struct CvRule cvRule) {
     return PAPI_CVM_NOT_APPLICABLE;
 }
 
-enum PapiCvmResult
+extern "C" enum PapiCvmResult
 papi_Proprietary_Cvm_Support_Check(const struct CvRule cvRule) {
     return PAPI_CVM_NOT_SUPPORTED;
 }
