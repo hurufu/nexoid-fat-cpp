@@ -34,11 +34,14 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 }
 
 enum ProcedureResult
-papi_Diagnostics_Maintenance_Recovery(void) {
+papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
     cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__
          << ' ' << TtdKeeper::instance().fetch_nok_reason()
          << ' ' << TtdKeeper::instance().fetch_ter_reason()
          << endl;
+    return PR_NOK;
+} catch (...) {
+    papi_handle_exception();
     return PR_NOK;
 }
 
