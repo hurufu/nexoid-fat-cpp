@@ -167,16 +167,16 @@ TtdKeeper::handle_exception(void) noexcept try {
     throw;
 } catch (const nng::exception& e) {
     ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Messaging related exception originated at '" << e.who() << "' suppressed: " << e.what() << endl;
+    cout << "Messaging related exception originated at '" << e.who() << "' suppressed: " << e.what() << endl;
 } catch (const exception& e) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Generic exception suppressed: " << e.what() << endl;
+    cout << "Generic exception suppressed: " << e.what() << endl;
 } catch (const libsocket::socket_exception& e) {
     ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
+    cout << "Connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
 } catch (...) {
     ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << " Unexpected exception suppressed" << endl;
+    cout << "Unexpected exception suppressed" << endl;
 }
 
 enum NokReason TtdKeeper::fetch_nok_reason(void) {
