@@ -136,28 +136,28 @@ map_scapi_request(const ::scapi::Request& r) {
     case 1: {
         ret.present = ScapiRequest_PR_output;
         for (const auto& e : get<1>(r)) {
-            ScapiInteraction* const tmp = reinterpret_cast<ScapiInteraction*>(calloc(1, sizeof(ScapiInteraction)));
+            auto* const tmp = reinterpret_cast<Member*>(calloc(1, sizeof(Member)));
             switch (e.index()) {
             case 0:
-                tmp->present = ScapiInteraction_PR_msg;
+                tmp->present = Member_PR_msg;
                 tmp->choice.msg = get<0>(e);
                 break;
             case 1:
-                tmp->present = ScapiInteraction_PR_ssn;
+                tmp->present = Member_PR_ssn;
                 tmp->choice.ssn = get<1>(e);
                 break;
             case 17:
-                tmp->present = ScapiInteraction_PR_selectedService;
+                tmp->present = Member_PR_selectedService;
                 tmp->choice.selectedService = get<17>(e);
                 break;
             case 18:
-                tmp->present = ScapiInteraction_PR_nokReason;
+                tmp->present = Member_PR_nokReason;
                 tmp->choice.nokReason = map_nok_reason_to_asn1c(get<18>(e));
                 break;
             default:
                 throw runtime_error("Omg"); // FIXME: Memory leak
             }
-            if (ASN_SEQUENCE_ADD(&ret.choice.output, tmp) != 0) {
+            if (ASN_SEQUENCE_ADD(&ret.choice.output.what.list, tmp) != 0) {
                 throw runtime_error("ASN_SEQUENCE_ADD failed"); // FIXME: Memory leak
             }
         }

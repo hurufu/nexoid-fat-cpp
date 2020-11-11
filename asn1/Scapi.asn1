@@ -10,9 +10,9 @@ DEFINITIONS IMPLICIT TAGS ::= BEGIN
     -- Request from nexoid core to SCAP
     ScapiRequest ::= CHOICE {
         updateInterfaces [0] ScapiUpdateInterfaces,
-        output [1] SEQUENCE OF ScapiInteraction,
+        output [1] ScapiInteraction,
         print [2] ScapiPrintMessage,
-        entry [3] SEQUENCE OF ScapiInteraction,
+        entry [3] ScapiInteraction,
         authoriseService [4] NULL
     }
 
@@ -77,29 +77,32 @@ DEFINITIONS IMPLICIT TAGS ::= BEGIN
         cardholderReceipt(1)
     }
 
-    ScapiInteraction ::= CHOICE {
-        msg [0] ScapiCardholderMesage,
-        ssn [1] ScapiSaleSystemNotification,
-        uiParametersForOutcome [128] ScapiUiParameters,
-        uiParametersForRestart [129] ScapiUiParameters,
-        uiParametersForCompletion [130] ScapiUiParameters,
-        uiParametersForOutcomeStatusOnly [135] ScapiUiParameters,
-        declineDisplayMessage [131] UTF8String (SIZE(0..40)),
-        cardholderMessage [133] UTF8String, -- FIXME: Probably should be removed
-        applicationLabelDisplayed [136] UTF8String (SIZE(1..16)), -- TODO: Only 'space' should be allowed as a special character
-        commandKeyEnterLabel [138] NexoCommandKey,
-        commandKeyChangeApplicationLabel [141] NexoCommandKey,
-        commandKeyPinBypassLabel [144] NexoCommandKey,
-        paymentAmount [137] NexoAmount,
-        trxAmount [140] NexoAmount,
-        cashbackAmount [142] NexoAmount,
-        supplementaryAmount [143] NexoAmount,
-        trxCurrencyAlpha3 [139] Iso4217,
-        selectedService [132] ServiceIdentifier,
-        nokReason [134] NexoNokReason,
-        searchTrxResultList [145] SEQUENCE OF ScapiSearchTrxResult,
-        updatePreAuthTotalAmount [146] NexoAmount,
-        minus [147] BOOLEAN
+    ScapiInteraction ::= SEQUENCE {
+        language Iso639 DEFAULT "en",
+        what SET OF CHOICE {
+            msg [0] ScapiCardholderMesage,
+            ssn [1] ScapiSaleSystemNotification,
+            uiParametersForOutcome [128] ScapiUiParameters,
+            uiParametersForRestart [129] ScapiUiParameters,
+            uiParametersForCompletion [130] ScapiUiParameters,
+            uiParametersForOutcomeStatusOnly [135] ScapiUiParameters,
+            declineDisplayMessage [131] UTF8String (SIZE(0..40)),
+            cardholderMessage [133] UTF8String, -- FIXME: Probably should be removed
+            applicationLabelDisplayed [136] UTF8String (SIZE(1..16)), -- TODO: Only 'space' should be allowed as a special character
+            commandKeyEnterLabel [138] NexoCommandKey,
+            commandKeyChangeApplicationLabel [141] NexoCommandKey,
+            commandKeyPinBypassLabel [144] NexoCommandKey,
+            paymentAmount [137] NexoAmount,
+            trxAmount [140] NexoAmount,
+            cashbackAmount [142] NexoAmount,
+            supplementaryAmount [143] NexoAmount,
+            trxCurrencyAlpha3 [139] Iso4217,
+            selectedService [132] ServiceIdentifier,
+            nokReason [134] NexoNokReason,
+            searchTrxResultList [145] SEQUENCE OF ScapiSearchTrxResult,
+            updatePreAuthTotalAmount [146] NexoAmount,
+            minus [147] BOOLEAN
+        }
     }
 
     ScapiUiParameters ::= SET {
