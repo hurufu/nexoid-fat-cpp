@@ -165,10 +165,10 @@ map_scapi_request(const ::scapi::Request& r) {
     }
     case 2:
         ret.present = ScapiRequest_PR_print;
-        break;
+        throw runtime_error("Printer Interaction isn't implemented");
     case 3:
         ret.present = ScapiRequest_PR_entry;
-        break;
+        throw runtime_error("Entry Interaction isn't implemented");
     default:
         throw runtime_error("Can't encode SCAPI request"); // FIXME: Memory leak
     }
