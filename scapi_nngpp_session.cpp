@@ -29,8 +29,8 @@ Session::Impl::Impl(void) :
     notification_socket(pull::open()) {
     set_opt_recv_timeout(interaction_socket, 3 * 1000);
     set_opt_send_timeout(interaction_socket, 1 * 1000);
-    interaction_socket.dial("tcp://localhost:50153");
-    notification_socket.dial("tcp://localhost:50154");
+    interaction_socket.dial("ipc:///tmp/fatrq");
+    notification_socket.dial("ipc:///tmp/fatnt");
 }
 
 vector<unsigned char>
