@@ -165,7 +165,8 @@ map_scapi_request(const ::scapi::Request& r) {
     }
     case 2:
         ret.present = ScapiRequest_PR_print;
-        throw runtime_error("Printer Interaction isn't implemented");
+        ret.choice.print.type = get<2>(r).type;
+        break;
     case 3:
         ret.present = ScapiRequest_PR_entry;
         throw runtime_error("Entry Interaction isn't implemented");
