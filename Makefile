@@ -125,6 +125,7 @@ clean: F += $(ASN1_MAKEFILE)
 clean: F += nexoconf.o
 clean: D += $(ASN1_GENERATED_DIR)
 clean: F += $(EXECUTABLE).strace
+clean: F += $(EXECUTABLE).valgrind
 
 $(ASN1_MAKEFILE): $(wildcard asn1/*.asn1)
 	mkdir -p $(ASN1_GENERATED_DIR)
