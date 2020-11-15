@@ -107,6 +107,11 @@ cg.png:
 .PHONY: valgrind
 valgrind: $(EXECUTABLE).valgrind
 
+.PHONY: strace
+strace: $(EXECUTABLE).strace
+%.strace: %
+	strace $(STRACE_FLAGS) ./$* 3>&2 2>&1 1>&3 | ts -i %.S >$@
+
 %.s: %.cpp
 	$(CXX) -S $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) -o $@ $<
 
@@ -119,6 +124,7 @@ clean: F += $(lib_LTLIBRARIES)
 clean: F += $(ASN1_MAKEFILE)
 clean: F += nexoconf.o
 clean: D += $(ASN1_GENERATED_DIR)
+clean: F += $(EXECUTABLE).strace
 
 $(ASN1_MAKEFILE): $(wildcard asn1/*.asn1)
 	mkdir -p $(ASN1_GENERATED_DIR)
