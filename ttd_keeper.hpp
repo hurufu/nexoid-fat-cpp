@@ -25,6 +25,7 @@ public:
     enum NokReason fetch_nok_reason(void);
     enum TerminalErrorReason fetch_ter_reason(void);
     enum ServiceId fetch_selected_service(void);
+    union Iso639_1 fetch_selected_language(void);
 
     /** Unconditionaly clears TTD. Useful for testing
      */

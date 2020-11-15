@@ -191,6 +191,10 @@ enum ServiceId TtdKeeper::fetch_selected_service(void) {
     return ttd.selectedService;
 }
 
+union Iso639_1 TtdKeeper::fetch_selected_language(void) {
+    return ttd.selectedLanguage;
+}
+
 void
 TtdKeeper::reset(void) noexcept {
     // FIXME: Implement better clearing method, eg. release ptmalloc arena
