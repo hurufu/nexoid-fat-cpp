@@ -1,6 +1,7 @@
 #include "scapi_messages_asn1c.hpp"
 
 #include "utils.hpp"
+#include "ttd_keeper.hpp"
 
 #include <ScapiSocketRequest.h>
 #include <ScapiSocketResponse.h>
@@ -161,6 +162,15 @@ map_scapi_request(const ::scapi::Request& r) {
                 throw runtime_error("ASN_SEQUENCE_ADD failed"); // FIXME: Memory leak
             }
         }
+#       if 1
+        // Extremely ugly workaround
+        const auto l = TtdKeeper::instance().fetch_selected_language();
+        ret.choice.output.language = reinterpret_cast<Iso639_t*>(calloc(1, sizeof(Iso639_t)));
+        ret.choice.output.language->buf = reinterpret_cast<uint8_t*>(calloc(3, 1));
+        ret.choice.output.language->buf[0] = l.c[0];
+        ret.choice.output.language->buf[1] = l.c[1];
+        ret.choice.output.language->size = 2;
+#       endif
         break;
     }
     case 2:
