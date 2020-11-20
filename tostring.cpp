@@ -1,8 +1,24 @@
 #include "tostring.hpp"
 
-#include <stdexcept>
+#include "exceptions.hpp"
 
 using namespace std;
+
+template <typename EnumType>
+[[noreturn]] static void
+throw_bad_mapping(const EnumType e, const char* const name) {
+    throw bad_mapping(e, make_desc("Can't convert ", name, " to string"));
+}
+
+const char*
+tostring(const enum asn_dec_rval_code_e code) {
+    switch (code) {
+        case RC_OK: return "RC_OK";
+        case RC_WMORE: return "RC_WMORE";
+        case RC_FAIL: return "RC_FAIL";
+    }
+    throw bad_mapping(code, "Unexpected ASNC decoder error code");
+}
 
 const char*
 tostring(const enum ProcedureResult r) {
@@ -58,7 +74,7 @@ tostring(const enum ProcedureResult r) {
         case PR_CVM_RETRY: return "PR_CVM_RETRY";
         case PR_MAX: return "PR_MAX";
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(r, "ProcedureResult");
 }
 
 const char*
@@ -150,7 +166,7 @@ tostring(const enum CardholderMessage m) {
         case CRDHLDR_ENT_CVD: return "CRDHLDR_ENT_CVD";
         case CRDHLDR_ENT_DCC_CONFIRMATION: return "CRDHLDR_ENT_DCC_CONFIRMATION";
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(m, "CardholderMessage");
 }
 
 const char*
@@ -182,9 +198,7 @@ tostring(const enum NokReason n) {
         case N_MAX:
             break;
     }
-    char buf[255];
-    snprintf(buf, sizeof(buf), "%s %d", __PRETTY_FUNCTION__, n);
-    throw runtime_error(buf);
+    throw_bad_mapping(n, "NokReason");
 }
 
 const char*
@@ -209,7 +223,7 @@ tostring(const enum TerminalErrorReason t) {
         case TER_MAX:
             break;
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(t, "TerminalErrorReason");
 }
 
 const char*
@@ -401,7 +415,7 @@ tostring(const enum LanguageAlpha2 a) {
         case LANG_CHINESE: return "LANG_CHINESE";
         case LANG_ZULU: return "LANG_ZULU";
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(a, "LanguageAlpha2");
 }
 
 const char*
@@ -423,7 +437,7 @@ tostring(const enum ServiceId s) {
         case S_NO_SHOW: return "S_NO_SHOW";
         case S_MAX: return "S_MAX";
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(s, "ServiceId");
 }
 
 const char*
@@ -434,7 +448,7 @@ tostring(const enum CvdPresence p) {
         case CVD_ILLEGIBLE: return "CVD_ILLEGIBLE";
         case CVD_NOT_PRESENT: return "CVD_NOT_PRESENT";
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(p, "CvdPresence");
 }
 
 const char*
@@ -450,5 +464,5 @@ tostring(const enum TransactionResult r) {
         case T_DECLINED: return "T_DECLINED";
         case T_MAX: break;
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw_bad_mapping(r, "TransactionResult");
 }

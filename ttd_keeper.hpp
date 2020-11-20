@@ -16,7 +16,7 @@ public:
 
     /** Exception handler, should be used on a boundary between C and C++
      */
-    void handle_exception(void) noexcept;
+    void handle_exception(const char* func = nullptr) noexcept;
 
     /** Should be called when wrong kind of response was received
      */

@@ -4,6 +4,7 @@
 #include "scapi_messages_asn1c.hpp"
 #include "ttd_keeper.hpp"
 #include "tostring.hpp"
+#include "exceptions.hpp"
 
 extern "C" {
 #include <nexoid/scapi.h>
@@ -135,7 +136,7 @@ classify_to_variant_index(const CardholderMessage m) {
         case CRDHLDR_SSN_RECEIPT_PRINTING_FAILED:
             return 1;
     }
-    throw runtime_error("Not supported CardholderMessage mapping");
+    throw bad_mapping(m, "Unexpected CardholderMessage");
 }
 
 static Interaction
@@ -150,9 +151,7 @@ map_to_interaction(const CardholderMessage m) {
     case 18:
         return TtdKeeper::instance().fetch_nok_reason();
     }
-    char buf[255];
-    snprintf(buf, sizeof(buf), "Not implemented mapping [%x] %s", m, tostring(m));
-    throw runtime_error(buf);
+    throw not_implemented(make_desc("Interaction message ", m, " isn't implemented"));
 }
 
 static vector<Interaction>
@@ -169,7 +168,7 @@ scapi_Initialize(void) noexcept try {
     s_scapi = make_unique<scapi::nngpp::Session>();
     return SCAPI_OK;
 } catch (...) {
-    TtdKeeper::instance().handle_exception();
+    TtdKeeper::instance().handle_exception(__func__);
     return SCAPI_NOK;
 }
 
@@ -186,7 +185,7 @@ scapi_Update_Interfaces(const enum InterfaceStatus status) noexcept try {
         return SCAPI_NOK;
     }
 } catch (...) {
-    TtdKeeper::instance().handle_exception();
+    TtdKeeper::instance().handle_exception(__func__);
     return SCAPI_NOK;
 }
 
@@ -204,7 +203,7 @@ scapi_Data_Print_Interaction(const enum PrintMessage m) noexcept try {
         return SCAPI_NOK;
     }
 } catch (...) {
-    TtdKeeper::instance().handle_exception();
+    TtdKeeper::instance().handle_exception(__func__);
     return SCAPI_NOK;
 }
 
@@ -219,7 +218,7 @@ scapi_Data_Output_Interaction(const size_t size, const enum CardholderMessage ms
         return SCAPI_NOK;
     }
 } catch (...) {
-    TtdKeeper::instance().handle_exception();
+    TtdKeeper::instance().handle_exception(__func__);
     return SCAPI_NOK;
 }
 
@@ -233,7 +232,7 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
     }
     return SCAPI_OK;
 } catch (...) {
-    TtdKeeper::instance().handle_exception();
+    TtdKeeper::instance().handle_exception(__func__);
     return SCAPI_NOK;
 }
 
@@ -246,7 +245,7 @@ scapi_Wait_For_Event(void) noexcept try {
     }
     return SCAPI_NEW_EVENT;
 } catch (...) {
-    TtdKeeper::instance().handle_exception();
+    TtdKeeper::instance().handle_exception(__func__);
     return SCAPI_NOK;
 }
 

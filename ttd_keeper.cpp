@@ -1,6 +1,7 @@
 #include "ttd_keeper.hpp"
 #include "scapi_messages.hpp"
 #include "tostring.hpp"
+#include "exceptions.hpp"
 
 extern "C" {
 #include <nexoid/gtd.h>
@@ -161,22 +162,120 @@ TtdKeeper::handle_bad_response(const scapi::Response& rsp) noexcept {
     }
 }
 
+static TerminalErrorReason
+mapto_TerminalErrorReason(const nng::error e) {
+    switch (e) {
+        case nng::error::success: return TE_NONE;
+        case nng::error::nomem: return TE_MEMORY_FAILURE;
+        case nng::error::noarg:
+        case nng::error::internal:
+        case nng::error::inval: return TER_INTERNAL_ERROR;
+        case nng::error::timedout: return TER_TIMEOUT;
+        case nng::error::notsup: return TER_NOT_IMPLEMENTED;
+        case nng::error::syserr: return TER_OS_ERROR;
+        default: return TE_COMMUNICATION_ERROR;
+    }
+}
+
+static TerminalErrorReason
+mapto_TerminalErrorReason_for_libsocket(const int e) {
+    switch (e) {
+        case 0: return TE_NONE;
+        case ENOMEM: return TE_MEMORY_FAILURE;
+        case EINVAL: return TER_INTERNAL_ERROR;
+    }
+    return TE_COMMUNICATION_ERROR;
+}
+
 void
-TtdKeeper::handle_exception(void) noexcept try {
+TtdKeeper::handle_exception(const char* const func) noexcept {
     ttd.terminalErrorIndicator = true;
-    throw;
-} catch (const nng::exception& e) {
-    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << "Messaging related exception originated at '" << e.who() << "' suppressed: " << e.what() << endl;
-} catch (const exception& e) {
-    ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cout << "Generic exception suppressed: " << e.what() << endl;
-} catch (const libsocket::socket_exception& e) {
-    ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
-    cout << "Connectivity related exception suppressed (" << e.err << ")\n" << e.mesg << endl;
-} catch (...) {
-    ttd.terminalErrorReason = TE_UNSPECIFIED;
-    cout << "Unexpected exception suppressed" << endl;
+    ostream& os = cout;
+    try {
+        if (func) {
+            os << func << ": ";
+        }
+        throw;
+    } catch (const exception& e) {
+        try {
+            throw;
+        } catch (const not_implemented& e) {
+            ttd.terminalErrorReason = TER_NOT_IMPLEMENTED;
+            os << "Not implemented";
+
+        } catch (const logic_error& e) {
+            ttd.terminalErrorReason = TER_INTERNAL_ERROR;
+            try {
+                throw;
+            } catch (const bad_mapping& e) {
+                os << "Bad mapping (" << e.from << ')';
+            } catch (const bad_variant_mapping& e) {
+                os << "Can't handle variant at " << e.index << " of " << e.tinfo.name();
+            } catch (const null_argument& e) {
+                os << "Null argument at " << e.null_arg_index;
+            } catch (const length_error& e) {
+                os << "length_error";
+            } catch (const invalid_argument& e) {
+                os << "invalid_argument";
+            } catch (const domain_error& e) {
+                os << "domain_error";
+            } catch (const out_of_range& e) {
+                os << "out_of_range";
+            } catch (...) {
+                os << "logic_error";
+            }
+
+        } catch (const endec_error& e) {
+            ttd.terminalErrorReason = TE_COMMUNICATION_ERROR;
+            try {
+                throw;
+            } catch (const unmet_constraints& e) {
+                os << "Message constraints violaiton";
+            } catch (const encoding_error& e) {
+                os << "Can't encode outgoing message";
+            } catch (const decoding_error& e) {
+                const string cons(e.get_data_str(), 0, e.consumed);
+                os << "Can't decode incomming message (" << e.get_code_str() << "), consumed " << e.consumed << " bytes up to: \"" << cons << '"';
+            }
+        } catch (const nng::exception& e) {
+            ttd.terminalErrorReason = mapto_TerminalErrorReason(e.get_error());
+            os << "Messaging error (" << static_cast<int>(e.get_error()) << ") at '" << e.who() << '\'';
+
+        } catch (const system_error& e) {
+            ttd.terminalErrorReason = TER_OS_ERROR;
+            os << "System Error (" << e.code() << ')';
+
+        } catch (const bad_alloc& e) {
+            ttd.terminalErrorReason = TE_MEMORY_FAILURE;
+            os << "Out of memory";
+
+        } catch (const bad_typeid& e) {
+            ttd.terminalErrorReason = TER_INTERNAL_ERROR;
+            os << "bad_typeid";
+        } catch (const bad_optional_access& e) {
+            ttd.terminalErrorReason = TER_INTERNAL_ERROR;
+            os << "bad_optional_access";
+
+        } catch (const runtime_error& e) {
+            ttd.terminalErrorReason = TE_UNSPECIFIED;
+            os << "runtime_error";
+
+        } catch (...) {
+            ttd.terminalErrorReason = TE_UNSPECIFIED;
+            os << "Generic Error";
+        }
+
+        os << ": " << e.what();
+
+    } catch (const libsocket::socket_exception& e) { // WARNING: They don't inherit std::exception 🤦
+        ttd.terminalErrorReason = mapto_TerminalErrorReason_for_libsocket(e.err);
+        os << "Socket Error (" << e.err << "): " << e.mesg;
+    } catch (...) {
+        ttd.terminalErrorReason = TE_UNSPECIFIED;
+        os << "...";
+    }
+
+    os << endl;
 }
 
 enum NokReason TtdKeeper::fetch_nok_reason(void) {

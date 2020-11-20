@@ -2,6 +2,7 @@
 
 #include "utils.hpp"
 #include "ttd_keeper.hpp"
+#include "exceptions.hpp"
 
 #include <ScapiSocketRequest.h>
 #include <ScapiSocketResponse.h>
@@ -13,6 +14,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
+#include <cerrno>
 
 // TODO: Redesign module scapi_messages_asn1c to be more universal
 
@@ -54,7 +56,7 @@ map_nok_reason_to_asn1c(const enum NokReason n) {
         case N_MAX:
             break;
     }
-    throw runtime_error("Invalid NokReason conversion");
+    throw bad_mapping(n, "No valid mapping from NokReason to NexoNokReason");
 }
 
 static optional<enum NokReason>
@@ -87,7 +89,7 @@ map_nok_reason_from_asn1c(const long int* const n) {
         case NexoNokReason_cardBlocked: return N_CARD_BLOCKED;
         case NexoNokReason_emptyList: return N_EMPTY_LIST;
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
+    throw bad_mapping(*n, "No valid mapping from NexoNokReason to NokReason");
 }
 
 static optional<enum TerminalErrorReason>
@@ -111,17 +113,7 @@ map_error_reason_from_asn1c(const long int* const e) {
         case NexoTerminalErrorReason_interfaceContractViolation: return TER_INTERFACE_CONTRACT_VIOLATION;
         case NexoTerminalErrorReason_internalError: return TER_INTERNAL_ERROR;
     }
-    throw runtime_error(__PRETTY_FUNCTION__);
-}
-
-static const char*
-asn_dec_rval_code_e_tostring(const asn_dec_rval_code_e code) {
-    switch (code) {
-        case RC_OK: return "RC_OK";
-        case RC_WMORE: return "RC_WMORE";
-        case RC_FAIL: return "RC_FAIL";
-    }
-    return NULL;
+    throw bad_mapping(*e, "No valid mapping from NexoTerminalErrorReason to TerminalErrorReason");
 }
 
 static ScapiRequest
@@ -159,7 +151,15 @@ map_scapi_request(const ::scapi::Request& r) {
                 throw runtime_error("Omg"); // FIXME: Memory leak
             }
             if (ASN_SEQUENCE_ADD(&ret.choice.output.what.list, tmp) != 0) {
-                throw runtime_error("ASN_SEQUENCE_ADD failed"); // FIXME: Memory leak
+                // FIXME: Memory leak
+                switch (errno) {
+                    case EINVAL:
+                        throw null_argument({&ret.choice.output.what.list, tmp}, "Can't map Request due to ASN_SEQUENCE_ADD failure");
+                    case ENOMEM:
+                        throw out_of_memory("Can't map Request due to ASN_SEQUENCE_ADD failure");
+                    default:
+                        throw 0; // This should never happen
+                }
             }
         }
 #       if 1
@@ -179,9 +179,9 @@ map_scapi_request(const ::scapi::Request& r) {
         break;
     case 3:
         ret.present = ScapiRequest_PR_entry;
-        throw runtime_error("Entry Interaction isn't implemented");
+        throw not_implemented("Entry Interaction isn't implemented");
     default:
-        throw runtime_error("Can't encode SCAPI request"); // FIXME: Memory leak
+        throw bad_variant_mapping(r, "Can't encode ScapiRequest"); // FIXME: Memory leak
     }
     return ret;
 }
@@ -201,11 +201,11 @@ map_to_asn1c(const ::scapi::socket::Request& r) {
         c->req.present = req_PR_notification;
         break;
     default:
-        throw runtime_error("Can't encode not supported request type");
+        throw bad_variant_mapping(r, "Can't encode not supported request type");
     }
     unique_ptr<ScapiSocketRequest, asn1c_deleter<&asn_DEF_ScapiSocketRequest>> ret(c);
     if (asn_fprint(stdout, &asn_DEF_ScapiSocketRequest, c) != 0) {
-        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+        throw system_error(errno, generic_category(), "asn_DEF_ScapiSocketRequest printing failed");
     }
     return ret;
 }
@@ -223,7 +223,7 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
         throw runtime_error("Not implemented 2");
     case rsp_PR_NOTHING:
     default:
-        throw runtime_error("Unexpected response, can't map it internally");
+        throw bad_mapping(ptr->rsp.present, "Unexpected response, can't map it internally");
     }
     return ret;
 }
@@ -250,14 +250,14 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
     case ScapiResponse_PR_NOTHING:
         break;
     }
-    throw runtime_error("Unexpected response, can't map it internally");
+    throw bad_mapping(ptr->present, "Unexpected ScapiResponse, can't map it internally");
 }
 
 static union ExpirationDate
 map_expiration_date_from_asn1c(const struct ScapiExpirationDate& d) {
     char f[5];
     if (snprintf(f, sizeof(f), "%02ld%02ld", d.year, d.month) >= integer_cast<int>(sizeof(f))) {
-        throw runtime_error("Expiration date doesn't fit into it's type");
+        throw length_error("Expiration date doesn't fit into it's type");
     }
     return { .full = { f[0], f[1], f[2], f[3] } };
 }
@@ -270,14 +270,14 @@ map_cvd_data_from_asn1c(const struct CvdData* const c) {
     switch (c->present) {
         case CvdData_PR_cvd:
             if (c->choice.cvd.size != 2) {
-                throw runtime_error("CVD has incorrect length");
+                throw length_error("CVD has incorrect length");
             }
             return (struct cn2){ c->choice.cvd.buf[0], c->choice.cvd.buf[1] };
         case CvdData_PR_cvdPresence:
             return static_cast<enum CvdPresence>(c->choice.cvdPresence);
         case CvdData_PR_NOTHING:
         default:
-            throw runtime_error("Unexpected CvdData component");
+            throw bad_mapping(c->present, "Unexpected CvdData component");
     }
 }
 
@@ -314,7 +314,7 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
         return scapi::Event(in_place_index<4>);
     case ScapiEvent_PR_NOTHING:
     default:
-        throw runtime_error("Unsupported");
+        throw bad_mapping(e->present, "Unsupported ScapiEvent");
     }
 }
 
@@ -334,9 +334,7 @@ validate(const asn_TYPE_descriptor_t* const tp, const void* const rsp) {
     char errbuf[255];
     size_t errlen = sizeof(errbuf);
     if (asn_check_constraints(tp, rsp, errbuf, &errlen) != 0) {
-        char b[350];
-        snprintf(b, sizeof(b), "Constraints validation failed: %s", errbuf);
-        throw runtime_error(errbuf);
+        throw unmet_constraints(errbuf);
     }
 }
 
@@ -392,12 +390,11 @@ decode(const vector<unsigned char>& buf) {
     unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> rsp(tmp);
     cout << "Received: \"" << string(buf.begin(), buf.end()) << '"' << endl;
     if (asn_fprint(stdout, tp, tmp) != 0) {
-        throw runtime_error("asn_DEF_ScapiSocketRequest printing failed");
+        throw system_error(errno, generic_category(), "asn_DEF_ScapiSocketRequest printing failed");
     }
     if (RC_OK != r.code) {
-        char buf[255];
-        snprintf(buf, sizeof(buf), "xer_decode returned: { code: %s, consumed: %zu }", asn_dec_rval_code_e_tostring(r.code), r.consumed);
-        throw runtime_error(buf);
+        const string str_buf(buf.begin(), buf.end());
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for ::scapi::socket::Response");
     }
 #   if 0
     if (r.consumed != buf.size()) {
@@ -410,17 +407,15 @@ decode(const vector<unsigned char>& buf) {
 
 ::scapi::Response
 decode_nng(const vector<unsigned char>& buf) {
-    cout << "dec: " << string(buf.begin(), buf.end()) << endl;
+    const string str_buf(buf.begin(), buf.end());
+    cout << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
     ScapiResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiResponse;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>> rsp(tmp);
     if (RC_OK != r.code) {
-        char err[255];
-        snprintf(err, sizeof(err), "xer_decode returned: { code: %s, consumed: %zu, up-to: \"%.*s\" }",
-                asn_dec_rval_code_e_tostring(r.code), r.consumed, integer_cast<int>(r.consumed), buf.data());
-        throw runtime_error(err);
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::Response");
     }
     validate(tp, rsp.get());
     return map_nng_from_asn1c(rsp);
@@ -428,17 +423,15 @@ decode_nng(const vector<unsigned char>& buf) {
 
 ::scapi::Notification
 decode_nng_ntf(const vector<unsigned char>& buf) {
-    cout << "dec: " << string(buf.begin(), buf.end()) << endl;
+    const string str_buf(buf.begin(), buf.end());
+    cout << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
     ScapiNotification* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNotification;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>> rsp(tmp);
     if (RC_OK != r.code) {
-        char err[255];
-        snprintf(err, sizeof(err), "xer_decode returned: { code: %s, consumed: %zu, up-to: \"%.*s\" }",
-                asn_dec_rval_code_e_tostring(r.code), r.consumed, integer_cast<int>(r.consumed), buf.data());
-        throw runtime_error(err);
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::Response");
     }
     validate(tp, rsp.get());
     return map_nng_ntf_from_asn1c(rsp);
