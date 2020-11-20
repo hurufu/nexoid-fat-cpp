@@ -28,6 +28,10 @@ create_maintenance_info(const enum TerminalErrorReason ter, const enum NokReason
 
 extern "C" enum PapiResult
 papi_Proprietary_Startup_Sequence(void) noexcept try {
+    // Workaround for case when possible error happens too early and nexo-FAST
+    // doesn't have time to set NokReason
+    TtdKeeper::instance().update(N_NONE);
+
     s_nexui = make_unique<nngpp::NexuiSession>();
     s_nexui->interaction({ NexuiRequest::Api::output, {"Startup"}});
     if (scapi_Initialize() != SCAPI_OK) {
