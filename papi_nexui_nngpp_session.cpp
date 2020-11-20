@@ -43,7 +43,7 @@ operator << (::std::ostream& os, const papi::NexuiRequest::Api& x) {
 static vector<unsigned char>
 encode_nexui_request(const NexuiRequest& req) {
     stringstream ss;
-    ss << "[{\"api\": \"" << req.api << "\", \"line\": [\"" << join(req.lines) << "\"]}]";
+    ss << "[{\"api\": \"" << req.api << "\", \"line\": [\"" << join(req.lines, "\", \"") << "\"]}]";
     const auto s = ss.str();
     cout << "enc: " << s << endl;
     return vector<unsigned char>(s.begin(), s.end());
