@@ -251,5 +251,6 @@ scapi_Wait_For_Event(void) noexcept try {
 
 extern "C" bool
 scapi_Authorise_Service(void) noexcept {
+    cout << __func__ << endl;
     return true;
 }
