@@ -16,12 +16,12 @@ using namespace std;
 static unique_ptr<NexuiSession> s_nexui;
 
 static NexuiRequest
-create_maintenance_info(void) {
+create_maintenance_info(const enum TerminalErrorReason ter, const enum NokReason nok) {
     return {
         NexuiRequest::Api::output, {
             "Diagnostics",
-            string("Terminal Error: ") + tostring(TtdKeeper::instance().fetch_ter_reason()),
-            string("Nok: ") + tostring(TtdKeeper::instance().fetch_nok_reason())
+            string("Terminal Error: ") + tostring(ter),
+            string("Nok: ") + tostring(nok)
         }
     };
 }
@@ -42,11 +42,11 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 
 extern "C" enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
-    cout << __FILE__ << ':' << __LINE__ << '@' << __PRETTY_FUNCTION__
-         << ' ' << TtdKeeper::instance().fetch_ter_reason()
-         << ' ' << TtdKeeper::instance().fetch_nok_reason()
-         << endl;
-    s_nexui->interaction(create_maintenance_info());
+    const auto ter = TtdKeeper::instance().fetch_ter_reason();
+    const auto nok = TtdKeeper::instance().fetch_nok_reason();
+    cout << __FILE__ << ':' << __LINE__ << '@' << __func__
+         << ' ' << ter << ' ' << nok << endl;
+    s_nexui->interaction(create_maintenance_info(ter, nok));
     return PR_NOK;
 } catch (...) {
     TtdKeeper::instance().handle_exception();
