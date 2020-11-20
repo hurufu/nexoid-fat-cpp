@@ -36,6 +36,7 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
     s_nexui->interaction({ NexuiRequest::Api::output, {"Startup"}});
     if (scapi_Initialize() != SCAPI_OK) {
         cout << "SCAPI Initialization failed" << endl;
+        s_nexui->interaction({ NexuiRequest::Api::output, {"SCAPI Initialization failed"} });
         return PAPI_NOK;
     }
     return PAPI_OK;
