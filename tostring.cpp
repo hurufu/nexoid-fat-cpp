@@ -172,6 +172,7 @@ tostring(const enum CardholderMessage m) {
 const char*
 tostring(const enum NokReason n) {
     switch (n) {
+        case N_UNINITIALISED: return "N_UNINITIALISED";
         case N_NONE: return "N_NONE";
         case N_NOT_IMPLEMENTED: return "N_NOT_IMPLEMENTED";
         case N_ORIGINAL_TRX_NOT_FOUND: return "N_ORIGINAL_TRX_NOT_FOUND";

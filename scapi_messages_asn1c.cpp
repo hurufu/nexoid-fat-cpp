@@ -30,6 +30,7 @@ struct asn1c_deleter {
 static enum NexoNokReason
 map_nok_reason_to_asn1c(const enum NokReason n) {
     switch (n) {
+        case N_UNINITIALISED: return NexoNokReason_uninitialised;
         case N_NONE: return NexoNokReason_none;
         case N_NOT_IMPLEMENTED: return NexoNokReason_notImplemented;
         case N_ORIGINAL_TRX_NOT_FOUND: return NexoNokReason_originalTrxNotFound;

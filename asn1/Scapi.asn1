@@ -326,6 +326,7 @@ DEFINITIONS IMPLICIT TAGS ::= BEGIN
 --      )
 
     NexoNokReason ::= ENUMERATED {
+        uninitialised,
         none,
         notImplemented,
         originalTrxNotFound,
