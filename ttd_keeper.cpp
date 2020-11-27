@@ -106,7 +106,7 @@ void
 TtdKeeper::update(const scapi::Event& e) {
     const auto index = map_event_to_ttd_event_index(e);
     if (ttd.event.Table[index]) {
-        throw runtime_error("Event duplicated");
+        throw duplicated_event(make_desc(index));
     }
     ttd.event.Table[index] = true;
     switch (index) {
@@ -199,6 +199,10 @@ TtdKeeper::handle_exception(const char* const func) noexcept {
     } catch (const exception& e) {
         try {
             throw;
+        } catch (const duplicated_event& e) {
+            ttd.terminalErrorReason = TER_NOT_IMPLEMENTED;
+            os << "Duplicated SCAP event";
+
         } catch (const not_implemented& e) {
             ttd.terminalErrorReason = TER_NOT_IMPLEMENTED;
             os << "Not implemented";

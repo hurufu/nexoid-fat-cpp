@@ -20,6 +20,18 @@ struct unmet_constraints : public endec_error {
     using endec_error::endec_error;
 };
 
+/** Signals that the same event arrived more then once in a sinle message.
+ *
+ *  This conditions isn't currently supported, and I doubt it will ever be,
+ *  because both ignoring consecutive events and overwritting by the consecutive
+ *  events isn't a good solution
+ *
+ *  @note The exception has can only by used for SCAP
+ */
+struct duplicated_event : public not_implemented {
+    using not_implemented::not_implemented;
+};
+
 /**
  *  @todo: Expand encoding_error exception class
  */
