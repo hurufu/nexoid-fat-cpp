@@ -13,6 +13,7 @@ public:
     void update(enum NokReason);
     void update(enum AuthorisationResponseCode);
     void update(enum TransactionResult);
+    enum TerminalErrorReason update(enum TerminalErrorReason);
 
     /** Exception handler, should be used on a boundary between C and C++
      */

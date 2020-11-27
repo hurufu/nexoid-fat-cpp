@@ -147,6 +147,16 @@ TtdKeeper::update(const enum TransactionResult r) {
     ttd.transactionResult = r;
 }
 
+enum TerminalErrorReason
+TtdKeeper::update(const enum TerminalErrorReason t) {
+    const auto ret = ttd.terminalErrorReason;
+    if (t == TE_NONE) {
+        ttd.terminalErrorIndicator = false;
+    }
+    ttd.terminalErrorReason = t;
+    return ret;
+}
+
 void
 TtdKeeper::handle_bad_response(const scapi::Response& rsp) noexcept {
     if (rsp.index() == 0) { // Nak
