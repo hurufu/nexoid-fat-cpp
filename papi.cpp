@@ -2,6 +2,7 @@
 #include "tostring.hpp"
 #include "ttd_keeper.hpp"
 #include "papi_nexui_nngpp_session.hpp"
+#include "exceptions.hpp"
 
 extern "C" {
 #include <nexoid/papi.h>
@@ -26,6 +27,34 @@ create_maintenance_info(const enum TerminalErrorReason ter, const enum NokReason
     };
 }
 
+static enum ProcedureResult
+decide_what_kind_of_maintenance_is_required(const enum TerminalErrorReason ter) {
+    switch (ter) {
+        case TE_CONFIGURATION_ERROR:
+        case TE_CRYPTOGRAPHIC_KEYS_MISSING:
+        case TER_NOT_IMPLEMENTED:
+        case TER_TIMEOUT:
+            return PR_STARTUP_SEQUENCE;
+        case TE_LOG_LIMIT_EXCEEDED:
+        case TE_COMMUNICATION_ERROR:
+        case TE_UNSPECIFIED:
+        case TE_NEXO_FAST_FAILURE:
+        case TE_INTERACTION_ERROR:
+        case TE_OVERSPEND:
+        case TER_INTERFACE_CONTRACT_VIOLATION:
+        case TER_INTERNAL_ERROR:
+            return PR_SHUTDOWN;
+        case TER_OS_ERROR:
+        case TE_HARDWARE_ERROR:
+        case TE_MEMORY_FAILURE:
+            return PR_REBOOT;
+        case TE_NONE:
+        case TER_MAX:
+            return PR_NOK;
+    }
+    throw bad_mapping(ter, "Unknown TerminalErrorReason");
+}
+
 extern "C" enum PapiResult
 papi_Proprietary_Startup_Sequence(void) noexcept try {
     s_nexui = make_unique<nngpp::NexuiSession>();
@@ -43,12 +72,13 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 
 extern "C" enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
-    const auto ter = TtdKeeper::instance().fetch_ter_reason();
+    const auto ter = TtdKeeper::instance().update(TE_NONE);
     const auto nok = TtdKeeper::instance().fetch_nok_reason();
     cout << __FILE__ << ':' << __LINE__ << '@' << __func__
          << ' ' << ter << ' ' << nok << endl;
     s_nexui->interaction(create_maintenance_info(ter, nok));
-    return PR_NOK;
+    const auto ret = decide_what_kind_of_maintenance_is_required(ter);
+    return ret;
 } catch (...) {
     TtdKeeper::instance().handle_exception();
     return PR_NOK;
