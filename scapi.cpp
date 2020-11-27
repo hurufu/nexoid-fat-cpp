@@ -165,6 +165,7 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 
 enum ScapiResult
 scapi_Initialize(void) noexcept try {
+    s_scapi = nullptr;
     s_scapi = make_unique<scapi::nngpp::Session>();
     return SCAPI_OK;
 } catch (...) {
