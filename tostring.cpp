@@ -467,3 +467,34 @@ tostring(const enum TransactionResult r) {
     }
     throw_bad_mapping(r, "TransactionResult");
 }
+
+const char*
+tostring(enum IdleEvent e) {
+    switch (e) {
+        case E_LANGUAGE_SELECTION: return "E_LANGUAGE_SELECTION";
+        case E_CHOICE_OF_APPLICATION: return "E_CHOICE_OF_APPLICATION";
+        case E_SERVICE_SELECTION: return "E_SERVICE_SELECTION";
+        case E_ACQUIRER_PRESELECTION: return "E_ACQUIRER_PRESELECTION";
+        case E_CARDHOLDER_DETECTION: return "E_CARDHOLDER_DETECTION";
+        case E_AMOUNT_ENTRY: return "E_AMOUNT_ENTRY";
+        case E_CARD_INSERTED: return "E_CARD_INSERTED";
+        case E_CARD_SWIPED: return "E_CARD_SWIPED";
+        case E_MANUAL_ENTRY: return "E_MANUAL_ENTRY";
+        case E_REFERENCE_ENTRY: return "E_REFERENCE_ENTRY";
+        case E_ACCEPT: return "E_ACCEPT";
+        case E_ATTENDANT_FORCED_ONLINE: return "E_ATTENDANT_FORCED_ONLINE";
+        case E_ADDITIONAL_TRANSACTION_DATA: return "E_ADDITIONAL_TRANSACTION_DATA";
+        case E_CARD_REMOVAL: return "E_CARD_REMOVAL";
+        case E_CANCEL: return "E_CANCEL";
+        case E_PRINTER_STATUS: return "E_PRINTER_STATUS";
+        case E_REBOOT_REQUESTED: return "E_REBOOT_REQUESTED";
+        case E_TERMINATION_REQUESTED: return "E_TERMINATION_REQUESTED";
+        case E_SHUTDOWN_REQUESTED: return "E_SHUTDOWN_REQUESTED";
+        case E_NONE: return "E_NONE";
+        case E_TIMEOUT: return "E_TIMEOUT";
+        case E_ONE_CTLS_CARD_ACTIVATED: return "E_ONE_CTLS_CARD_ACTIVATED";
+        case E_CTLS_COLLISION: return "E_CTLS_COLLISION";
+        case E_MAX: break;
+    }
+    throw_bad_mapping(e, "IdleEvent");
+}
