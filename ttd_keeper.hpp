@@ -14,6 +14,7 @@ public:
     void update(enum AuthorisationResponseCode);
     void update(enum TransactionResult);
     enum TerminalErrorReason update(enum TerminalErrorReason);
+    std::optional<enum CvdPresence> update(enum CvdPresence);
 
     /** Exception handler, should be used on a boundary between C and C++
      */

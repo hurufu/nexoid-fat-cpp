@@ -157,6 +157,16 @@ TtdKeeper::update(const enum TerminalErrorReason t) {
     return ret;
 }
 
+optional<enum CvdPresence>
+TtdKeeper::update(const enum CvdPresence e) {
+    const auto old = ttd.cvdPresence;
+    set_cvd_presence_in_ttd(e);
+    if (old) {
+        return *old;
+    }
+    return {};
+}
+
 void
 TtdKeeper::handle_bad_response(const scapi::Response& rsp) noexcept {
     if (rsp.index() == 0) { // Nak
