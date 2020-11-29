@@ -44,7 +44,7 @@ Session::Session(void)
 }
 
 ::scapi::Response
-Session::interaction(const ::scapi::Request& r) {
+Session::interaction(const ::scapi::Request& r, std::chrono::milliseconds) {
     return get<0>(decode(exch(encode(Request(r)))));
 }
 

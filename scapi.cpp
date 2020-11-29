@@ -226,7 +226,7 @@ scapi_Data_Output_Interaction(const size_t size, const enum CardholderMessage ms
 extern "C" enum ScapiResult
 scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) noexcept try {
     const Request req(in_place_index<3>, create_interaction_vector(size, msg));
-    const auto rsp = s_scapi->interaction(req);
+    const auto rsp = s_scapi->interaction(req, 3min);
     if (rsp.index() != 2) {
         TtdKeeper::instance().handle_bad_response(rsp);
         return SCAPI_NOK;

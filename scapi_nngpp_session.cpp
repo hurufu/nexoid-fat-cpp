@@ -1,16 +1,38 @@
 #include "scapi_nngpp_session.hpp"
 #include "scapi_messages_asn1c.hpp"
+#include "utils.hpp"
 
 #include <nngpp/nngpp.h>
 #include <nngpp/protocol/req0.h>
 #include <nngpp/protocol/pull0.h>
 
 using namespace ::std;
+using namespace ::std::chrono;
 using namespace ::scapi::nngpp;
 using namespace ::nng;
 using ::scapi::Response;
 using ::scapi::Request;
 using ::scapi::Notification;
+
+class RecvTimeoutGuard {
+    ::socket& socket;
+    nng_duration stored_timeout;
+    bool ignore = true;
+public:
+    RecvTimeoutGuard(::socket& s, const nng_duration timeout)
+            : socket(s)
+            , stored_timeout(get_opt_recv_timeout(s)) {
+        if (timeout >= 0) {
+            set_opt_recv_timeout(socket, timeout);
+            ignore = false;
+        }
+    }
+    ~RecvTimeoutGuard(void) noexcept {
+        if (!ignore) {
+            set_opt_recv_timeout(socket, stored_timeout);
+        }
+    }
+};
 
 struct Session::Impl {
     ::socket interaction_socket;
@@ -20,7 +42,7 @@ struct Session::Impl {
     ~Impl(void) = default;
 
     vector<unsigned char> exch(const vector<unsigned char>&);
-    Response interaction(const Request& r);
+    Response interaction(const Request& r, milliseconds);
     Notification notification(void);
 };
 
@@ -43,7 +65,8 @@ Session::Impl::exch(const vector<unsigned char>& b) {
 }
 
 Response
-Session::Impl::interaction(const Request& r) {
+Session::Impl::interaction(const Request& r, const milliseconds rcv_timeout) {
+    const RecvTimeoutGuard guard(interaction_socket, integer_cast<nng_duration>(rcv_timeout.count()));
     const auto rq = encode_nng(r);
     const auto rs = exch(rq);
     return decode_nng(rs);
@@ -63,8 +86,8 @@ Session::Session(void) :
 Session::~Session(void) = default;
 
 Response
-Session::interaction(const Request& r) {
-    return pimpl->interaction(r);
+Session::interaction(const Request& r, const milliseconds rcv_timeout) {
+    return pimpl->interaction(r, rcv_timeout);
 }
 
 Notification

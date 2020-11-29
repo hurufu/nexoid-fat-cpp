@@ -21,7 +21,7 @@ namespace scapi::socket {
         ~Session(void) noexcept override = default;
 
         ::scapi::Response
-        interaction(const ::scapi::Request&) override;
+        interaction(const ::scapi::Request&, std::chrono::milliseconds) override;
 
         ::scapi::Notification
         notification(void) override;

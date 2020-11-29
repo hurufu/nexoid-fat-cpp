@@ -13,7 +13,7 @@ namespace scapi::nngpp {
         ~Session(void) noexcept override;
 
         ::scapi::Response
-        interaction(const ::scapi::Request&) override;
+        interaction(const ::scapi::Request&, std::chrono::milliseconds) override;
 
         ::scapi::Notification
         notification(void) override;
