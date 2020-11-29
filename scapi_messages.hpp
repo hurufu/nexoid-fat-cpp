@@ -80,6 +80,14 @@ namespace scapi {
     > Interaction;
 
     typedef ::std::variant<
+        std::string // PAN
+      , enum ::CvdPresence // CVD presence
+      , struct ::cn2 // CVD
+      , void* // FIXME: Implement PIN
+      , union ::ExpirationDate // Card expiry date
+    > AckEntry;
+
+    typedef ::std::variant<
         UpdateInterfaces // updateInterfaces
       , ::std::vector<Interaction> // output
       , PrintMessage // print
@@ -89,6 +97,7 @@ namespace scapi {
     typedef ::std::variant<
         Nak // nak
       , ::std::monostate // ack
+      , ::std::vector<AckEntry> // ackEntry
     > Response;
 
     struct Notification {

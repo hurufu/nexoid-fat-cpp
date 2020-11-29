@@ -117,6 +117,7 @@ map_error_reason_from_asn1c(const long int* const e) {
     throw bad_mapping(*e, "No valid mapping from NexoTerminalErrorReason to TerminalErrorReason");
 }
 
+/// FIXME: map_scapi_request requires URGENT refactoring
 static ScapiRequest
 map_scapi_request(const ::scapi::Request& r) {
     ScapiRequest ret = { };
@@ -178,9 +179,53 @@ map_scapi_request(const ::scapi::Request& r) {
         ret.present = ScapiRequest_PR_print;
         ret.choice.print.type = get<2>(r).type;
         break;
-    case 3:
+    case 3: {
         ret.present = ScapiRequest_PR_entry;
-        throw not_implemented("Entry Interaction isn't implemented");
+        for (const auto& e : get<3>(r)) {
+            auto* const tmp = reinterpret_cast<Member*>(calloc(1, sizeof(Member)));
+            switch (e.index()) {
+            case 0:
+                tmp->present = Member_PR_msg;
+                tmp->choice.msg = get<0>(e);
+                break;
+            case 1:
+                tmp->present = Member_PR_ssn;
+                tmp->choice.ssn = get<1>(e);
+                break;
+            case 17:
+                tmp->present = Member_PR_selectedService;
+                tmp->choice.selectedService = get<17>(e);
+                break;
+            case 18:
+                tmp->present = Member_PR_nokReason;
+                tmp->choice.nokReason = map_nok_reason_to_asn1c(get<18>(e));
+                break;
+            default:
+                throw runtime_error("Omg"); // FIXME: Memory leak
+            }
+            if (ASN_SEQUENCE_ADD(&ret.choice.output.what.list, tmp) != 0) {
+                // FIXME: Memory leak
+                switch (errno) {
+                    case EINVAL:
+                        throw null_argument({&ret.choice.output.what.list, tmp}, "Can't map Request due to ASN_SEQUENCE_ADD failure");
+                    case ENOMEM:
+                        throw out_of_memory("Can't map Request due to ASN_SEQUENCE_ADD failure");
+                    default:
+                        throw 0; // This should never happen
+                }
+            }
+        }
+#       if 1
+        // Extremely ugly workaround
+        const auto ll = TtdKeeper::instance().fetch_selected_language();
+        ret.choice.output.language = reinterpret_cast<Iso639_t*>(calloc(1, sizeof(Iso639_t)));
+        ret.choice.output.language->buf = reinterpret_cast<uint8_t*>(calloc(3, 1));
+        ret.choice.output.language->buf[0] = ll.c[0];
+        ret.choice.output.language->buf[1] = ll.c[1];
+        ret.choice.output.language->size = 2;
+#       endif
+        break;
+    }
     default:
         throw bad_variant_mapping(r, "Can't encode ScapiRequest"); // FIXME: Memory leak
     }
@@ -237,6 +282,22 @@ map_nak_from_asn1c(const struct ScapiNak& n) {
     };
 }
 
+static scapi::AckEntry
+map_ack_entry_from_asn1c(const struct ScapiDataEntryIntercation* const e) {
+    switch (e->present) {
+        case ScapiDataEntryIntercation_PR_cvdPresence:
+            return static_cast<enum CvdPresence>(e->choice.cvdPresence);
+        case ScapiDataEntryIntercation_PR_pan:
+        case ScapiDataEntryIntercation_PR_cvd:
+        case ScapiDataEntryIntercation_PR_pin:
+        case ScapiDataEntryIntercation_PR_expirationDate:
+            throw not_implemented(make_desc("Not implemented ackEntry type ", e->present));
+        case ScapiDataEntryIntercation_PR_NOTHING:
+            break;
+    }
+    throw bad_mapping(e->present, "Unexpected ScapiDataEntryIntercation");
+}
+
 static ::scapi::Response
 map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
     const auto ptr = rsp.get();
@@ -245,7 +306,13 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
         return scapi::Response(in_place_index<1>);
     case ScapiResponse_PR_nak:
         return map_nak_from_asn1c(ptr->choice.nak);
-    case ScapiResponse_PR_ackEntry:
+    case ScapiResponse_PR_ackEntry: {
+        vector<scapi::AckEntry> vec{};
+        for (int i = 0; i < ptr->choice.ackEntry.list.count; i++) {
+            vec.push_back(map_ack_entry_from_asn1c(ptr->choice.ackEntry.list.array[i]));
+        }
+        return vec;
+    }
     case ScapiResponse_PR_ackServiceAuthorised:
         throw runtime_error("Not implemented 3");
     case ScapiResponse_PR_NOTHING:
