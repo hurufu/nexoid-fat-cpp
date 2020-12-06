@@ -20,6 +20,7 @@ using namespace std;
 using scapi::Session,
       scapi::Request,
       scapi::Interaction,
+      scapi::AckEntry,
       scapi::UpdateInterfaces;
 
 static unique_ptr<Session> s_scapi;
@@ -163,6 +164,23 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
     return ret;
 }
 
+static void
+update_ttd_with_data_entry(const vector<AckEntry> v) {
+    for (const auto& e : v) {
+        switch (e.index()) {
+            case 1:
+                TtdKeeper::instance().update(get<1>(e));
+                break;
+            case 0:
+            case 2:
+            case 3:
+            case 4:
+            default:
+                throw not_implemented("Can't update TTD with entered data");
+        }
+    }
+}
+
 enum ScapiResult
 scapi_Initialize(void) noexcept try {
     s_scapi = nullptr;
@@ -231,19 +249,7 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
         TtdKeeper::instance().handle_bad_response(rsp);
         return SCAPI_NOK;
     }
-    for (const auto& e : get<2>(rsp)) {
-        switch (e.index()) {
-            case 1:
-                TtdKeeper::instance().update(get<1>(e));
-                break;
-            case 0:
-            case 2:
-            case 3:
-            case 4:
-            default:
-                throw not_implemented("Can't update TTD with entered data");
-        }
-    }
+    update_ttd_with_data_entry(get<2>(rsp));
     return SCAPI_OK;
 } catch (...) {
     TtdKeeper::instance().handle_exception(__func__);
