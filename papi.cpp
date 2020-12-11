@@ -34,6 +34,7 @@ decide_what_kind_of_maintenance_is_required(const enum TerminalErrorReason ter) 
         case TE_CRYPTOGRAPHIC_KEYS_MISSING:
         case TER_NOT_IMPLEMENTED:
         case TER_TIMEOUT:
+            s_nexui->interaction({ NexuiRequest::Api::output, {"Application restart requested"}});
             return PR_STARTUP_SEQUENCE;
         case TE_LOG_LIMIT_EXCEEDED:
         case TE_COMMUNICATION_ERROR:
@@ -43,10 +44,12 @@ decide_what_kind_of_maintenance_is_required(const enum TerminalErrorReason ter) 
         case TE_OVERSPEND:
         case TER_INTERFACE_CONTRACT_VIOLATION:
         case TER_INTERNAL_ERROR:
+            s_nexui->interaction({ NexuiRequest::Api::output, {"Device shutdown requested"}});
             return PR_SHUTDOWN;
         case TER_OS_ERROR:
         case TE_HARDWARE_ERROR:
         case TE_MEMORY_FAILURE:
+            s_nexui->interaction({ NexuiRequest::Api::output, {"Device reboot requested"}});
             return PR_REBOOT;
         case TE_NONE:
         case TER_MAX:
