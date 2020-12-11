@@ -75,6 +75,10 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 
 extern "C" enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
+    if (!s_nexui) {
+        cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << ' ' << "PAPI isn't initialized" << endl;
+        return PR_NOK;
+    }
     const auto ter = TtdKeeper::instance().update(TE_NONE);
     const auto nok = TtdKeeper::instance().fetch_nok_reason();
     cout << __FILE__ << ':' << __LINE__ << '@' << __func__
