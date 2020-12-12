@@ -19,6 +19,7 @@
 // TODO: Redesign module scapi_messages_asn1c to be more universal
 
 using namespace std;
+using namespace chrono;
 
 template <asn_TYPE_descriptor_t* AsnType>
 struct asn1c_deleter {
@@ -445,7 +446,8 @@ encode_nng(const ::scapi::Request& r) {
     if (res.encoded < 0) {
         throw runtime_error("Can't encode using XER");
     }
-    cout << "enc: " << string(ret.begin(), ret.end()) << endl;
+    cout << system_clock::now() << ' '
+         << "enc: " << string(ret.begin(), ret.end()) << endl;
     return ret;
 }
 
@@ -476,7 +478,8 @@ decode(const vector<unsigned char>& buf) {
 ::scapi::Response
 decode_nng(const vector<unsigned char>& buf) {
     const string str_buf(buf.begin(), buf.end());
-    cout << "dec: " << str_buf << endl;
+    cout << system_clock::now() << ' '
+         << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
     ScapiResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiResponse;
@@ -492,7 +495,8 @@ decode_nng(const vector<unsigned char>& buf) {
 ::scapi::Notification
 decode_nng_ntf(const vector<unsigned char>& buf) {
     const string str_buf(buf.begin(), buf.end());
-    cout << "dec: " << str_buf << endl;
+    cout << system_clock::now() << ' '
+         << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
     ScapiNotification* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNotification;
