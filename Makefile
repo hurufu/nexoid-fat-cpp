@@ -8,6 +8,12 @@ GCC_FEATURES        += lto=auto use-linker-plugin
 #GCC_FEATURES        := instrument-functions
 #GCC_FEATURES        += analyzer
 
+# Installation configuration ##################################################
+PREFIX          ?= /usr/local
+DESTDIR         ?= /
+BINDIR          := $(DESTDIR)/$(PREFIX)/bin
+INSTALLED_FILES := $(BINDIR)/nexoid-cpp
+
 # Project configuration #######################################################
 EXECUTABLE          := nexoid-cpp
 SOURCES             := $(wildcard *.cpp)
@@ -138,3 +144,12 @@ $(lib_LTLIBRARIES): $(libasncodec_la_OBJECTS)
 	gcc-ar rcs $@ $^
 $(ASN1_GENERATED_DIR)/%.o: $(ASN1_GENERATED_DIR)/%.c $(ASN_MODULE_HDRS)
 	$(CC) -c $(libasncodec_la_CPPFLAGS) -I/usr/share/asn1c $(libasncodec_la_CFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $< $(libasncodec_la_LDFLAGS)
+
+.PHONY: install uninstall
+install: $(INSTALLED_FILES)
+uninstall: F := $(sort $(wildcard $(INSTALLED_FILES)))
+uninstall:
+	$(if $(strip $F),$(RM) -- $F,)
+
+$(BINDIR)/nexoid-cpp: nexoid-cpp
+	install -D -m555 -t $(@D) $<
