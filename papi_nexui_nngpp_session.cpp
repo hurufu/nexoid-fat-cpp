@@ -12,6 +12,7 @@
 using namespace papi::nngpp;
 using namespace nng;
 using namespace std;
+using namespace chrono;
 using papi::NexuiResponse;
 using papi::NexuiRequest;
 
@@ -45,12 +46,16 @@ encode_nexui_request(const NexuiRequest& req) {
     stringstream ss;
     ss << R"({"source": {"type": "pap"}, "payload": [{"api": ")" << req.api << R"(", "line": [ ")" << join(req.lines, R"(", ")") << R"(" ]}]}")";
     const auto s = ss.str();
-    cout << "enc: " << s << endl;
+    cout << system_clock::now() << ' '
+         << "enc: " << s << endl;
     return vector<unsigned char>(s.begin(), s.end());
 }
 
 static NexuiResponse
-decode_nexui_response(vector<unsigned char>) {
+decode_nexui_response(vector<unsigned char> rsp) {
+    cout << system_clock::now() << ' '
+         << "dec: " << std::string(rsp.begin(), rsp.end()) << endl;
+    // TODO: Implement proper JER decoder
     return {};
 }
 
