@@ -8,6 +8,8 @@
 
 #include <vector>
 #include <sstream>
+#include <unistd.h>
+#include <sys/syscall.h>
 
 using namespace papi::nngpp;
 using namespace nng;
@@ -77,19 +79,22 @@ decode_nexui_response(vector<unsigned char> rsp) {
     return {};
 }
 
+static ostream& log_preamble(ostream& os, const char* const name) {
+    static const auto tid = syscall(SYS_gettid);
+    return os << system_clock::now() << " t:" << tid << " n:" << name;
+}
+
 NexuiSession::Impl::ExchangeLogger::ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq)
     : ctx(s) {
-    cout << system_clock::now() << ' '
-         << "n:" << get_opt_socket_name(ctx.interaction_socket) << ' '
-         << "prot:" << get_opt_protocol_name(ctx.interaction_socket) << ' '
-         << std::string(rq.begin(), rq.end()) << endl;
+    log_preamble(cout, ctx.name)
+        << " prot:" << get_opt_protocol_name(ctx.interaction_socket)
+        << ' ' << std::string(rq.begin(), rq.end()) << endl;
 }
 
 NexuiSession::Impl::ExchangeLogger::~ExchangeLogger(void) noexcept try {
-    cout << system_clock::now() << ' '
-         << "n:" << get_opt_socket_name(ctx.interaction_socket) << ' '
-         << "peer:" << get_opt_peer_name(ctx.interaction_socket) << ' '
-         << std::string(rsp.begin(), rsp.end()) << endl;
+    log_preamble(cout, ctx.name)
+        << " peer:" << get_opt_peer_name(ctx.interaction_socket)
+        << ' ' << std::string(rsp.begin(), rsp.end()) << endl;
 } catch (...) {
     // FIXME: Do something better then suppressing all possible errors in ExchangeLogger destructor
 }
