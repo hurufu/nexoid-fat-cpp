@@ -16,8 +16,17 @@ using namespace chrono;
 using papi::NexuiResponse;
 using papi::NexuiRequest;
 
+static ostream&
+operator << (ostream& os, const buffer& rhs) {
+    return os << reinterpret_cast<const char*>(rhs.data());
+}
+
 struct NexuiSession::Impl {
     socket interaction_socket;
+    const char* const addr = "ipc:///tmp/nexui";
+    const milliseconds send_timeout = 1s;
+    const milliseconds recv_timeout = 1min + 5s;
+    const char* const name = "papi_ui";
 
     Impl(void);
     ~Impl(void) = default;
@@ -25,6 +34,19 @@ struct NexuiSession::Impl {
     NexuiResponse interaction(const NexuiRequest& req);
 
     vector<unsigned char> exch(const vector<unsigned char>&);
+
+    class ExchangeLogger {
+        const NexuiSession::Impl& ctx;
+    public:
+        vector<unsigned char> rsp;
+
+        ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq);
+        ~ExchangeLogger();
+    };
+
+    inline struct ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq) {
+        return ExchangeLogger(*this, rq);
+    }
 };
 
 static const char* tostring(const ::papi::NexuiRequest::Api r) {
@@ -46,23 +68,37 @@ encode_nexui_request(const NexuiRequest& req) {
     stringstream ss;
     ss << R"({"source": {"type": "pap"}, "payload": [{"api": ")" << req.api << R"(", "line": [ ")" << join(req.lines, R"(", ")") << R"(" ]}]})";
     const auto s = ss.str();
-    cout << system_clock::now() << ' '
-         << "enc: " << s << endl;
     return vector<unsigned char>(s.begin(), s.end());
 }
 
 static NexuiResponse
 decode_nexui_response(vector<unsigned char> rsp) {
-    cout << system_clock::now() << ' '
-         << "dec: " << std::string(rsp.begin(), rsp.end()) << endl;
     // TODO: Implement proper JER decoder
     return {};
 }
 
+NexuiSession::Impl::ExchangeLogger::ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq)
+    : ctx(s) {
+    cout << system_clock::now() << ' '
+         << "n:" << get_opt_socket_name(ctx.interaction_socket) << ' '
+         << "prot:" << get_opt_protocol_name(ctx.interaction_socket) << ' '
+         << std::string(rq.begin(), rq.end()) << endl;
+}
+
+NexuiSession::Impl::ExchangeLogger::~ExchangeLogger(void) noexcept try {
+    cout << system_clock::now() << ' '
+         << "n:" << get_opt_socket_name(ctx.interaction_socket) << ' '
+         << "peer:" << get_opt_peer_name(ctx.interaction_socket) << ' '
+         << std::string(rsp.begin(), rsp.end()) << endl;
+} catch (...) {
+    // FIXME: Do something better then suppressing all possible errors in ExchangeLogger destructor
+}
+
 NexuiSession::Impl::Impl(void) : interaction_socket(req::open()) {
-    set_opt_recv_timeout(interaction_socket, 3 * 1000);
-    set_opt_send_timeout(interaction_socket, 1 * 1000);
-    interaction_socket.dial("ipc:///tmp/nexui");
+    set_opt_recv_timeout(interaction_socket, integer_cast<nng_duration>(recv_timeout.count()));
+    set_opt_send_timeout(interaction_socket, integer_cast<nng_duration>(send_timeout.count()));
+    set_opt_socket_name(interaction_socket, name);
+    interaction_socket.dial(addr);
 }
 
 vector<unsigned char>
@@ -77,7 +113,9 @@ NexuiSession::Impl::exch(const vector<unsigned char>& b) {
 NexuiResponse
 NexuiSession::Impl::interaction(const NexuiRequest& req) {
     const auto rq = encode_nexui_request(req);
+    ExchangeLogger l = make_exchange_logger(rq);
     const auto rs = exch(rq);
+    l.rsp = rs; // FIXME: Avoid unnecessary copy just for logging
     return decode_nexui_response(rs);
 }
 
