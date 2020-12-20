@@ -26,11 +26,10 @@ join(const Container& c, const std::string& delimeter = ", ") {
 }
 
 template<typename Clock, typename Duration>
-std::ostream &operator<<(std::ostream &stream,
-  const std::chrono::time_point<Clock, Duration> &time_point) {
-  const time_t time = Clock::to_time_t(time_point);
-  struct tm tm;
-  localtime_r(&time, &tm);
-  // FIXME: Print time with milliseconds
-  return stream << std::put_time(&tm, "%F %T.       ");
+std::ostream&
+operator << (std::ostream& os, const std::chrono::time_point<Clock, Duration>& tp) {
+  const time_t t = Clock::to_time_t(tp);
+  const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch()).count();
+  struct tm tm = {};
+  return os << std::put_time(localtime_r(&t, &tm), "%F %T.") << (ms - t * 1000);
 }
