@@ -8,6 +8,7 @@
 
 #include <vector>
 #include <sstream>
+#include <fstream>
 #include <unistd.h>
 #include <sys/syscall.h>
 
@@ -39,15 +40,20 @@ struct NexuiSession::Impl {
 
     class ExchangeLogger {
         const NexuiSession::Impl& ctx;
+        ostream& out;
     public:
         vector<unsigned char> rsp;
 
-        ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq);
+        ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq, ostream& os);
         ~ExchangeLogger();
     };
 
-    inline struct ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq) {
-        return ExchangeLogger(*this, rq);
+    inline struct ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq, ostream&& os) {
+        return ExchangeLogger(*this, rq, os);
+    }
+
+    inline struct ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq, ostream& os) {
+        return ExchangeLogger(*this, rq, os);
     }
 };
 
@@ -84,15 +90,15 @@ static ostream& log_preamble(ostream& os, const char* const name) {
     return os << system_clock::now() << " t:" << tid << " n:" << name;
 }
 
-NexuiSession::Impl::ExchangeLogger::ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq)
-    : ctx(s) {
-    log_preamble(cout, ctx.name)
+NexuiSession::Impl::ExchangeLogger::ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq, ostream& os)
+    : ctx(s), out(os) {
+    log_preamble(out, ctx.name)
         << " prot:" << get_opt_protocol_name(ctx.interaction_socket)
         << ' ' << std::string(rq.begin(), rq.end()) << endl;
 }
 
 NexuiSession::Impl::ExchangeLogger::~ExchangeLogger(void) noexcept try {
-    log_preamble(cout, ctx.name)
+    log_preamble(out, ctx.name)
         << " peer:" << get_opt_peer_name(ctx.interaction_socket)
         << ' ' << std::string(rsp.begin(), rsp.end()) << endl;
 } catch (...) {
@@ -118,7 +124,7 @@ NexuiSession::Impl::exch(const vector<unsigned char>& b) {
 NexuiResponse
 NexuiSession::Impl::interaction(const NexuiRequest& req) {
     const auto rq = encode_nexui_request(req);
-    ExchangeLogger l = make_exchange_logger(rq);
+    ExchangeLogger l = make_exchange_logger(rq, cout);
     const auto rs = exch(rq);
     l.rsp = rs; // FIXME: Avoid unnecessary copy just for logging
     return decode_nexui_response(rs);
