@@ -87,7 +87,7 @@ decode_nexui_response(vector<unsigned char> rsp) {
 
 static ostream& log_preamble(ostream& os, const char* const name) {
     static const auto tid = syscall(SYS_gettid);
-    return os << system_clock::now() << " t:" << tid << " n:" << name;
+    return os << system_clock::now() << " D nexoid-cpp    t:" << tid << " n:" << name;
 }
 
 NexuiSession::Impl::ExchangeLogger::ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq, ostream& os)

@@ -3,6 +3,7 @@
 #include "ttd_keeper.hpp"
 #include "papi_nexui_nngpp_session.hpp"
 #include "exceptions.hpp"
+#include "utils.hpp"
 
 extern "C" {
 #include <nexoid/papi.h>
@@ -13,6 +14,7 @@ extern "C" {
 
 using namespace papi;
 using namespace std;
+using namespace chrono;
 
 static unique_ptr<NexuiSession> s_nexui;
 
@@ -63,7 +65,8 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
     s_nexui = make_unique<nngpp::NexuiSession>();
     s_nexui->interaction({ NexuiRequest::Api::output, {"Startup"}});
     if (scapi_Initialize() != SCAPI_OK) {
-        cout << "SCAPI Initialization failed" << endl;
+        cout << system_clock::now() << " C nexoid-cpp    "
+             << __func__ << ": SCAPI Initialization failed" << endl;
         s_nexui->interaction({ NexuiRequest::Api::output, {"SCAPI Initialization failed"} });
         return PAPI_NOK;
     }
@@ -76,13 +79,14 @@ papi_Proprietary_Startup_Sequence(void) noexcept try {
 extern "C" enum ProcedureResult
 papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
     if (!s_nexui) {
-        cout << __FILE__ << ':' << __LINE__ << '@' << __func__ << ' ' << "PAPI isn't initialized" << endl;
+        cout << system_clock::now() << " C nexoid-cpp    "
+             << __func__ << ": PAPI isn't initialized" << endl;
         return PR_NOK;
     }
     const auto ter = TtdKeeper::instance().update(TE_NONE);
     const auto nok = TtdKeeper::instance().fetch_nok_reason();
-    cout << __FILE__ << ':' << __LINE__ << '@' << __func__
-         << ' ' << ter << ' ' << nok << endl;
+    cout << system_clock::now() << " W nexoid-cpp    "
+         << __func__ << ": " << ter << ' ' << nok << endl;
     s_nexui->interaction(create_maintenance_info(ter, nok));
     const auto ret = decide_what_kind_of_maintenance_is_required(ter);
     return ret;

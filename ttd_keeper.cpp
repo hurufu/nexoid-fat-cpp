@@ -2,6 +2,7 @@
 #include "scapi_messages.hpp"
 #include "tostring.hpp"
 #include "exceptions.hpp"
+#include "utils.hpp"
 
 extern "C" {
 #include <nexoid/gtd.h>
@@ -17,6 +18,7 @@ extern "C" {
 #include <cstring>
 
 using namespace std;
+using namespace chrono;
 
 static void
 set_pan_in_ttd(const string& p) {
@@ -212,6 +214,7 @@ TtdKeeper::handle_exception(const char* const func) noexcept {
     ttd.terminalErrorIndicator = true;
     ostream& os = cout;
     try {
+        os << system_clock::now() << " E nexoid-cpp    ";
         if (func) {
             os << func << ": ";
         }

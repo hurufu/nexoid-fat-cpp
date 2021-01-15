@@ -5,6 +5,7 @@
 #include "ttd_keeper.hpp"
 #include "tostring.hpp"
 #include "exceptions.hpp"
+#include "utils.hpp"
 
 extern "C" {
 #include <nexoid/scapi.h>
@@ -17,6 +18,7 @@ extern "C" {
 #include <cstring>
 
 using namespace std;
+using namespace chrono;
 using scapi::Session,
       scapi::Request,
       scapi::Interaction,
@@ -258,7 +260,8 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
 
 extern "C" enum ScapiResult
 scapi_Wait_For_Event(void) noexcept try {
-    cout << __func__ << " ..." << endl;
+    cout << system_clock::now() << " D nexoid-cpp    "
+         << __func__ << " ..." << endl;
     const auto ntf = s_scapi->notification();
     for (const auto& e : ntf.events) {
         TtdKeeper::instance().update(e);
@@ -271,6 +274,7 @@ scapi_Wait_For_Event(void) noexcept try {
 
 extern "C" bool
 scapi_Authorise_Service(void) noexcept {
-    cout << __func__ << endl;
+    cout << system_clock::now() << " D nexoid-cpp    "
+         << __func__ << endl;
     return true;
 }

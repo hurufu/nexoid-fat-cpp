@@ -446,7 +446,7 @@ encode_nng(const ::scapi::Request& r) {
     if (res.encoded < 0) {
         throw runtime_error("Can't encode using XER");
     }
-    cout << system_clock::now() << ' '
+    cout << system_clock::now() << " D nexoid-cpp    "
          << "enc: " << string(ret.begin(), ret.end()) << endl;
     return ret;
 }
@@ -478,7 +478,7 @@ decode(const vector<unsigned char>& buf) {
 ::scapi::Response
 decode_nng(const vector<unsigned char>& buf) {
     const string str_buf(buf.begin(), buf.end());
-    cout << system_clock::now() << ' '
+    cout << system_clock::now() << " D nexoid-cpp    "
          << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
     ScapiResponse* tmp = NULL;
@@ -495,7 +495,7 @@ decode_nng(const vector<unsigned char>& buf) {
 ::scapi::Notification
 decode_nng_ntf(const vector<unsigned char>& buf) {
     const string str_buf(buf.begin(), buf.end());
-    cout << system_clock::now() << ' '
+    cout << system_clock::now() << " D nexoid-cpp    "
          << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
     ScapiNotification* tmp = NULL;
