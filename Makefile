@@ -158,4 +158,4 @@ uninstall:
 	$(if $(strip $F),$(RM) -- $F,)
 
 $(BINDIR)/nexoid-cpp: nexoid-cpp
-	install -D -m555 -t $(@D) $<
+	install -D -m755 -t $(@D) $<
