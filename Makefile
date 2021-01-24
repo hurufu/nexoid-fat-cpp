@@ -3,7 +3,6 @@ OL                  := 0
 DL                  := gdb3
 WARNINGS            := all extra no-unused-parameter
 GCC_FEATURES        :=
-GCC_FEATURES        += permissive
 GCC_FEATURES        += lto=auto use-linker-plugin
 #GCC_FEATURES        := instrument-functions
 #GCC_FEATURES        += analyzer
@@ -25,19 +24,26 @@ ASN1_MAKEFILE      := $(ASN1_GENERATED_DIR)/Makefile.am.libasncodec
 
 #TODO: Remove hardcoded prefix of libnexoid.a
 LIBNEXOID_PATH      := /usr/local/lib/$(LIBNEXOID_NAME)
+
 CPPFLAGS            += -I/usr/local/include
 CPPFLAGS            += -I/usr/local/include/nexoid
 CPPFLAGS            += -I$(ASN1_GENERATED_DIR)
 CPPFLAGS            += -I/usr/share/asn1c
-CXXFLAGS              := -g$(DL) -O$(OL)
-CXXFLAGS              += -std=c++17
-CXXFLAGS              += $(addprefix -W,$(WARNINGS))
-CXXFLAGS              += $(addprefix -f,$(GCC_FEATURES))
-CXXFLAGS              += $(if $(USE_COLOR),-fdiagnostics-color=always,)
-CFLAGS              := -g$(DL) -O$(OL)
-CFLAGS              += $(addprefix -W,$(WARNINGS))
+
+_CXXFLAGS           := -g$(DL) -O$(OL)
+_CXXFLAGS           += $(addprefix -W,$(WARNINGS))
+_CXXFLAGS           += $(addprefix -f,$(GCC_FEATURES))
+_CXXFLAGS           += $(if $(USE_COLOR),-fdiagnostics-color=always,)
+CXXFLAGS            ?= $(_CXXFLAGS)
+CXXFLAGS            += -std=c++17
+CXXFLAGS            += -fpermissive
+
+_CFLAGS             := -g$(DL) -O$(OL)
+_CFLAGS             += $(addprefix -W,$(WARNINGS))
+CFLAGS              ?= $(_CFLAGS)
 #CFLAGS              += -DASN_EMIT_DEBUG=1
 #CFLAGS              += -DASN_THREAD_SAFE
+
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
