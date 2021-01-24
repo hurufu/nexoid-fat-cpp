@@ -49,7 +49,7 @@ struct Session::Impl {
 Session::Impl::Impl(void) :
     interaction_socket(req::open()),
     notification_socket(pull::open()) {
-    set_opt_recv_timeout(notification_socket, 1 * 60 * 1000);
+    set_opt_recv_timeout(notification_socket, 1 * 60 * 60 * 1000);
     set_opt_recv_timeout(interaction_socket, 3 * 1000);
     set_opt_send_timeout(interaction_socket, 1 * 1000);
     interaction_socket.dial("ipc:///tmp/fatrq");
