@@ -2,8 +2,13 @@
 OL                  := 0
 DL                  := gdb3
 WARNINGS            := all extra no-unused-parameter
+# Warnings taken from https://gist.github.com/jrelo/f5c976fdc602688a0fd40288fde6d886
+WARNINGS            += format format-security
+WARNINGS            += conversion sign-conversion
+WARNINGS            += stack-protector
 GCC_FEATURES        :=
 GCC_FEATURES        += lto=auto use-linker-plugin
+GCC_FEATURES        += trapv
 #GCC_FEATURES        := instrument-functions
 #GCC_FEATURES        += analyzer
 
