@@ -3,8 +3,8 @@
 
 extern "C" {
 
-#include <nexoid/pklr.h>
-#include <nexoid/NexoFast.h>
+#include "nexoid-ed/include/pklr.h"
+#include "nexoid-ed/NexoFast.h"
 
 }
 

@@ -1,5 +1,5 @@
 extern "C" {
-#include <nexoid/tmapi.h>
+#include "nexoid-ed/include/tmapi.h"
 }
 
 enum TmapiResult

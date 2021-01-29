@@ -1,7 +1,7 @@
 #pragma once
 
 extern "C" {
-#include <nexoid/types.h>
+#include "nexoid-ed/include/types.h"
 }
 
 #include <sys/types.h> // Fixes missing include in the library header

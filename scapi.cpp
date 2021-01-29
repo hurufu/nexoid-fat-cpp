@@ -7,9 +7,7 @@
 #include "exceptions.hpp"
 #include "utils.hpp"
 
-extern "C" {
-#include <nexoid/scapi.h>
-}
+#include "nexoid-ed/include/scapi.h"
 
 #include <stdexcept>
 #include <vector>

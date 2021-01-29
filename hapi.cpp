@@ -1,7 +1,7 @@
 #include "ttd_keeper.hpp"
 
 extern "C" {
-#include <nexoid/hapi.h>
+#include "nexoid-ed/include/hapi.h"
 }
 
 extern "C" enum HapiResult

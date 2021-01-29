@@ -1,7 +1,7 @@
 #include <cstdlib>
 
 extern "C" {
-#include <nexoid/dmapi.h>
+#include "nexoid-ed/include/dmapi.h"
 }
 
 enum DmapiResult

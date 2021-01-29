@@ -5,8 +5,8 @@
 #include "utils.hpp"
 
 extern "C" {
-#include <nexoid/gtd.h>
-#include <nexoid/dmapi.h>
+#include "nexoid-ed/include/gtd.h"
+#include "nexoid-ed/include/dmapi.h"
 }
 
 // FIXME: Remove external dependencies and map exceptions to some internal type
@@ -214,7 +214,7 @@ TtdKeeper::handle_exception(const char* const func) noexcept {
     ttd.terminalErrorIndicator = true;
     ostream& os = cout;
     try {
-        os << system_clock::now() << " E nexoid-cpp    ";
+        os << system_clock::now() << " E nexoid-fat    ";
         if (func) {
             os << func << ": ";
         }

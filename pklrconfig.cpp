@@ -1,5 +1,5 @@
 extern "C" {
-#include <nexoid/pklr.h>
+#include "nexoid-ed/include/pklr.h"
 }
 
 struct PklrConfiguration pklr = {

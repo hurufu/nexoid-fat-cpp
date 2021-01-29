@@ -1,4 +1,4 @@
-#include <nexoid/gtd.h>
+#include "nexoid-ed/include/gtd.h"
 
 struct PermanentTerminalSpecificData e0 = {
     .ifdSerialNumber = &(struct string8){ .s = "123456" },

@@ -2,7 +2,7 @@
 // TODO: This file should be generated
 
 extern "C" {
-#include <nexoid/types.h>
+#include "nexoid-ed/include/types.h"
 }
 
 #include <memory>

@@ -1,7 +1,7 @@
 #pragma once
 
 extern "C" {
-#include <nexoid/scapi.h>
+#include "nexoid-ed/include/scapi.h"
 }
 
 ScapiResult scapi_Initialize(void) noexcept;

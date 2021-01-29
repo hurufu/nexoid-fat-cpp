@@ -1,5 +1,5 @@
 extern "C" {
-#include <nexoid/eapi.h>
+#include "nexoid-ed/include/eapi.h"
 }
 
 enum EapiResult

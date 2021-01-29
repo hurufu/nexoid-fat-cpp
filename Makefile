@@ -9,6 +9,7 @@ WARNINGS            += stack-protector
 GCC_FEATURES        :=
 GCC_FEATURES        += lto=auto use-linker-plugin
 GCC_FEATURES        += trapv
+GCC_FEATURES        += permissive
 #GCC_FEATURES        := instrument-functions
 #GCC_FEATURES        += analyzer
 
@@ -30,7 +31,9 @@ ASN1_MAKEFILE      := $(ASN1_GENERATED_DIR)/Makefile.am.libasncodec
 LIBNEXOID_PATH      := nexoid-ed/$(LIBNEXOID_NAME)
 
 CPPFLAGS            += -I/usr/local/include
-CPPFLAGS            += -I/usr/local/include/nexoid
+CPPFLAGS            += -I.
+CPPFLAGS            += -Inexoid-ed
+CPPFLAGS            += -Inexoid-ed/include
 CPPFLAGS            += -I$(ASN1_GENERATED_DIR)
 CPPFLAGS            += -I/usr/share/asn1c
 
@@ -70,7 +73,7 @@ $(EXECUTABLE): $(SOURCES) $(LIBNEXOID_PATH) nexoconf.o $(lib_LTLIBRARIES)
 
 # TODO: Integrate child Makefile better
 $(LIBNEXOID_PATH):
-	make -C '$(@D)' static
+	+make -C '$(@D)' static
 
 nexoconf.o: nexoconf.c
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASMFLAGS) $^
@@ -82,7 +85,7 @@ run: $(EXECUTABLE)
 .PHONY: clean
 clean: F += $(EXECUTABLE) trace.log tags $(TRACE_LOG) $(NOHUP_OUT)
 clean:
-	make -C nexoid-ed wipe
+	+make -C nexoid-ed wipe
 	$(if $(strip $(sort $(wildcard $F))),$(RM) -- $F,)
 	$(if $(strip $(sort $(wildcard $D))),rmdir -p -- $D,)
 

@@ -1,5 +1,5 @@
 extern "C" {
-#include <nexoid/gtd.h>
+#include "nexoid-ed/include/gtd.h"
 }
 
 static struct E1KernelData s_e1kd;
