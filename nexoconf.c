@@ -83,6 +83,7 @@ struct ApplicationProfileSelectionTable* e2 = &(struct ApplicationProfileSelecti
     },
     .profileNumber = 0x01,
     .supportedServices = {
+        .payment = 1,
         .cardValidityCheck = 1
     },
 
@@ -96,6 +97,7 @@ struct ApplicationProfileSelectionTable* e2 = &(struct ApplicationProfileSelecti
         },
         .profileNumber = 0x02,
         .supportedServices = {
+            .payment = 1,
             .cardValidityCheck = 1
         },
 
@@ -136,7 +138,7 @@ struct CaPublicKeyTable* e3 = &(struct CaPublicKeyTable){
 };
 
 struct ServiceSettingsTable e4 = {
-    .s = 2,
+    .s = 3,
     .a = {
         {
             .serviceIdentifier = S_CARD_VALIDITY_CHECK,
@@ -159,6 +161,31 @@ struct ServiceSettingsTable e4 = {
                     { .cardInserted = 1 }
                   , { .cardSwiped = 1 }
                   , { .manualEntry = 1 }
+                }
+            }
+        },
+        {
+            .serviceIdentifier = S_PAYMENT,
+            .cardholderInitialMessage = CRDHLDR_MSG_WELCOME,
+            .serviceSettings = {
+                .msrProcessingModeSupported = 1,
+                .ServiceProtected = 0,
+                .contactProcessingModeSupported = 1,
+                .contactChipHasPriority = 1,
+                .manualEntryProcessingModeSupported = 1,
+            },
+            .allowedServiceStartEvents = {
+                .amountEntry = 1,
+                .manualEntry = 1,
+                .cardInserted = 1,
+                .cardSwiped = 1,
+            },
+            .minimumServiceStartConditions = {
+                .s = 3,
+                .a = {
+                    { .amountEntry = 1, .manualEntry = 1 }
+                  , { .amountEntry = 1, .cardInserted = 1 }
+                  , { .amountEntry = 1, .cardSwiped = 1 }
                 }
             }
         },
@@ -297,6 +324,7 @@ struct ApplicationProfileSelectionTableNonChip* e8 = &(struct ApplicationProfile
     },
     .ApplicationProfileNumber = 0x02,
     .SupportedServices = {
+        .payment = 1,
         .cardValidityCheck = 1
     }
 };
