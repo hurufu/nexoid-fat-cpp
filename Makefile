@@ -23,6 +23,7 @@ INSTALLED_FILES := $(BINDIR)/nexoid-cpp
 EXECUTABLE          := nexoid-cpp
 SOURCES             := $(wildcard *.cpp)
 LIBNEXOID_NAME      := libnexoid.a
+ASN_SOURCES         := asn1/Scapi.asn1 asn1/ScapiSocketClient.asn1
 
 # ASN.1 generator config for asn1c from http://lionet.info/asn1c
 ASN1_GENERATED_DIR := asn1c-generated
@@ -151,7 +152,7 @@ clean: D += $(ASN1_GENERATED_DIR)
 clean: F += $(EXECUTABLE).strace
 clean: F += $(EXECUTABLE).valgrind
 
-$(ASN1_MAKEFILE): $(wildcard asn1/*.asn1)
+$(ASN1_MAKEFILE): $(ASN_SOURCES)
 	mkdir -p $(ASN1_GENERATED_DIR)
 	asn1c -fincludes-quoted -pdu=auto -D $(ASN1_GENERATED_DIR) -no-gen-example -no-gen-OER -no-gen-PER $^
 
