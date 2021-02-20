@@ -24,6 +24,8 @@ EXECUTABLE          := nexoid-cpp
 SOURCES             := $(wildcard *.cpp)
 LIBNEXOID_NAME      := libnexoid.a
 ASN_SOURCES         := asn1/Scapi.asn1 asn1/ScapiSocketClient.asn1
+OBJECTS             := $(SOURCES:.cpp=.o) nexoconf.o
+DEPENDS             := $(OBJECTS:.o=.d)
 
 # ASN.1 generator config for asn1c from http://lionet.info/asn1c
 ASN1_GENERATED_DIR := asn1c-generated
@@ -62,22 +64,32 @@ VALGRIND_FLAGS := --leak-check=full --track-origins=yes --show-error-list=yes
 # Commands ####################################################################
 MIMEOPEN            := mimeopen
 
-
-include $(ASN1_MAKEFILE)
+# Targets that do not need *.d dependencies for source files
+NOT_DEP      := clean asm pp wipe update
 
 .PHONY: all most_frequent FORCE
 most_frequent: run index
 all: $(EXECUTABLE) .syntastic_cpp_config
 
-$(EXECUTABLE): $(SOURCES) $(LIBNEXOID_PATH) nexoconf.o $(lib_LTLIBRARIES)
-	$(CXX) -o $@ $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) $(LDFLAGS) $^ $(LDLIBS)
+include $(ASN1_MAKEFILE)
+include $(if $(filter $(NOT_DEP),$(MAKECMDGOALS)),,$(DEPENDS))
+
+$(EXECUTABLE): $(OBJECTS) $(LIBNEXOID_PATH) $(lib_LTLIBRARIES)
+	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
+
+%.o: %.cpp
+	$(CXX) -c -o $@ $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) $(word 1,$^)
+%.d: %.cpp $(LIBNEXOID_PATH)
+	$(CXX) -MM -MG -MF $@ -MT $*.o $(CPPFLAGS) $(CXXFLAGS) $(ASMFLAGS) -o $@ $<
+%.d: %.c $(LIBNEXOID_PATH)
+	$(CC) -MM -MG -MF $@ -MT $*.o $(CPPFLAGS) $(CFLAGS) $(ASMFLAGS) -o $@ $<
 
 # TODO: Integrate child Makefile better
 $(LIBNEXOID_PATH):
 	+make -C '$(@D)' static
 
 nexoconf.o: nexoconf.c
-	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASMFLAGS) $^
+	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(ASMFLAGS) $<
 
 .PHONY: run
 run: $(EXECUTABLE)
@@ -85,6 +97,8 @@ run: $(EXECUTABLE)
 
 .PHONY: clean
 clean: F += $(EXECUTABLE) trace.log tags $(TRACE_LOG) $(NOHUP_OUT)
+clean: F += $(OBJECTS)
+clean: F += $(DEPENDS)
 clean:
 	+make -C nexoid-ed wipe
 	$(if $(strip $(sort $(wildcard $F))),$(RM) -- $F,)
