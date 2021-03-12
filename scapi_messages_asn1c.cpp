@@ -7,6 +7,9 @@
 #include <ScapiSocketRequest.h>
 #include <ScapiSocketResponse.h>
 #include <ScapiNotification.h>
+#include <ScapiNngRequest.h>
+#include <ScapiNngResponse.h>
+#include <ScapiNngNotification.h>
 
 #include <stdexcept>
 #include <memory>
@@ -300,17 +303,16 @@ map_ack_entry_from_asn1c(const struct ScapiDataEntryIntercation* const e) {
 }
 
 static ::scapi::Response
-map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>>& rsp) {
-    const auto ptr = rsp.get();
-    switch (ptr->present) {
+map_nng_from_asn1c(const ScapiResponse& rsp) {
+    switch (rsp.present) {
     case ScapiResponse_PR_ack:
         return scapi::Response(in_place_index<1>);
     case ScapiResponse_PR_nak:
-        return map_nak_from_asn1c(ptr->choice.nak);
+        return map_nak_from_asn1c(rsp.choice.nak);
     case ScapiResponse_PR_ackEntry: {
         vector<scapi::AckEntry> vec{};
-        for (int i = 0; i < ptr->choice.ackEntry.list.count; i++) {
-            vec.push_back(map_ack_entry_from_asn1c(ptr->choice.ackEntry.list.array[i]));
+        for (int i = 0; i < rsp.choice.ackEntry.list.count; i++) {
+            vec.push_back(map_ack_entry_from_asn1c(rsp.choice.ackEntry.list.array[i]));
         }
         return vec;
     }
@@ -319,7 +321,7 @@ map_nng_from_asn1c(const unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiR
     case ScapiResponse_PR_NOTHING:
         break;
     }
-    throw bad_mapping(ptr->present, "Unexpected ScapiResponse, can't map it internally");
+    throw bad_mapping(rsp.present, "Unexpected ScapiResponse, can't map it internally");
 }
 
 static union ExpirationDate
@@ -388,10 +390,10 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
 }
 
 static ::scapi::Notification
-map_nng_ntf_from_asn1c(const unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>>& rsp) {
+map_nng_ntf_from_asn1c(const ScapiNotification& rsp) {
     ::scapi::Notification ret;
-    for (int i = 0; i < rsp->events.list.count; i++) {
-        const auto tmp = rsp->events.list.array[i];
+    for (int i = 0; i < rsp.events.list.count; i++) {
+        const auto tmp = rsp.events.list.array[i];
         const auto evt = map_event_from_asn1c(tmp);
         ret.events.push_back(evt);
     }
@@ -436,9 +438,12 @@ encode(const ::scapi::socket::Request& r) {
 }
 
 vector<unsigned char>
-encode_nng(const ::scapi::Request& r) {
-    static const auto tp = &asn_DEF_ScapiRequest;
-    auto c = map_scapi_request(r);
+encode_nng(const ::scapi::nng::Request& r) {
+    static const auto tp = &asn_DEF_ScapiNngRequest;
+    const struct ScapiNngRequest c = {
+        .req = map_scapi_request(r.req),
+        .id = r.id,
+    };
     validate(tp, &c);
     vector<unsigned char> ret;
     const auto res = xer_encode(tp, &c, XER_F_CANONICAL, &consume_bytes_cb, &ret);
@@ -475,36 +480,42 @@ decode(const vector<unsigned char>& buf) {
     return map_from_asn1c(rsp);
 }
 
-::scapi::Response
+::scapi::nng::Response
 decode_nng(const vector<unsigned char>& buf) {
     const string str_buf(buf.begin(), buf.end());
     cout << system_clock::now() << " D nexoid-fat    "
          << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
-    ScapiResponse* tmp = NULL;
-    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiResponse;
+    ScapiNngResponse* tmp = NULL;
+    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNngResponse;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
-    unique_ptr<ScapiResponse, asn1c_deleter<&asn_DEF_ScapiResponse>> rsp(tmp);
+    unique_ptr<ScapiNngResponse, asn1c_deleter<&asn_DEF_ScapiNngResponse>> rsp(tmp);
     if (RC_OK != r.code) {
         throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::Response");
     }
     validate(tp, rsp.get());
-    return map_nng_from_asn1c(rsp);
+    return {
+        .rsp = map_nng_from_asn1c(rsp->rsp),
+        .id = rsp->id,
+    };
 }
 
-::scapi::Notification
+::scapi::nng::Notification
 decode_nng_ntf(const vector<unsigned char>& buf) {
     const string str_buf(buf.begin(), buf.end());
     cout << system_clock::now() << " D nexoid-fat    "
          << "dec: " << str_buf << endl;
     asn_codec_ctx_t ctx = { };
-    ScapiNotification* tmp = NULL;
-    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNotification;
+    ScapiNngNotification* tmp = NULL;
+    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNngNotification;
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
-    unique_ptr<ScapiNotification, asn1c_deleter<&asn_DEF_ScapiNotification>> rsp(tmp);
+    unique_ptr<ScapiNngNotification, asn1c_deleter<&asn_DEF_ScapiNngNotification>> rsp(tmp);
     if (RC_OK != r.code) {
         throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::Response");
     }
     validate(tp, rsp.get());
-    return map_nng_ntf_from_asn1c(rsp);
+    return {
+        .ntf = map_nng_ntf_from_asn1c(rsp->ntf),
+        .id = rsp->id,
+    };
 }

@@ -124,4 +124,23 @@ namespace scapi {
         > Response;
 
     }
+
+    namespace nng {
+
+        struct Request {
+            ::scapi::Request req;
+            int id;
+        };
+
+        struct Response {
+            ::scapi::Response rsp;
+            int id;
+        };
+
+        struct Notification {
+            ::scapi::Notification ntf;
+            int id;
+        };
+
+    }
 }

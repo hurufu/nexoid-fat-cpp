@@ -10,11 +10,11 @@ encode(const ::scapi::socket::Request&);
 ::scapi::socket::Response
 decode(const ::std::vector<unsigned char>&);
 
-::scapi::Response
+::scapi::nng::Response
 decode_nng(const ::std::vector<unsigned char>& buf);
 
 ::std::vector<unsigned char>
-encode_nng(const ::scapi::Request& r);
+encode_nng(const ::scapi::nng::Request& r);
 
-::scapi::Notification
+::scapi::nng::Notification
 decode_nng_ntf(const ::std::vector<unsigned char>& buf);

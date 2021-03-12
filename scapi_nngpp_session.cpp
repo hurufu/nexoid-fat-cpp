@@ -37,6 +37,7 @@ public:
 struct Session::Impl {
     ::socket interaction_socket;
     ::socket notification_socket;
+    int req_counter = 0;
 
     Impl(void);
     ~Impl(void) = default;
@@ -68,16 +69,16 @@ Session::Impl::exch(const vector<unsigned char>& b) {
 Response
 Session::Impl::interaction(const Request& r, const milliseconds rcv_timeout) {
     const RecvTimeoutGuard guard(interaction_socket, integer_cast<nng_duration>(rcv_timeout.count()));
-    const auto rq = encode_nng(r);
+    const auto rq = encode_nng({r, ++req_counter});
     const auto rs = exch(rq);
-    return decode_nng(rs);
+    return decode_nng(rs).rsp;
 }
 
 Notification
 Session::Impl::notification(void) {
     buffer nntf = notification_socket.recv();
     vector<unsigned char> ntf(nntf.data<unsigned char>(), nntf.data<unsigned char>() + nntf.size());
-    return decode_nng_ntf(ntf);
+    return decode_nng_ntf(ntf).ntf;
 }
 
 Session::Session(void) :
