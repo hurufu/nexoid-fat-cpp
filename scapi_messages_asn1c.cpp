@@ -31,6 +31,49 @@ struct asn1c_deleter {
     }
 };
 
+template <typename Bcd>
+Bcd map_integer_as_bcd_from_asn1c(const INTEGER_t* const from) {
+    uintmax_t integer = 0;
+    // TODO: Implement direct conversion from INTEGER_t to BCD, without relying on intermediary intmax_t variable
+    if (asn_INTEGER2umax(from, &integer) != 0) {
+        switch (errno) {
+            case EINVAL:
+                throw null_argument({from}, "Can't map non-existent integer to BCD");
+            case ERANGE:
+                throw runtime_error("Out of bounds for integer conversion detected during conversion to BCD");
+            default:
+                throw 0; // This should never happen
+        }
+    }
+    return convert_int_to_bcd<decltype(integer), Bcd>(integer);
+}
+
+template <typename Bcd>
+INTEGER_t map_bcd_as_integer_from_asn1c(const Bcd& from) {
+    INTEGER_t ret = { };
+    if (asn_umax2INTEGER(&ret, convert_bcd_to_int<uintmax_t, union bcd6>(from)) != 0) {
+        throw 0; // This should never happen
+    }
+    return ret;
+}
+
+template <typename Bcd>
+optional<Bcd>
+map_optional_integer_as_bcd_from_asn1c(const INTEGER_t* const b) {
+    if (!b) {
+        return {};
+    }
+    return map_integer_as_bcd_from_asn1c<union bcd6>(b);
+}
+
+static optional<bool>
+map_optinal_boolean_from_asn1c(const BOOLEAN_t* const b) {
+    if (!b) {
+        return {};
+    }
+    return static_cast<bool>(b);
+}
+
 static enum NexoNokReason
 map_nok_reason_to_asn1c(const enum NokReason n) {
     switch (n) {
@@ -145,6 +188,18 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = Member_PR_ssn;
                 tmp->choice.ssn = get<1>(e);
                 break;
+            case 13:
+                tmp->present = Member_PR_trxAmount;
+                tmp->choice.trxAmount = map_bcd_as_integer_from_asn1c<union bcd6>(get<13>(e));
+                break;
+            case 16:
+                tmp->present = Member_PR_trxCurrencyAlpha3;
+                tmp->choice.trxCurrencyAlpha3.buf = reinterpret_cast<uint8_t*>(calloc(4, 1));
+                for (int i = 0; i < 3; i++) {
+                    tmp->choice.trxCurrencyAlpha3.buf[i] = get<16>(e).Str[i];
+                }
+                tmp->choice.trxCurrencyAlpha3.size = 3;
+                break;
             case 17:
                 tmp->present = Member_PR_selectedService;
                 tmp->choice.selectedService = get<17>(e);
@@ -195,6 +250,18 @@ map_scapi_request(const ::scapi::Request& r) {
             case 1:
                 tmp->present = Member_PR_ssn;
                 tmp->choice.ssn = get<1>(e);
+                break;
+            case 13:
+                tmp->present = Member_PR_trxAmount;
+                tmp->choice.trxAmount = map_bcd_as_integer_from_asn1c<union bcd6>(get<13>(e));
+                break;
+            case 16:
+                tmp->present = Member_PR_trxCurrencyAlpha3;
+                tmp->choice.trxCurrencyAlpha3.buf = reinterpret_cast<uint8_t*>(calloc(4, 1));
+                for (int i = 0; i < 3; i++) {
+                    tmp->choice.trxCurrencyAlpha3.buf[i] = get<16>(e).Str[i];
+                }
+                tmp->choice.trxCurrencyAlpha3.size = 3;
                 break;
             case 17:
                 tmp->present = Member_PR_selectedService;
@@ -361,6 +428,32 @@ map_manual_entry_from_asn1c(const struct ScapiEventManualEntry& m) {
     };
 }
 
+static optional<variant<bool, union bcd6>>
+map_optional_supplementary_amount_from_asn1c(const struct ScapiEventAmountEntry::supplementaryAmount* const a) {
+    if (!a) {
+        return {};
+    }
+    switch (a->present) {
+        case supplementaryAmount_PR_confirmed:
+            return static_cast<bool>(a->choice.confirmed);
+        case supplementaryAmount_PR_amount:
+            return map_integer_as_bcd_from_asn1c<union bcd6>(&a->choice.amount);
+        case supplementaryAmount_PR_NOTHING:
+            break;
+    }
+    throw bad_mapping(a->present, "Unexpected supplementaryAmount component");
+}
+
+static scapi::AmountEntry
+map_amount_entry_from_asn1c(const struct ScapiEventAmountEntry& a) {
+    return {
+        .totalAmount = map_integer_as_bcd_from_asn1c<union bcd6>(&a.totalAmount),
+        .minus = map_optinal_boolean_from_asn1c(a.minus),
+        .supplementaryAmount = map_optional_supplementary_amount_from_asn1c(a.supplementaryAmount),
+        .cashbackAmount = map_optional_integer_as_bcd_from_asn1c<union bcd6>(a.cashbackAmount),
+    };
+}
+
 static scapi::Event
 map_event_from_asn1c(const struct ScapiEvent* const e) {
     switch (e->present) {
@@ -383,6 +476,8 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
         return scapi::Event(in_place_index<3>);
     case ScapiEvent_PR_reboot:
         return scapi::Event(in_place_index<4>);
+    case ScapiEvent_PR_amountEntry:
+        return map_amount_entry_from_asn1c(e->choice.amountEntry);
     case ScapiEvent_PR_NOTHING:
     default:
         throw bad_mapping(e->present, "Unsupported ScapiEvent");

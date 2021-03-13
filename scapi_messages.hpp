@@ -46,12 +46,23 @@ namespace scapi {
         ::std::optional<CvdData> cvdData;
     };
 
+    struct AmountEntry {
+        union ::bcd6 totalAmount;
+        ::std::optional<bool> minus;
+        ::std::optional<::std::variant<
+            bool, // confirmed
+            union ::bcd6 // amount
+        >> supplementaryAmount;
+        ::std::optional<union ::bcd6> cashbackAmount;
+    };
+
     typedef ::std::variant<
         LanguageSelection
       , ServiceSelection
       , ManualEntry
       , ::std::monostate // Terminate
       , ::std::monostate // Reboot
+      , AmountEntry
     > Event;
 
     typedef ::std::variant<
@@ -71,7 +82,7 @@ namespace scapi {
       , union ::bcd6 // trxAmount
       , union ::bcd6 // cashbackAmount
       , union ::bcd6 // supplementaryAmount
-      , union ::CurrencyCode // trxCurrencyAlpha3 - FIXME: Check if type is correct
+      , union ::CurrencyAlpha3 // trxCurrencyAlpha3
       , enum ::ServiceId // selectedService
       , enum ::NokReason // nokReason
       , ::std::monostate // FIXME: Implement searchTrxResultList

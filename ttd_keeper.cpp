@@ -72,6 +72,32 @@ set_manual_entry_in_ttd(const scapi::ManualEntry& m) {
 }
 
 static void
+set_amounts_in_ttd(const scapi::AmountEntry& a) {
+    // NEXO: Check if they define what FAT shall do when it receives amount
+    // multiple times (rewrites? ignores? aborts?)
+    // TODO: Throw an exception if transaction is already in progress
+    ttd.transactionAmount = a.totalAmount;
+    if (a.minus) {
+        shallow_copy_to_ttd(ttd.minus, *a.minus);
+    }
+    if (a.supplementaryAmount) {
+        switch (a.supplementaryAmount->index()) {
+            case 0:
+                ttd.supplementaryAmountConfirmed = get<0>(*a.supplementaryAmount);
+                break;
+            case 1:
+                ttd.supplementaryAmount = get<1>(*a.supplementaryAmount);
+                break;
+            default:
+                throw runtime_error("supplementaryAmount can't be mapped");
+        }
+    }
+    if (a.cashbackAmount) {
+        ttd.cashbackAmount = *a.cashbackAmount;
+    }
+}
+
+static void
 set_error_reason_in_ttd(const enum TerminalErrorReason r) {
     if (ttd.terminalErrorIndicator) {
         if (ttd.terminalErrorReason == TE_NONE) {
@@ -103,6 +129,7 @@ map_event_to_ttd_event_index(const scapi::Event& e) {
         case 2: return E_MANUAL_ENTRY;
         case 3: return E_TERMINATION_REQUESTED;
         case 4: return E_REBOOT_REQUESTED;
+        case 5: return E_AMOUNT_ENTRY;
     }
     throw runtime_error("Event can't be mapped");
 }
@@ -126,6 +153,9 @@ TtdKeeper::update(const scapi::Event& e) {
         break;
     case E_TERMINATION_REQUESTED:
     case E_REBOOT_REQUESTED:
+        break;
+    case E_AMOUNT_ENTRY:
+        set_amounts_in_ttd(get<5>(e));
         break;
     default:
         throw runtime_error("Unexpected event");
@@ -322,6 +352,14 @@ enum ServiceId TtdKeeper::fetch_selected_service(void) {
 
 union Iso639_1 TtdKeeper::fetch_selected_language(void) {
     return ttd.selectedLanguage;
+}
+
+union bcd6 TtdKeeper::fetch_transaction_amount(void) {
+    return ttd.transactionAmount;
+}
+
+union CurrencyAlpha3 TtdKeeper::fetch_transaction_currency_code_alpha3(void) {
+    return ttd.transactionCurrencyCodeAlpha3;
 }
 
 void

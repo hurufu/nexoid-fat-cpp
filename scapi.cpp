@@ -147,6 +147,10 @@ map_to_interaction(const CardholderMessage m) {
         return Interaction(in_place_index<0>, m);
     case 1:
         return Interaction(in_place_index<1>, m);
+    case 13:
+        return Interaction(in_place_index<13>, TtdKeeper::instance().fetch_transaction_amount());
+    case 16:
+        return Interaction(in_place_index<16>, TtdKeeper::instance().fetch_transaction_currency_code_alpha3());
     case 17:
         return TtdKeeper::instance().fetch_selected_service();
     case 18:
