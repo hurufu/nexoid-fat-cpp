@@ -20,6 +20,12 @@ extern "C" {
 using namespace std;
 using namespace chrono;
 
+template <typename T>
+void shallow_copy_to_ttd(T*& ttd_member, const T& pod) {
+    ttd_member = reinterpret_cast<T*>(dmapi_malloc(sizeof(T)));
+    *ttd_member = pod;
+}
+
 static void
 set_pan_in_ttd(const string& p) {
     ttd.pan = reinterpret_cast<decltype(ttd.pan)>(dmapi_malloc(sizeof(*ttd.pan)));
@@ -28,20 +34,17 @@ set_pan_in_ttd(const string& p) {
 
 static void
 set_expiration_date_in_ttd(const union ExpirationDate& d) {
-    ttd.expirationDate = reinterpret_cast<decltype(ttd.expirationDate)>(dmapi_malloc(sizeof(*ttd.expirationDate)));
-    *ttd.expirationDate = d;
+    shallow_copy_to_ttd(ttd.expirationDate, d);
 }
 
 static void
 set_cvd_presence_in_ttd(const enum CvdPresence c) {
-    ttd.cvdPresence = reinterpret_cast<decltype(ttd.cvdPresence)>(dmapi_malloc(sizeof(*ttd.cvdPresence)));
-    *ttd.cvdPresence = c;
+    shallow_copy_to_ttd(ttd.cvdPresence, c);
 }
 
 static void
 set_cvd_in_ttd(const struct cn2 c) {
-    ttd.cvd = reinterpret_cast<decltype(ttd.cvd)>(dmapi_malloc(sizeof(*ttd.cvd)));
-    *ttd.cvd = c;
+    shallow_copy_to_ttd(ttd.cvd, c);
     set_cvd_presence_in_ttd(CVD_PRESENT);
 }
 
