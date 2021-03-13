@@ -586,7 +586,7 @@ decode_nng(const vector<unsigned char>& buf) {
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiNngResponse, asn1c_deleter<&asn_DEF_ScapiNngResponse>> rsp(tmp);
     if (RC_OK != r.code) {
-        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::Response");
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::nng::Response");
     }
     validate(tp, rsp.get());
     return {
@@ -606,7 +606,7 @@ decode_nng_ntf(const vector<unsigned char>& buf) {
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiNngNotification, asn1c_deleter<&asn_DEF_ScapiNngNotification>> rsp(tmp);
     if (RC_OK != r.code) {
-        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::Response");
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::nng::Notification");
     }
     validate(tp, rsp.get());
     return {
