@@ -34,7 +34,7 @@ Session::exch(const vector<unsigned char> req) {
     if (received < 0) {
         throw runtime_error("No message");
     }
-    buf.resize(received);
+    buf.resize(static_cast<size_t>(received));
     return buf;
 }
 

@@ -29,7 +29,7 @@ public:
     enum ServiceId fetch_selected_service(void);
     union Iso639_1 fetch_selected_language(void);
     union bcd6 fetch_transaction_amount(void);
-    union CurrencyAlpha3 TtdKeeper::fetch_transaction_currency_code_alpha3(void);
+    union CurrencyAlpha3 fetch_transaction_currency_code_alpha3(void);
 
     /** Unconditionaly clears TTD. Useful for testing
      */

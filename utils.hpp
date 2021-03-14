@@ -40,7 +40,7 @@ template <typename UnsignedInteger, typename Bcd>
 Bcd convert_int_to_bcd(const UnsignedInteger from) {
     Bcd ret = { };
     UnsignedInteger tmp = from;
-    for (size_t j = sizeof(ret.v) - 1; tmp && j >= 0; tmp /= 100, j--) {
+    for (ssize_t j = sizeof(ret.v) - 1; tmp && j >= 0; tmp /= 100, j--) {
         ret.v[j] = (uint8_t)((((tmp % 100) / 10) << 4) | (tmp % 10));
     }
     if (tmp != 0) {
@@ -52,7 +52,6 @@ Bcd convert_int_to_bcd(const UnsignedInteger from) {
 template <typename UnsignedInteger, typename Bcd>
 UnsignedInteger convert_bcd_to_int(const Bcd from) {
     UnsignedInteger ret = 0, power = 1;
-    size_t x = sizeof(from.v)/sizeof(from.v[0]) - 1;
     for (size_t j = sizeof(from.v)/sizeof(from.v[0]) - 1; j != 0; j--, power *= 100) {
         ret += (from.v[j] & 0x0F) * power;
         ret += ((from.v[j] & 0xF0) >> 4) * power * 10;

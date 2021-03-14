@@ -95,7 +95,7 @@ struct bad_mapping : public std::invalid_argument {
 };
 
 struct bad_variant_mapping : public std::invalid_argument {
-    int index;
+    size_t index;
     const std::type_info& tinfo;
 
     template <typename... Variant>
@@ -107,7 +107,7 @@ struct bad_variant_mapping : public std::invalid_argument {
 };
 
 struct null_argument : public std::invalid_argument {
-    int null_arg_index;
+    std::ptrdiff_t null_arg_index;
 
     template <typename... Args>
     null_argument(const std::initializer_list<const void*> param, Args&&... args) :

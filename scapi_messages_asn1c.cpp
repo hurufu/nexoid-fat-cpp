@@ -196,7 +196,7 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = Member_PR_trxCurrencyAlpha3;
                 tmp->choice.trxCurrencyAlpha3.buf = reinterpret_cast<uint8_t*>(calloc(4, 1));
                 for (int i = 0; i < 3; i++) {
-                    tmp->choice.trxCurrencyAlpha3.buf[i] = get<16>(e).Str[i];
+                    tmp->choice.trxCurrencyAlpha3.buf[i] = static_cast<uint8_t>(get<16>(e).Str[i]);
                 }
                 tmp->choice.trxCurrencyAlpha3.size = 3;
                 break;
@@ -228,8 +228,8 @@ map_scapi_request(const ::scapi::Request& r) {
         const auto l = TtdKeeper::instance().fetch_selected_language();
         ret.choice.output.language = reinterpret_cast<Iso639_t*>(calloc(1, sizeof(Iso639_t)));
         ret.choice.output.language->buf = reinterpret_cast<uint8_t*>(calloc(3, 1));
-        ret.choice.output.language->buf[0] = l.c[0];
-        ret.choice.output.language->buf[1] = l.c[1];
+        ret.choice.output.language->buf[0] = static_cast<uint8_t>(l.c[0]);
+        ret.choice.output.language->buf[1] = static_cast<uint8_t>(l.c[1]);
         ret.choice.output.language->size = 2;
 #       endif
         break;
@@ -259,7 +259,7 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = Member_PR_trxCurrencyAlpha3;
                 tmp->choice.trxCurrencyAlpha3.buf = reinterpret_cast<uint8_t*>(calloc(4, 1));
                 for (int i = 0; i < 3; i++) {
-                    tmp->choice.trxCurrencyAlpha3.buf[i] = get<16>(e).Str[i];
+                    tmp->choice.trxCurrencyAlpha3.buf[i] = static_cast<uint8_t>(get<16>(e).Str[i]);
                 }
                 tmp->choice.trxCurrencyAlpha3.size = 3;
                 break;
@@ -291,8 +291,8 @@ map_scapi_request(const ::scapi::Request& r) {
         const auto ll = TtdKeeper::instance().fetch_selected_language();
         ret.choice.output.language = reinterpret_cast<Iso639_t*>(calloc(1, sizeof(Iso639_t)));
         ret.choice.output.language->buf = reinterpret_cast<uint8_t*>(calloc(3, 1));
-        ret.choice.output.language->buf[0] = ll.c[0];
-        ret.choice.output.language->buf[1] = ll.c[1];
+        ret.choice.output.language->buf[0] = static_cast<uint8_t>(ll.c[0]);
+        ret.choice.output.language->buf[1] = static_cast<uint8_t>(ll.c[1]);
         ret.choice.output.language->size = 2;
 #       endif
         break;
@@ -535,9 +535,10 @@ encode(const ::scapi::socket::Request& r) {
 vector<unsigned char>
 encode_nng(const ::scapi::nng::Request& r) {
     static const auto tp = &asn_DEF_ScapiNngRequest;
-    const struct ScapiNngRequest c = {
+    struct ScapiNngRequest c = {
         .req = map_scapi_request(r.req),
         .id = r.id,
+        ._asn_ctx = { },
     };
     validate(tp, &c);
     vector<unsigned char> ret;
