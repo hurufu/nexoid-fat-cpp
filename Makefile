@@ -7,7 +7,7 @@ WARNINGS            += format format-security
 WARNINGS            += conversion sign-conversion
 WARNINGS            += stack-protector
 GCC_FEATURES        :=
-GCC_FEATURES        += lto=auto use-linker-plugin
+#GCC_FEATURES        += lto=auto use-linker-plugin
 GCC_FEATURES        += trapv
 GCC_FEATURES        += permissive
 #GCC_FEATURES        := instrument-functions

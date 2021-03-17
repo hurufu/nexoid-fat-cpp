@@ -45,14 +45,14 @@ struct NexuiSession::Impl {
         vector<unsigned char> rsp;
 
         ExchangeLogger(const NexuiSession::Impl& s, const vector<unsigned char>& rq, ostream& os);
-        ~ExchangeLogger();
+        ~ExchangeLogger() noexcept;
     };
 
-    inline struct ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq, ostream&& os) {
+    inline ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq, ostream&& os) {
         return ExchangeLogger(*this, rq, os);
     }
 
-    inline struct ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq, ostream& os) {
+    inline ExchangeLogger make_exchange_logger(const vector<unsigned char>& rq, ostream& os) {
         return ExchangeLogger(*this, rq, os);
     }
 };
