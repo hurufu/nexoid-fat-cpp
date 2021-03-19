@@ -10,7 +10,6 @@
 #include <sstream>
 #include <fstream>
 #include <unistd.h>
-#include <sys/syscall.h>
 
 using namespace papi::nngpp;
 using namespace nng;
@@ -86,7 +85,7 @@ decode_nexui_response(vector<unsigned char> rsp) {
 }
 
 static ostream& log_preamble(ostream& os, const char* const name) {
-    static const auto tid = syscall(SYS_gettid);
+    static const auto tid = -1;
     return os << system_clock::now() << " D nexoid-fat    t:" << tid << " n:" << name;
 }
 

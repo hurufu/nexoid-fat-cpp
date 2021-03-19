@@ -21,8 +21,8 @@ INSTALLED_FILES := $(BINDIR)/nexoid-cpp
 
 # Project configuration #######################################################
 EXECUTABLE          := nexoid-cpp
-SOURCES             := $(wildcard *.cpp)
-LIBNEXOID_NAME      := libnexoid.a
+SOURCES             := $(filter-out scapi_socket_session.cpp,$(wildcard *.cpp))
+LIBNEXOID_NAME      := cygnexoid.a
 ASN_SOURCES         := asn1/Scapi.asn1 asn1/ScapiSocketClient.asn1 asn1/ScapiNngClient.asn1
 OBJECTS             := $(SOURCES:.cpp=.o) nexoconf.o
 DEPENDS             := $(OBJECTS:.o=.d)
@@ -57,7 +57,7 @@ CFLAGS              ?= $(_CFLAGS)
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
-LDLIBS              := -lsocket++ -lnng
+LDLIBS              := -lnng
 
 VALGRIND_FLAGS := --leak-check=full --track-origins=yes --show-error-list=yes
 
