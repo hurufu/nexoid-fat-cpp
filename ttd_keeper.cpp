@@ -362,6 +362,10 @@ union CurrencyAlpha3 TtdKeeper::fetch_transaction_currency_code_alpha3(void) {
     return ttd.transactionCurrencyCodeAlpha3;
 }
 
+union bcd TtdKeeper::fetch_transaction_currency_exponent(void) {
+    return ttd.transactionCurrencyExponent;
+}
+
 void
 TtdKeeper::reset(void) noexcept {
     // FIXME: Implement better clearing method, eg. release ptmalloc arena

@@ -200,6 +200,10 @@ map_scapi_request(const ::scapi::Request& r) {
                 }
                 tmp->choice.trxCurrencyAlpha3.size = 3;
                 break;
+            case 22:
+                tmp->present = Member_PR_trxCurrencyExponent;
+                tmp->choice.trxCurrencyExponent = 10 * get<22>(e).high + get<22>(e).low;
+                break;
             case 17:
                 tmp->present = Member_PR_selectedService;
                 tmp->choice.selectedService = get<17>(e);
@@ -262,6 +266,10 @@ map_scapi_request(const ::scapi::Request& r) {
                     tmp->choice.trxCurrencyAlpha3.buf[i] = static_cast<uint8_t>(get<16>(e).Str[i]);
                 }
                 tmp->choice.trxCurrencyAlpha3.size = 3;
+                break;
+            case 22:
+                tmp->present = Member_PR_trxCurrencyExponent;
+                tmp->choice.trxCurrencyExponent = 10 * get<22>(e).high + get<22>(e).low;
                 break;
             case 17:
                 tmp->present = Member_PR_selectedService;

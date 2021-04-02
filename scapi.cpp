@@ -136,6 +136,8 @@ classify_to_variant_index(const CardholderMessage m) {
             return 20;
         case CRDHLDR_SRC_MINUS:
             return 21;
+        case CRDHLDR_SRC_TRX_CURRENCY_EXPONENT:
+            return 22;
         case CRDHLDR_SSN_CARD_REMOVAL_REQUESTED:
         case CRDHLDR_SSN_CARD_REMOVED:
         case CRDHLDR_SSN_REQUEST_SIGNATURE:
@@ -160,6 +162,8 @@ map_to_interaction(const CardholderMessage m) {
         return TtdKeeper::instance().fetch_selected_service();
     case 18:
         return TtdKeeper::instance().fetch_nok_reason();
+    case 22:
+        return Interaction(in_place_index<22>, TtdKeeper::instance().fetch_transaction_currency_exponent());
     }
     throw not_implemented(make_desc("Interaction message ", m, " isn't implemented"));
 }

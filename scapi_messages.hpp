@@ -88,6 +88,7 @@ namespace scapi {
       , ::std::monostate // FIXME: Implement searchTrxResultList
       , union ::bcd6 // updatePreAuthTotalAmount
       , bool // minus
+      , union ::bcd // trxCurrencyExponent
     > Interaction;
 
     typedef ::std::variant<
