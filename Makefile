@@ -35,7 +35,7 @@ LIBNEXOID_PATH      := nexoid-ed/$(LIBNEXOID_NAME)
 
 CPPFLAGS            += -I/usr/local/include
 CPPFLAGS            += -I.
-CPPFLAGS            += -Inexoid-ed
+CPPFLAGS            += -Inexoid-ed/src
 CPPFLAGS            += -Inexoid-ed/include
 CPPFLAGS            += -I$(ASN1_GENERATED_DIR)
 CPPFLAGS            += -I/usr/share/asn1c
@@ -73,6 +73,8 @@ all: $(EXECUTABLE) .syntastic_cpp_config
 
 include $(ASN1_MAKEFILE)
 include $(if $(filter $(NOT_DEP),$(MAKECMDGOALS)),,$(DEPENDS))
+
+VPATH += . nexoid-ed/src
 
 $(EXECUTABLE): $(OBJECTS) $(LIBNEXOID_PATH) $(lib_LTLIBRARIES)
 	$(CXX) -o $@ $(LDFLAGS) $^ $(LDLIBS)
