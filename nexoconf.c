@@ -279,6 +279,20 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .signature = 1
                 }
             },
+            .additionalTerminalCapabilities = &(union AdditionalTerminalCapabilities){
+                .terminalDataInput = {
+                    .numericKeys = 1,
+                    .alphabeticAndSpecialCharactersKeys = 1,
+                    .commandKeys = 1,
+                    .functionKeys = 1
+                },
+                .terminalDataOutput = {
+                    .printAttendant = 1,
+                    .printCardholder = 1,
+                    .displayAttendant = 1,
+                    .displayCardholder = 1
+                }
+            },
             .cvmMagneticStripe = CVM_MSR_SIGNATURE,
             .cvmManualEntry = &(enum CvmManualEntry){ CVM_MAN_NO_CVM },
             .applicationProfileSettings = {
