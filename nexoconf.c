@@ -73,7 +73,7 @@ struct TerminalSpecificData e1 = {
             { .e = LANG_RUSSIAN },
         }
     },
-    .cardholderDefaultLanguage = { .e = LANG_POLISH }
+    .cardholderDefaultLanguage = { .e = LANG_ENGLISH }
 };
 
 struct ApplicationProfileSelectionTable* e2 = &(struct ApplicationProfileSelectionTable){
