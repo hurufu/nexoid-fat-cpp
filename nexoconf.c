@@ -62,7 +62,7 @@ struct TerminalSpecificData e1 = {
         .cardValidityCheck = 1
     },
     .terminalTransactionCurrencyExponent = { .raw = 0x02},
-    .currencyCodeAlpha3 = { .Code = Currency_PLN },
+    .currencyCodeAlpha3 = { .Code = Currency_EUR },
     .terminalSupportedLanguageList = {
         .l = 5,
         .a = {
