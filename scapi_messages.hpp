@@ -89,6 +89,7 @@ namespace scapi {
       , union ::bcd6 // updatePreAuthTotalAmount
       , bool // minus
       , union ::bcd // trxCurrencyExponent
+      , ::std::vector<::std::string> // missingParameters // non-nexo
     > Interaction;
 
     typedef ::std::variant<

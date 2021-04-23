@@ -16,6 +16,7 @@ extern "C" {
 #include <iostream>
 #include <stdexcept>
 #include <cstring>
+#include <algorithm>
 
 using namespace std;
 using namespace chrono;
@@ -113,14 +114,6 @@ set_error_reason_in_ttd(const enum TerminalErrorReason r) {
     ttd.terminalErrorReason = r;
 }
 
-static void
-set_nok_reason(const enum NokReason n) {
-    if (ttd.nokReason != N_NONE) {
-        throw runtime_error("Avoided overwritting of nok reason");
-    }
-    ttd.nokReason = n;
-}
-
 static enum IdleEvent
 map_event_to_ttd_event_index(const scapi::Event& e) {
     switch (e.index()) {
@@ -164,6 +157,9 @@ TtdKeeper::update(const scapi::Event& e) {
 
 void
 TtdKeeper::update(const enum NokReason n) {
+    if (ttd.nokReason != N_NONE) {
+        throw runtime_error("Avoided overwritting of nok reason");
+    }
     ttd.nokReason = n;
 }
 
@@ -207,7 +203,7 @@ TtdKeeper::handle_bad_response(const scapi::Response& rsp) noexcept {
     if (rsp.index() == 0) { // Nak
         const auto& nak = get<0>(rsp);
         if (nak.nokReason) {
-            set_nok_reason(*nak.nokReason);
+            update(*nak.nokReason);
         }
         if (nak.terminalErrorReason) {
             set_error_reason_in_ttd(*nak.terminalErrorReason);
@@ -364,6 +360,11 @@ union CurrencyAlpha3 TtdKeeper::fetch_transaction_currency_code_alpha3(void) {
 
 union bcd TtdKeeper::fetch_transaction_currency_exponent(void) {
     return ttd.transactionCurrencyExponent;
+}
+
+vector<string> TtdKeeper::fetch_missing_parameters(void) {
+    const auto& p = ttd.missingParameters;
+    return vector<string>(begin(p), find(begin(p), end(p), nullptr));
 }
 
 void

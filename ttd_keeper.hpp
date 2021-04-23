@@ -31,6 +31,7 @@ public:
     union bcd6 fetch_transaction_amount(void);
     union CurrencyAlpha3 fetch_transaction_currency_code_alpha3(void);
     union bcd fetch_transaction_currency_exponent(void);
+    std::vector<std::string> fetch_missing_parameters(void);
 
     /** Unconditionaly clears TTD. Useful for testing
      */

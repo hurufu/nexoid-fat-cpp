@@ -217,9 +217,6 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
         .acquirerIdentifier = &(union bcd6){ .v = { 0x45, 0x00, 0x00, 0x00, 0x00, 0x01 } },
         .terminalFloorLimit = &(union bcd6){ .v = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x0 } },
         .cvcDefaultAmount = &(union bcd6){ .v = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} },
-        .tacDefault = &(union TerminalVerificationResults){ },
-        .tacDenial = &(union TerminalVerificationResults){ },
-        .tacOnline = &(union TerminalVerificationResults){ },
         .terminalCapabilities = &(union TerminalCapabilities){
             .cvmCapability = {
                 .noCvmRequired = 1,
@@ -267,11 +264,6 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
     .next = &(struct ApplicationProfileList){
         .entry = {
             .profileNumber = 0x02,
-            .acquirerNumber = &(union bcd){0x01},
-            .acquirerIdentifier = &(union bcd6){ .v = { 0x45, 0x00, 0x00, 0x00, 0x00, 0x01 } },
-            .tacDefault = &(union TerminalVerificationResults){ },
-            .tacDenial = &(union TerminalVerificationResults){ },
-            .tacOnline = &(union TerminalVerificationResults){ },
             .terminalCapabilities = &(union TerminalCapabilities){
                 .cvmCapability = {
                     .noCvmRequired = 1,
@@ -279,22 +271,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .signature = 1
                 }
             },
-            .additionalTerminalCapabilities = &(union AdditionalTerminalCapabilities){
-                .terminalDataInput = {
-                    .numericKeys = 1,
-                    .alphabeticAndSpecialCharactersKeys = 1,
-                    .commandKeys = 1,
-                    .functionKeys = 1
-                },
-                .terminalDataOutput = {
-                    .printAttendant = 1,
-                    .printCardholder = 1,
-                    .displayAttendant = 1,
-                    .displayCardholder = 1
-                }
-            },
             .cvmMagneticStripe = (enum CvmMagneticStripe[]){ CVM_MSR_SIGNATURE },
-            .cvmManualEntry = &(enum CvmManualEntry){ CVM_MAN_NO_CVM },
             .applicationProfileSettings = &(union ApplicationProfileSettings){
                 .cvdRequiredForManualEntry = 1,
                 .merchantReceipt = {
@@ -310,7 +287,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .printAborted = 1
                 }
             },
-            .referenceProfileNumber = NULL,
+            .referenceProfileNumber = (bcd_t[]){0x01},
         },
         .next = NULL
     }

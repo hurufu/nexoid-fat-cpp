@@ -171,6 +171,7 @@ tostring(const enum CardholderMessage m) {
         case CRDHLDR_ENT_CVD: return "CRDHLDR_ENT_CVD";
         case CRDHLDR_ENT_DCC_CONFIRMATION: return "CRDHLDR_ENT_DCC_CONFIRMATION";
         case CRDHLDR_SRC_TRX_CURRENCY_EXPONENT: return "CRDHLDR_SRC_TRX_CURRENCY_EXPONENT";
+        case CRDHLDR_DBG_MISSING_PARAMETERS: return "CRDHLDR_DBG_MISSING_PARAMETERS";
     }
     throw_bad_mapping(m, "CardholderMessage");
 }

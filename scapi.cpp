@@ -143,6 +143,8 @@ classify_to_variant_index(const CardholderMessage m) {
         case CRDHLDR_SSN_REQUEST_SIGNATURE:
         case CRDHLDR_SSN_RECEIPT_PRINTING_FAILED:
             return 1;
+        case CRDHLDR_DBG_MISSING_PARAMETERS:
+            return 23;
     }
     throw bad_mapping(m, "Unexpected CardholderMessage");
 }
@@ -164,6 +166,8 @@ map_to_interaction(const CardholderMessage m) {
         return TtdKeeper::instance().fetch_nok_reason();
     case 22:
         return Interaction(in_place_index<22>, TtdKeeper::instance().fetch_transaction_currency_exponent());
+    case 23:
+        return Interaction(in_place_index<23>, TtdKeeper::instance().fetch_missing_parameters());
     }
     throw not_implemented(make_desc("Interaction message ", m, " isn't implemented"));
 }

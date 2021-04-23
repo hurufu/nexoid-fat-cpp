@@ -107,6 +107,30 @@ map_nok_reason_to_asn1c(const enum NokReason n) {
     throw bad_mapping(n, "No valid mapping from NokReason to NexoNokReason");
 }
 
+static PrintableString_t*
+map_printable_string_to_asn1c(const string& s) {
+    return OCTET_STRING_new_fromBuf(&asn_DEF_PrintableString, s.c_str(), integer_cast<int>(s.length()));
+}
+
+static struct MissingParameters
+map_missing_parameters_to_asn1c(const vector<string>& p) {
+    struct MissingParameters ret{};
+    for (const auto& s : p) {
+        auto* const tmp = map_printable_string_to_asn1c(s);
+        if (ASN_SEQUENCE_ADD(&ret.list, tmp) != 0) {
+            switch (errno) {
+                case EINVAL:
+                    throw null_argument({&ret.list, tmp}, "Can't map MissingParameters due to ASN_SEQUENCE_ADD failure");
+                case ENOMEM:
+                    throw out_of_memory("Can't map MissingParameters due to ASN_SEQUENCE_ADD failure");
+                default:
+                    throw 0; // This should never happen
+            }
+        }
+    }
+    return ret;
+}
+
 static optional<enum NokReason>
 map_nok_reason_from_asn1c(const long int* const n) {
     if (!n) {
@@ -212,6 +236,12 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = Member_PR_nokReason;
                 tmp->choice.nokReason = map_nok_reason_to_asn1c(get<18>(e));
                 break;
+            case 23:{
+                tmp->present = Member_PR_missingParameters;
+                const auto& x = get<23>(e);
+                tmp->choice.missingParameters = map_missing_parameters_to_asn1c(x);
+                break;
+            }
             default:
                 throw runtime_error("Omg"); // FIXME: Memory leak
             }
@@ -279,6 +309,12 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = Member_PR_nokReason;
                 tmp->choice.nokReason = map_nok_reason_to_asn1c(get<18>(e));
                 break;
+            case 23:{
+                tmp->present = Member_PR_missingParameters;
+                const auto& x = get<23>(e);
+                tmp->choice.missingParameters = map_missing_parameters_to_asn1c(x); // ?
+                break;
+            }
             default:
                 throw runtime_error("Omg"); // FIXME: Memory leak
             }
