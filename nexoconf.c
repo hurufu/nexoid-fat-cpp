@@ -41,6 +41,7 @@ struct TerminalSpecificData e1 = {
             .cardCapture = 1
         }
     },
+    .terminalCountryCode = { .bcd.v = { 0x06, 0x16 } },
     .additionalTerminalCapabilities = {
         .transactionType = {
         },
@@ -212,9 +213,8 @@ struct ServiceSettingsTable e4 = {
 struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
     .entry = {
         .profileNumber = 0x01,
-        .acquirerNumber = 0x01,
-        .acquirerIdentifier = { .v = { 0x45, 0x00, 0x00, 0x00, 0x00, 0x01 } },
-        .terminalCountryCode = { .bcd.v = { 0x06, 0x16 } },
+        .acquirerNumber = &(union bcd){0x01},
+        .acquirerIdentifier = &(union bcd6){ .v = { 0x45, 0x00, 0x00, 0x00, 0x00, 0x01 } },
         .terminalFloorLimit = &(union bcd6){ .v = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x0 } },
         .cvcDefaultAmount = &(union bcd6){ .v = { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00} },
         .tacDefault = &(union TerminalVerificationResults){ },
@@ -243,7 +243,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
             }
         },
         .cvmManualEntry = &(enum CvmManualEntry){ CVM_MAN_NO_CVM },
-        .applicationProfileSettings = {
+        .applicationProfileSettings = &(union ApplicationProfileSettings){
             .forcedApprovalAllowedForOnlineDeclinedTrx = 1,
             .forcedApprovalAllowedForOfflineDeclinedTrx = 1,
             .cvdRequiredForManualEntry = 1,
@@ -261,14 +261,14 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                 .printDeclined = 1,
                 .printAborted = 1
             }
-        }
+        },
+        .referenceProfileNumber = NULL,
     },
     .next = &(struct ApplicationProfileList){
         .entry = {
             .profileNumber = 0x02,
-            .acquirerNumber = 0x01,
-            .acquirerIdentifier = { .v = { 0x45, 0x00, 0x00, 0x00, 0x00, 0x01 } },
-            .terminalCountryCode = { .bcd.v = { 0x06, 0x16 } },
+            .acquirerNumber = &(union bcd){0x01},
+            .acquirerIdentifier = &(union bcd6){ .v = { 0x45, 0x00, 0x00, 0x00, 0x00, 0x01 } },
             .tacDefault = &(union TerminalVerificationResults){ },
             .tacDenial = &(union TerminalVerificationResults){ },
             .tacOnline = &(union TerminalVerificationResults){ },
@@ -293,9 +293,9 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .displayCardholder = 1
                 }
             },
-            .cvmMagneticStripe = CVM_MSR_SIGNATURE,
+            .cvmMagneticStripe = (enum CvmMagneticStripe[]){ CVM_MSR_SIGNATURE },
             .cvmManualEntry = &(enum CvmManualEntry){ CVM_MAN_NO_CVM },
-            .applicationProfileSettings = {
+            .applicationProfileSettings = &(union ApplicationProfileSettings){
                 .cvdRequiredForManualEntry = 1,
                 .merchantReceipt = {
                     .printApproved = 1,
@@ -309,7 +309,8 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .printDeclined = 1,
                     .printAborted = 1
                 }
-            }
+            },
+            .referenceProfileNumber = NULL,
         },
         .next = NULL
     }
