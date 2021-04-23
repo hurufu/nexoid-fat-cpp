@@ -239,6 +239,12 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                 .displayCardholder = 1
             }
         },
+        .panMask = &(union PanMask){
+            .leading = { 0xF0,0x00,0x00 },
+            .trailing = { 0x00,0x00,0x00 },
+            .applyPanMaskToMerchantReceipt = 1,
+            .applyPanMaskToCardholderReceipt = 0,
+        },
         .cvmManualEntry = &(enum CvmManualEntry){ CVM_MAN_NO_CVM },
         .applicationProfileSettings = &(union ApplicationProfileSettings){
             .forcedApprovalAllowedForOnlineDeclinedTrx = 1,
@@ -271,6 +277,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .signature = 1
                 }
             },
+            .applicationLabelDefault = &(struct ans_16){ .l = 4, .v = "VISA" },
             .cvmMagneticStripe = (enum CvmMagneticStripe[]){ CVM_MSR_SIGNATURE },
             .applicationProfileSettings = &(union ApplicationProfileSettings){
                 .cvdRequiredForManualEntry = 1,
