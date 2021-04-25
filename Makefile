@@ -23,7 +23,7 @@ INSTALLED_FILES := $(BINDIR)/nexoid-cpp
 EXECUTABLE          := nexoid-cpp
 SOURCES             := $(wildcard *.cpp)
 LIBNEXOID_NAME      := libnexoid.a
-ASN_SOURCES         := asn1/Scapi.asn1 asn1/ScapiSocketClient.asn1 asn1/ScapiNngClient.asn1
+ASN_SOURCES         := asn1/Scapi.asn1 asn1/ScapiSocketClient.asn1 asn1/ScapiNngClient.asn1 asn1/NexoConfig.asn1 asn1/Tmapi.asn1 asn1/Common.asn1
 OBJECTS             := $(SOURCES:.cpp=.o) nexoconf.o
 DEPENDS             := $(OBJECTS:.o=.d)
 
