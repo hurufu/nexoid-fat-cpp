@@ -265,7 +265,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                 .printAborted = 1
             }
         },
-        .referenceProfileNumber = NULL,
+        .referenceProfileNumber = (bcd_t[]){0x03},
     },
     .next = &(struct ApplicationProfileList){
         .entry = {
@@ -296,7 +296,15 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
             },
             .referenceProfileNumber = (bcd_t[]){0x01},
         },
-        .next = NULL
+        .next = &(struct ApplicationProfileList){
+            .entry = {
+                .profileNumber = 0x03,
+                .merchantNameAndLocation = "Test merchant",
+                .merchantIdentifier = &(struct ans15){ .v = "1T1234567" },
+                .referenceProfileNumber = NULL
+            },
+            .next = NULL
+        }
     }
 };
 
