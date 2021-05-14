@@ -277,7 +277,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .signature = 1
                 }
             },
-            .applicationLabelDefault = &(struct ans_16){ .l = 4, .v = "VISA" },
+            .applicationLabelDefault = &(struct string16){ .s = "VISA" },
             .cvmMagneticStripe = (enum CvmMagneticStripe[]){ CVM_MSR_SIGNATURE },
             .applicationProfileSettings = &(union ApplicationProfileSettings){
                 .cvdRequiredForManualEntry = 1,
