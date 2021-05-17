@@ -34,7 +34,6 @@ decide_what_kind_of_maintenance_is_required(const enum TerminalErrorReason ter) 
         case TE_CRYPTOGRAPHIC_KEYS_MISSING:
         case TER_NOT_IMPLEMENTED:
         case TER_TIMEOUT:
-            s_nexui->interaction({ NexuiRequest::Api::output, {"Application restart requested"}});
             return PR_STARTUP_SEQUENCE;
         case TE_LOG_LIMIT_EXCEEDED:
         case TE_COMMUNICATION_ERROR:
@@ -44,18 +43,28 @@ decide_what_kind_of_maintenance_is_required(const enum TerminalErrorReason ter) 
         case TE_OVERSPEND:
         case TER_INTERFACE_CONTRACT_VIOLATION:
         case TER_INTERNAL_ERROR:
-            s_nexui->interaction({ NexuiRequest::Api::output, {"Device shutdown requested"}});
             return PR_SHUTDOWN;
         case TER_OS_ERROR:
         case TE_HARDWARE_ERROR:
         case TE_MEMORY_FAILURE:
-            s_nexui->interaction({ NexuiRequest::Api::output, {"Device reboot requested"}});
             return PR_REBOOT;
         case TE_NONE:
         case TER_MAX:
             return PR_NOK;
     }
     throw bad_mapping(ter, "Unknown TerminalErrorReason");
+}
+
+static const char*
+map_maintenance_type_tostring(const enum ProcedureResult r) {
+    switch (r) {
+        case PR_STARTUP_SEQUENCE: return "Application restart requested";
+        case PR_SHUTDOWN: return "Device shutdown requested";
+        case PR_REBOOT: return "Device reboot requested";
+        case PR_NOK: return "Nothing can help";
+        default:
+            throw bad_mapping(r, "Unknown maintenance type");
+    }
 }
 
 extern "C" enum PapiResult
@@ -87,6 +96,7 @@ papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
          << __func__ << ": " << ter << ' ' << nok << endl;
     s_nexui->interaction(create_maintenance_info(ter, nok));
     const auto ret = decide_what_kind_of_maintenance_is_required(ter);
+    s_nexui->interaction({ NexuiRequest::Api::output, {map_maintenance_type_tostring(ret)} });
     return ret;
 } catch (...) {
     TtdKeeper::instance().handle_exception();
