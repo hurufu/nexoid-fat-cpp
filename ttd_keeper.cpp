@@ -22,15 +22,17 @@ using namespace std;
 using namespace chrono;
 
 template <typename T>
-void shallow_copy_to_ttd(T*& ttd_member, const T& pod) {
+static void
+shallow_copy_to_ttd(T*& ttd_member, const T& pod) {
     ttd_member = reinterpret_cast<T*>(dmapi_malloc(sizeof(T)));
     *ttd_member = pod;
 }
 
 static void
 set_pan_in_ttd(const string& p) {
-    ttd.pan = reinterpret_cast<decltype(ttd.pan)>(dmapi_malloc(sizeof(*ttd.pan)));
-    strncpy(*ttd.pan, p.c_str(), sizeof(*ttd.pan));
+    struct Prefix tmp = {};
+    tmp.size = integer_cast<uint8_t>(p.copy(tmp.value, sizeof(tmp.value)));
+    shallow_copy_to_ttd(ttd.pan, tmp);
 }
 
 static void
@@ -171,9 +173,7 @@ TtdKeeper::update(const enum AuthorisationResponseCode arc) {
 void
 TtdKeeper::update(const enum TransactionResult r) {
     if (ttd.transactionResult == T_ABORTED && r != T_ABORTED) {
-        char buf[255];
-        snprintf(buf, sizeof(buf), "TransactionResult update to %s tried to introduce inconsistency", tostring(r));
-        throw runtime_error(buf);
+        throw runtime_error(string("TransactionResult update to ") + tostring(r) + " tried to introduce inconsistency");
     }
     ttd.transactionResult = r;
 }
