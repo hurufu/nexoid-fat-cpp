@@ -85,7 +85,7 @@ Session::Session(void) :
     pimpl(make_unique<Session::Impl>()) {
 }
 
-Session::~Session(void) = default;
+Session::~Session(void) noexcept = default;
 
 Response
 Session::interaction(const Request& r, const milliseconds rcv_timeout) {
