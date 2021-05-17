@@ -11,11 +11,14 @@
 template <typename L, typename R>
 constexpr L
 integer_cast(const R r) {
-    if (r > ::std::numeric_limits<L>::max()) {
-        throw ::std::range_error("Integer conversion overflow");
-    }
-    if (r < ::std::numeric_limits<L>::min()) {
-        throw ::std::range_error("Integer conversion undeflow");
+    if (r < 0) {
+        if (r < ::std::numeric_limits<L>::min()) {
+            throw ::std::range_error("Integer conversion undeflow");
+        }
+    } else {
+        if (r > ::std::numeric_limits<L>::max()) {
+            throw ::std::range_error("Integer conversion overflow");
+        }
     }
     return static_cast<L>(r);
 }
