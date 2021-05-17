@@ -88,7 +88,7 @@ struct ApplicationProfileSelectionTable* e2 = &(struct ApplicationProfileSelecti
         .cardValidityCheck = 1
     },
 
-    .applicationProfileAcquirerNumber = &(bcd_t){ 0x01 },
+    .applicationProfileAcquirerNumber = &(union bcd){ 0x01 },
     .aidMatchCriteria = &(bool){ false },
 
     .next = &(struct ApplicationProfileSelectionTable){
@@ -325,15 +325,18 @@ struct TerminalListOfBid* e7 = &(struct TerminalListOfBid){
 };
 
 struct ApplicationProfileSelectionTableNonChip* e8 = &(struct ApplicationProfileSelectionTableNonChip){
-    .Bid = {
-        .size = 2,
-        .value = { 0x11, 0x22 }
+    .entry = {
+        .bid = {
+            .size = 2,
+            .value = { 0x11, 0x22 }
+        },
+        .applicationProfileNumber = 0x02,
+        .supportedServices = {
+            .payment = 1,
+            .cardValidityCheck = 1
+        }
     },
-    .ApplicationProfileNumber = 0x02,
-    .SupportedServices = {
-        .payment = 1,
-        .cardValidityCheck = 1
-    }
+    .next = NULL
 };
 
 struct ExceptionFile* e9 = &(struct ExceptionFile){
