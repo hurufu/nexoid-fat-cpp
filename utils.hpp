@@ -9,8 +9,14 @@
 #include <stdexcept>
 
 template <typename L, typename R>
-L integer_cast(R r) {
-    // TODO: Throw an exception if r doesnt fit into L
+constexpr L
+integer_cast(const R r) {
+    if (r > ::std::numeric_limits<L>::max()) {
+        throw ::std::range_error("Integer conversion overflow");
+    }
+    if (r < ::std::numeric_limits<L>::min()) {
+        throw ::std::range_error("Integer conversion undeflow");
+    }
     return static_cast<L>(r);
 }
 
