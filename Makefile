@@ -102,7 +102,7 @@ clean: F += $(EXECUTABLE) trace.log tags $(TRACE_LOG) $(NOHUP_OUT)
 clean: F += $(OBJECTS)
 clean: F += $(DEPENDS)
 clean:
-	+make -C nexoid-ed wipe
+	+make -C nexoid-ed clean
 	$(if $(strip $(sort $(wildcard $F))),$(RM) -- $F,)
 	$(if $(strip $(sort $(wildcard $D))),rmdir -p -- $D,)
 
