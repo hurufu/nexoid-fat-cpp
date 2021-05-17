@@ -319,7 +319,14 @@ struct TerminalListOfBid* e7 = &(struct TerminalListOfBid){
             .size = 1,
             .value = "4"
         },
-        .next = NULL
+        .next = &(struct MatchingPattern){
+            .type = MATCH_PREFIX,
+            .prefix = {
+                .size = 2,
+                .value = "51"
+            },
+            .next = NULL
+        }
     },
     .next = NULL
 };
