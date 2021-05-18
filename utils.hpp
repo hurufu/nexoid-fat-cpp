@@ -9,11 +9,15 @@
 #include <stdexcept>
 
 template <typename L, typename R>
-constexpr L
+inline constexpr L
 integer_cast(const R r) {
     if (r < 0) {
-        if (r < ::std::numeric_limits<L>::min()) {
-            throw ::std::range_error("Integer conversion undeflow");
+        if (::std::numeric_limits<L>::is_signed) {
+            if (::std::numeric_limits<L>::min() > static_cast<intmax_t>(r)) {
+                throw ::std::range_error("Integer conversion undeflow");
+            }
+        } else {
+            throw ::std::range_error("Integer conversion failed. Can't fit negative number to unsigned type");
         }
     } else {
         if (r > ::std::numeric_limits<L>::max()) {
