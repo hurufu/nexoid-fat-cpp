@@ -59,6 +59,11 @@ TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
 LDLIBS              := -lnng
 
+# Unit tests settings #########################################################
+UT_EXECUTABLE  := ut/ut
+UT_SOURCES     := $(wildcard ut/*.cpp)
+UT_OBJECTS     := $(UT_SOURCES:.cpp=.o)
+
 VALGRIND_FLAGS := --leak-check=full --track-origins=yes --show-error-list=yes
 
 # Commands ####################################################################
@@ -167,6 +172,7 @@ clean: F += nexoconf.o
 clean: D += $(ASN1_GENERATED_DIR)
 clean: F += $(EXECUTABLE).strace
 clean: F += $(EXECUTABLE).valgrind
+clean: F += $(UT_OBJECTS) $(UT_EXECUTABLE)
 
 $(ASN1_MAKEFILE): $(ASN_SOURCES)
 	mkdir -p $(ASN1_GENERATED_DIR)
@@ -188,3 +194,9 @@ uninstall:
 
 $(BINDIR)/nexoid-cpp: nexoid-cpp
 	install -D -m755 -t $(@D) $<
+
+.PHONY: test
+test: $(UT_EXECUTABLE)
+	./$<
+$(UT_EXECUTABLE): $(UT_OBJECTS)
+	$(LINK.cc) -o $@ $^ $(LDLIBS)
