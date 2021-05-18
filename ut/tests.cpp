@@ -1,5 +1,5 @@
 #define CATCH_CONFIG_MAIN
-#include "catch_amalgamated.hpp"
+#include <catch2/catch.hpp>
 #include "utils.hpp"
 
 template <typename T, T S> static constexpr T C = S;
