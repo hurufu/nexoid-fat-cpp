@@ -41,6 +41,7 @@ struct TerminalSpecificData e1 = {
             .cardCapture = 1
         }
     },
+    .maxNumberOfChipTries = { .raw = 0x03 },
     .terminalCountryCode = { .bcd.v = { 0x06, 0x16 } },
     .additionalTerminalCapabilities = {
         .transactionType = {
