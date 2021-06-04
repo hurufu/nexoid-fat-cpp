@@ -182,11 +182,9 @@ struct ServiceSettingsTable e4 = {
                 .cardSwiped = 1,
             },
             .minimumServiceStartConditions = {
-                .s = 3,
+                .s = 1,
                 .a = {
-                    { .amountEntry = 1, .manualEntry = 1 }
-                  , { .amountEntry = 1, .cardInserted = 1 }
-                  , { .amountEntry = 1, .cardSwiped = 1 }
+                    { .amountEntry = 1 }
                 }
             }
         },
