@@ -32,6 +32,7 @@ public:
     union CurrencyAlpha3 fetch_transaction_currency_code_alpha3(void);
     union bcd fetch_transaction_currency_exponent(void);
     std::vector<std::string> fetch_missing_parameters(void);
+    enum CtlssIndicatorStatus fetch_ctlss_indicator_status(void);
 
     /** Unconditionaly clears TTD. Useful for testing
      */

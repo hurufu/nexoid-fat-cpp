@@ -90,6 +90,7 @@ namespace scapi {
       , bool // minus
       , union ::bcd // trxCurrencyExponent
       , ::std::vector<::std::string> // missingParameters // non-nexo
+      , enum CtlssIndicatorStatus // Contactless LEDs status
     > Interaction;
 
     typedef ::std::variant<

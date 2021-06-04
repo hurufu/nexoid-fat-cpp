@@ -242,8 +242,13 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->choice.missingParameters = map_missing_parameters_to_asn1c(x);
                 break;
             }
+            case 24:{
+                tmp->present = Member_PR_status;
+                tmp->choice.status = get<24>(e);
+                break;
+            }
             default:
-                throw runtime_error("Omg"); // FIXME: Memory leak
+                throw runtime_error("1 Omg"); // FIXME: Memory leak
             }
             if (ASN_SEQUENCE_ADD(&ret.choice.output.what.list, tmp) != 0) {
                 // FIXME: Memory leak
@@ -315,8 +320,13 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->choice.missingParameters = map_missing_parameters_to_asn1c(x); // ?
                 break;
             }
+            case 24:{
+                tmp->present = Member_PR_status;
+                tmp->choice.status = get<24>(e);
+                break;
+            }
             default:
-                throw runtime_error("Omg"); // FIXME: Memory leak
+                throw runtime_error("2 Omg"); // FIXME: Memory leak
             }
             if (ASN_SEQUENCE_ADD(&ret.choice.output.what.list, tmp) != 0) {
                 // FIXME: Memory leak

@@ -47,7 +47,7 @@ classify_to_variant_index(const CardholderMessage m) {
         case CRDHLDR_MSG_PROCESSING:
         case CRDHLDR_MSG_CARD_READ_OK_REMOVE_CARD:
         case CRDHLDR_MSG_PLEASE_INSERT_OR_SWIPE_CARD:
-        case CRDHLDR_MSG_PLEASE_INSERT_ONE_CARD_ONLY:
+        case CRDHLDR_MSG_PLEASE_PRESENT_ONE_CARD_ONLY:
         case CRDHLDR_MSG_APPROVED_PLEASE_SIGN:
         case CRDHLDR_MSG_AUTHORISING_PLEASE_WAIT:
         case CRDHLDR_MSG_INSERT_SWIPE_OR_TRY_ANOTHER_CARD:
@@ -138,6 +138,8 @@ classify_to_variant_index(const CardholderMessage m) {
             return 21;
         case CRDHLDR_SRC_TRX_CURRENCY_EXPONENT:
             return 22;
+        case CRDHLDR_SRC_STATUS:
+            return 24;
         case CRDHLDR_SSN_CARD_REMOVAL_REQUESTED:
         case CRDHLDR_SSN_CARD_REMOVED:
         case CRDHLDR_SSN_REQUEST_SIGNATURE:
@@ -168,6 +170,8 @@ map_to_interaction(const CardholderMessage m) {
         return Interaction(in_place_index<22>, TtdKeeper::instance().fetch_transaction_currency_exponent());
     case 23:
         return Interaction(in_place_index<23>, TtdKeeper::instance().fetch_missing_parameters());
+    case 24:
+        return Interaction(TtdKeeper::instance().fetch_ctlss_indicator_status());
     }
     throw not_implemented(make_desc("Interaction message ", m, " isn't implemented"));
 }

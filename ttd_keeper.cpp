@@ -367,6 +367,13 @@ vector<string> TtdKeeper::fetch_missing_parameters(void) {
     return vector<string>(begin(p), find(begin(p), end(p), nullptr));
 }
 
+enum CtlssIndicatorStatus TtdKeeper::fetch_ctlss_indicator_status(void) {
+    if (ttd.contactlessLedStatus) {
+        return *ttd.contactlessLedStatus;
+    }
+    throw runtime_error("Contactless LEDs status is absent");
+}
+
 void
 TtdKeeper::reset(void) noexcept {
     // FIXME: Implement better clearing method, eg. release ptmalloc arena
