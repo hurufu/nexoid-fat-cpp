@@ -1,5 +1,9 @@
 #pragma once
 
+extern "C" {
+#include "nexoid-ed/include/dmapi.h"
+}
+
 #include <limits>
 #include <string>
 #include <iomanip>
@@ -70,5 +74,12 @@ UnsignedInteger convert_bcd_to_int(const Bcd from) {
         ret += ((from.v[j] & 0xF0) >> 4) * power * 10;
         // TODO: Detect overflow
     }
+    return ret;
+}
+
+template <typename T>
+T* acp(const T&& prototype) {
+    auto ret = reinterpret_cast<T*>(dmapi_malloc(sizeof(T)));
+    *ret = prototype;
     return ret;
 }
