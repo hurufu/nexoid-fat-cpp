@@ -21,6 +21,10 @@ extern "C" {
 using namespace std;
 using namespace chrono;
 
+// TODO: Write a temlate (if possible) for automatic deep copy using custom
+// allocator (like dmapi_malloc) for any two references to lvalues of the same
+// type.
+
 template <typename T>
 static void
 shallow_copy_to_ttd(T*& ttd_member, const T& pod) {
