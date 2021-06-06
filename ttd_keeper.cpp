@@ -129,6 +129,7 @@ map_event_to_ttd_event_index(const scapi::Event& e) {
         case 3: return E_TERMINATION_REQUESTED;
         case 4: return E_REBOOT_REQUESTED;
         case 5: return E_AMOUNT_ENTRY;
+        case 6: return E_CARD_INSERTED;
     }
     throw runtime_error("Event can't be mapped");
 }
@@ -152,6 +153,7 @@ TtdKeeper::update(const scapi::Event& e) {
         break;
     case E_TERMINATION_REQUESTED:
     case E_REBOOT_REQUESTED:
+    case E_CARD_INSERTED:
         break;
     case E_AMOUNT_ENTRY:
         set_amounts_in_ttd(get<5>(e));
@@ -200,6 +202,15 @@ TtdKeeper::update(const enum CvdPresence e) {
         return *old;
     }
     return {};
+}
+
+enum Technology TtdKeeper::update(const enum Technology t) {
+    const auto previous = ttd.technologySelected;
+    if (previous != TECH_NONE) {
+        throw runtime_error(string("Technology update to ") + tostring(t) + " tried to introduce inconsistency");
+    }
+    ttd.technologySelected = t;
+    return previous;
 }
 
 void

@@ -56,6 +56,9 @@ namespace scapi {
         ::std::optional<union ::bcd6> cashbackAmount;
     };
 
+    struct CardInserted {
+    };
+
     typedef ::std::variant<
         LanguageSelection
       , ServiceSelection
@@ -63,6 +66,7 @@ namespace scapi {
       , ::std::monostate // Terminate
       , ::std::monostate // Reboot
       , AmountEntry
+      , CardInserted
     > Event;
 
     typedef ::std::variant<
