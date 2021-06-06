@@ -506,3 +506,18 @@ tostring(enum IdleEvent e) {
     }
     throw_bad_mapping(e, "IdleEvent");
 }
+
+const char*
+tostring(const enum Technology t) {
+    switch (t) {
+        case TECH_NONE: return "TECH_NONE";
+        case TECH_EMV_CHIP: return "TECH_EMV_CHIP";
+        case TECH_MAGNETIC_STRIPE: return "TECH_MAGNETIC_STRIPE";
+        case TECH_MANUAL_ENTRY: return "TECH_MANUAL_ENTRY";
+        case TECH_NON_EMV_CHIP: return "TECH_NON_EMV_CHIP";
+        case TECH_FALLBACK: return "TECH_FALLBACK";
+        case TECH_CONTACTLESS: return "TECH_CONTACTLESS";
+        case TECH_MAX: break;
+    }
+    throw_bad_mapping(t, "Technology");
+}
