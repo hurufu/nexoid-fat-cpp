@@ -10,6 +10,7 @@ GCC_FEATURES        :=
 #GCC_FEATURES        += lto=auto use-linker-plugin
 GCC_FEATURES        += trapv
 GCC_FEATURES        += permissive
+GCC_FEATURES        += stack-protector-all
 #GCC_FEATURES        := instrument-functions
 #GCC_FEATURES        += analyzer
 

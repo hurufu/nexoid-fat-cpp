@@ -34,6 +34,7 @@ struct TerminalSpecificData e1 = {
         .cvmCapability = {
             .noCvmRequired = 1,
             .signature = 1,
+            .encipheredPinForOnlineVerification = 1,
             .plainTextPinForIccVerification = 1
         },
         .securityCapability = {
@@ -222,7 +223,6 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
             .cvmCapability = {
                 .noCvmRequired = 1,
                 .plainTextPinForIccVerification = 1,
-                .encipheredPinForOfflineVerification = 1,
                 .signature = 1
             }
         },
@@ -247,6 +247,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
             .applyPanMaskToCardholderReceipt = 0,
         },
         .cvmManualEntry = &(enum CvmManualEntry){ CVM_MAN_NO_CVM },
+        .applicationLabelDefault = &(struct string16){ .s = "TEST" },
         .applicationProfileSettings = &(union ApplicationProfileSettings){
             .forcedApprovalAllowedForOnlineDeclinedTrx = 1,
             .forcedApprovalAllowedForOfflineDeclinedTrx = 1,
@@ -266,6 +267,8 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                 .printAborted = 1
             }
         },
+        .tacDefault = &(union TerminalVerificationResults){},
+        .tacOnline = &(union TerminalVerificationResults){},
         .referenceProfileNumber = (bcd_t[]){0x03},
     },
     .next = &(struct ApplicationProfileList){
