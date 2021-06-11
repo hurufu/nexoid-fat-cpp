@@ -254,7 +254,7 @@ eapi_Verify_Pin_Block(const uint8_t p2) {
             return EAPI_NOK;
         }
         return verify_enciphered_pin_block(p2);
-       }
+    }
 
     //char buf[8*4+10];
     //MSG(N,F,R,C, "PIN Block %s P2: [%02X]\n", bin_tostring(8, e1kd->cd.pinData.offlinePinBlock->raw, &buf), p2);
