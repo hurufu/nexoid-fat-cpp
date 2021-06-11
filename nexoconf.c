@@ -269,6 +269,7 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
         },
         .tacDefault = &(union TerminalVerificationResults){},
         .tacOnline = &(union TerminalVerificationResults){},
+        .tacDenial = &(union TerminalVerificationResults){},
         .referenceProfileNumber = (bcd_t[]){0x03},
     },
     .next = &(struct ApplicationProfileList){
