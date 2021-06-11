@@ -349,6 +349,13 @@ TtdKeeper::handle_exception(const char* const func) noexcept {
     os << endl;
 }
 
+string TtdKeeper::fetch_application_label_displayed(void) {
+    if (ttd.applicationLabelDisplayed) {
+        return ttd.applicationLabelDisplayed->s;
+    }
+    throw runtime_error("applicationLabelDisplayed is absent");
+}
+
 enum NokReason TtdKeeper::fetch_nok_reason(void) {
     return ttd.nokReason;
 }
@@ -387,6 +394,17 @@ enum CtlssIndicatorStatus TtdKeeper::fetch_ctlss_indicator_status(void) {
         return *ttd.contactlessLedStatus;
     }
     throw runtime_error("Contactless LEDs status is absent");
+}
+
+struct ::string5 TtdKeeper::fetch_command_key_enter_label(void) {
+    return e0.commandKeyEnterLabel;
+}
+
+struct ::string6 TtdKeeper::fetch_command_key_bypass_pin_label(void) {
+    if (e0.commandKeyBypassPinLabel) {
+        return *e0.commandKeyBypassPinLabel;
+    }
+    throw runtime_error("commandKeyBypassPinLabel is absent");
 }
 
 void

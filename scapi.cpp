@@ -158,6 +158,12 @@ map_to_interaction(const CardholderMessage m) {
         return Interaction(in_place_index<0>, m);
     case 1:
         return Interaction(in_place_index<1>, m);
+    case 8:
+        return Interaction(in_place_index<8>, TtdKeeper::instance().fetch_application_label_displayed());
+    case 9:
+        return Interaction(in_place_index<9>, TtdKeeper::instance().fetch_command_key_enter_label());
+    case 11:
+        return Interaction(in_place_index<11>, TtdKeeper::instance().fetch_command_key_bypass_pin_label());
     case 13:
         return Interaction(in_place_index<13>, TtdKeeper::instance().fetch_transaction_amount());
     case 16:

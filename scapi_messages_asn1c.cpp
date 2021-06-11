@@ -112,6 +112,15 @@ map_printable_string_to_asn1c(const string& s) {
     return OCTET_STRING_new_fromBuf(&asn_DEF_PrintableString, s.c_str(), integer_cast<int>(s.length()));
 }
 
+static UTF8String_t
+map_utf8_string_to_asn1c(const string& s) {
+    UTF8String_t ret = {};
+    if (OCTET_STRING_fromString(&ret, s.c_str()) != 0) {
+        throw runtime_error("Can't convert string \"" + s + "\" to asn1c");
+    }
+    return ret;
+}
+
 static struct MissingParameters
 map_missing_parameters_to_asn1c(const vector<string>& p) {
     struct MissingParameters ret{};
@@ -290,6 +299,18 @@ map_scapi_request(const ::scapi::Request& r) {
                 tmp->present = Member_PR_ssn;
                 tmp->choice.ssn = get<1>(e);
                 break;
+            case 8:
+                tmp->present = Member_PR_applicationLabelDisplayed;
+                tmp->choice.applicationLabelDisplayed = map_utf8_string_to_asn1c(get<8>(e));
+                break;
+            case 9:
+                tmp->present = Member_PR_commandKeyEnterLabel;
+                tmp->choice.commandKeyEnterLabel = map_utf8_string_to_asn1c(get<9>(e).s);
+                break;
+            case 11:
+                tmp->present = Member_PR_commandKeyPinBypassLabel;
+                tmp->choice.commandKeyPinBypassLabel = map_utf8_string_to_asn1c(get<11>(e).s);
+                break;;
             case 13:
                 tmp->present = Member_PR_trxAmount;
                 tmp->choice.trxAmount = map_bcd_as_integer_from_asn1c<union bcd6>(get<13>(e));
