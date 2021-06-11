@@ -80,8 +80,8 @@ namespace scapi {
       , ::std::string // cardholderMessage - FIXME: See Scapi.asn1
       , ::std::string // applicationLabelDisplayed
       , struct ::string5 // commandKeyEnterLabel
-      , struct ::string5 // commandKeyChangeApplicationLabel
-      , struct ::string5 // commandKeyPinBypassLabel
+      , struct ::string6 // commandKeyChangeApplicationLabel
+      , struct ::string6 // commandKeyPinBypassLabel
       , union ::bcd6 // paymentAmount
       , union ::bcd6 // trxAmount
       , union ::bcd6 // cashbackAmount
@@ -97,11 +97,24 @@ namespace scapi {
       , enum CtlssIndicatorStatus // Contactless LEDs status
     > Interaction;
 
+    // Keep values synchronized with ASN.1 specification
+    enum class PinAbsentReason {
+        pinPadNotWorking = 0,
+        pinEntryBypassed = 1,
+        cardholderRequestedChangeOfApplication = 2
+    };
+
+    typedef ::std::variant<
+        std::string // plainTextPin
+      , struct ::OpaquePinData* // opaquePinData
+      , PinAbsentReason // noPin
+    > CardholderPin;
+
     typedef ::std::variant<
         std::string // PAN
       , enum ::CvdPresence // CVD presence
       , struct ::cn2 // CVD
-      , void* // FIXME: Implement PIN
+      , CardholderPin // PIN
       , union ::ExpirationDate // Card expiry date
     > AckEntry;
 

@@ -105,7 +105,7 @@ papi_Diagnostics_Maintenance_Recovery(void) noexcept try {
 
 extern "C" enum PapiResult
 papi_Specific_Processing_Based_On_Pan(void) noexcept try {
-    return PAPI_NOK;
+    return PAPI_DONE;
 } catch (...) {
     TtdKeeper::instance().handle_exception(__func__);
     return PAPI_NOK;

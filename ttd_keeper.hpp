@@ -25,6 +25,7 @@ public:
      */
     void handle_bad_response(const scapi::Response&) noexcept;
 
+    std::string fetch_application_label_displayed(void);
     enum NokReason fetch_nok_reason(void);
     enum TerminalErrorReason fetch_ter_reason(void);
     enum ServiceId fetch_selected_service(void);
@@ -34,6 +35,8 @@ public:
     union bcd fetch_transaction_currency_exponent(void);
     std::vector<std::string> fetch_missing_parameters(void);
     enum CtlssIndicatorStatus fetch_ctlss_indicator_status(void);
+    struct ::string5 fetch_command_key_enter_label(void); ///< Not in TTD, It's in E0
+    struct ::string6 fetch_command_key_bypass_pin_label(void); ///< Not in TTD, It's in E0
 
     /** Unconditionaly clears TTD. Useful for testing
      */
