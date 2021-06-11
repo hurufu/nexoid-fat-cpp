@@ -121,6 +121,11 @@ map_utf8_string_to_asn1c(const string& s) {
     return ret;
 }
 
+string
+map_string_from_asn1c(const struct OCTET_STRING o) {
+    return string(reinterpret_cast<char*>(o.buf), o.size);
+}
+
 static struct MissingParameters
 map_missing_parameters_to_asn1c(const vector<string>& p) {
     struct MissingParameters ret{};
@@ -428,14 +433,30 @@ map_nak_from_asn1c(const struct ScapiNak& n) {
     };
 }
 
+static scapi::CardholderPin
+map_pin_from_asn1c(const struct ScapiCardholderPin p) {
+    switch (p.present) {
+        case ScapiCardholderPin_PR_plainTextPin:
+            return map_string_from_asn1c(p.choice.plainTextPin);
+        case ScapiCardholderPin_PR_noPin:
+            return static_cast<scapi::PinAbsentReason>(p.choice.noPin);
+        case ScapiCardholderPin_PR_opaquePinData:
+            throw runtime_error("Opaque PIN Data isn't implemented");
+        case ScapiCardholderPin_PR_NOTHING:
+            break;
+    }
+    throw bad_mapping(p.present, "Unexpected ScapiCardholderPin");
+}
+
 static scapi::AckEntry
 map_ack_entry_from_asn1c(const struct ScapiDataEntryIntercation* const e) {
     switch (e->present) {
         case ScapiDataEntryIntercation_PR_cvdPresence:
             return static_cast<enum CvdPresence>(e->choice.cvdPresence);
+        case ScapiDataEntryIntercation_PR_pin:
+            return map_pin_from_asn1c(e->choice.pin);
         case ScapiDataEntryIntercation_PR_pan:
         case ScapiDataEntryIntercation_PR_cvd:
-        case ScapiDataEntryIntercation_PR_pin:
         case ScapiDataEntryIntercation_PR_expirationDate:
             throw not_implemented(make_desc("Not implemented ackEntry type ", e->present));
         case ScapiDataEntryIntercation_PR_NOTHING:

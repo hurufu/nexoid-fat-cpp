@@ -97,11 +97,24 @@ namespace scapi {
       , enum CtlssIndicatorStatus // Contactless LEDs status
     > Interaction;
 
+    // Keep values synchronized with ASN.1 specification
+    enum class PinAbsentReason {
+        pinPadNotWorking = 0,
+        pinEntryBypassed = 1,
+        cardholderRequestedChangeOfApplication = 2
+    };
+
+    typedef ::std::variant<
+        std::string // plainTextPin
+      , struct ::OpaquePinData* // opaquePinData
+      , PinAbsentReason // noPin
+    > CardholderPin;
+
     typedef ::std::variant<
         std::string // PAN
       , enum ::CvdPresence // CVD presence
       , struct ::cn2 // CVD
-      , void* // FIXME: Implement PIN
+      , CardholderPin // PIN
       , union ::ExpirationDate // Card expiry date
     > AckEntry;
 

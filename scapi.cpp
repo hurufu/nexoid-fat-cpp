@@ -8,6 +8,7 @@
 #include "utils.hpp"
 
 #include "nexoid-ed/include/scapi.h"
+#include "nexoid-ed/include/gtd.h"
 
 #include <stdexcept>
 #include <vector>
@@ -192,15 +193,41 @@ create_interaction_vector(const size_t size, const CardholderMessage msg[]) {
 }
 
 static void
+update_e1kd_with_plain_text_pin(const string& p) {
+    if (!e1kd) {
+        throw runtime_error("Trying to updated non existent e1kd");
+    }
+    char* const tmp = reinterpret_cast<char*>(dmapi_malloc(p.length() + 1));
+    *copy(p.begin(), p.end(), tmp) = '\0';
+    e1kd->wd.pinData.plainTextPin = tmp;
+}
+
+static void
+update_e1kd_with_pin_data(const scapi::CardholderPin p) {
+    switch (p.index()) {
+        case 0:
+            return update_e1kd_with_plain_text_pin(get<0>(p));
+        case 1:
+            throw not_implemented("OpaquePinData isn't implemented");
+        case 2:
+            throw not_implemented("PinAbsentReason isn't implemented");
+        default:
+            throw runtime_error("Unknown type of CardholderPin");
+    }
+}
+
+static void
 update_ttd_with_data_entry(const vector<AckEntry> v) {
     for (const auto& e : v) {
         switch (e.index()) {
             case 1:
                 TtdKeeper::instance().update(get<1>(e));
                 break;
+            case 3:
+                update_e1kd_with_pin_data(get<3>(e));
+                break;
             case 0:
             case 2:
-            case 3:
             case 4:
             default:
                 throw not_implemented("Can't update TTD with entered data");
