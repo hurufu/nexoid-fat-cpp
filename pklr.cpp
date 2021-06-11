@@ -76,20 +76,23 @@ pklr_Kernel_E_Processing(void) {
 
 enum PklrResult
 pklr_First_Generate_Ac_Processing(const uint8_t p1) {
-    return PKLR_NOK;
+    ttd.onlineRequired = true;
+    return PKLR_OK;
 }
 
 enum PklrResult
 pklr_Second_Generate_Ac_Processing(const uint8_t p1) {
-    return PKLR_NOK;
+    ttd.tcReceived = true;
+    ttd.onlineRequired = false;
+    return PKLR_OK;
 }
 
 enum PklrResult
 pklr_First_Issuer_Script_Processing(void) {
-    return PKLR_NOK;
+    return PKLR_OK;
 }
 
 enum PklrResult
 pklr_Second_Issuer_Script_Processing(void) {
-    return PKLR_NOK;
+    return PKLR_OK;
 }
