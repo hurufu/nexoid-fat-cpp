@@ -36,7 +36,7 @@ pklr_Process_Read_Record(const uint8_t p1, const uint8_t p2) {
 
 enum PklrResult
 pklr_Offline_Data_Authentication(void) {
-    return PKLR_NOK;
+    return PKLR_SUCCESSFUL;
 }
 
 enum PklrResult
