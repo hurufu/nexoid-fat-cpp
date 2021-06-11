@@ -80,8 +80,8 @@ namespace scapi {
       , ::std::string // cardholderMessage - FIXME: See Scapi.asn1
       , ::std::string // applicationLabelDisplayed
       , struct ::string5 // commandKeyEnterLabel
-      , struct ::string5 // commandKeyChangeApplicationLabel
-      , struct ::string5 // commandKeyPinBypassLabel
+      , struct ::string6 // commandKeyChangeApplicationLabel
+      , struct ::string6 // commandKeyPinBypassLabel
       , union ::bcd6 // paymentAmount
       , union ::bcd6 // trxAmount
       , union ::bcd6 // cashbackAmount
