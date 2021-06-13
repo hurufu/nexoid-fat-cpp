@@ -8,6 +8,20 @@ extern "C" {
 #include "eapi_dummy_session.hpp"
 #include <cstring>
 
+// TODO: A lot of things have to be changed here, this implementation is only
+// suitable for testing with dummy card data, there is no proper modularization
+// and data isolation.
+//
+// What at least needs to be done in a production code:
+//
+//   * Proper life time managment of card object it should be created when card
+//     is inserted and destroyed as soon as it's not useful anymore
+//   * Dependency injection
+//   * E1KD data retiaval can be done here so Eapi object should not fetch
+//     anything from internal database
+//   * Ensure isolation of data from E1KD, TTD and CD.
+//   * Add exception safety
+
 using namespace std;
 
 static unique_ptr<EapiSession> s_e = make_unique<EapiDummy>();
