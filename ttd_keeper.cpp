@@ -21,45 +21,24 @@ extern "C" {
 using namespace std;
 using namespace chrono;
 
-// TODO: Write a temlate (if possible) for automatic deep copy using custom
-// allocator (like dmapi_malloc) for any two references to lvalues of the same
-// type.
-
-template <typename T>
-static void
-shallow_copy_to_ttd(T*& ttd_member, const T& pod) {
-    ttd_member = reinterpret_cast<T*>(dmapi_malloc(sizeof(T)));
-    *ttd_member = pod;
-}
-
-static void
-set_pan_in_ttd(const string& p) {
+static struct Prefix
+convert_string_to_prefix(const string& p) {
     struct Prefix tmp = {};
     tmp.size = integer_cast<uint8_t>(p.copy(tmp.value, sizeof(tmp.value)));
-    shallow_copy_to_ttd(ttd.pan, tmp);
-}
-
-static void
-set_expiration_date_in_ttd(const union ExpirationDate& d) {
-    shallow_copy_to_ttd(ttd.expirationDate, d);
-}
-
-static void
-set_cvd_presence_in_ttd(const enum CvdPresence c) {
-    shallow_copy_to_ttd(ttd.cvdPresence, c);
+    return tmp;
 }
 
 static void
 set_cvd_in_ttd(const struct cn2 c) {
-    shallow_copy_to_ttd(ttd.cvd, c);
-    set_cvd_presence_in_ttd(CVD_PRESENT);
+    ttd.cvd = acp(c);
+    ttd.cvdPresence = acp(CVD_PRESENT);
 }
 
 static void
 set_cvd_in_ttd(const scapi::CvdData& d) {
     switch (d.index()) {
     case 0:
-        set_cvd_presence_in_ttd(get<0>(d));
+        ttd.cvdPresence = acp(get<0>(d));
         break;
     case 1:
         set_cvd_in_ttd(get<1>(d));
@@ -71,8 +50,8 @@ set_cvd_in_ttd(const scapi::CvdData& d) {
 
 static void
 set_manual_entry_in_ttd(const scapi::ManualEntry& m) {
-    set_pan_in_ttd(m.pan);
-    set_expiration_date_in_ttd(m.expirationDate);
+    ttd.pan = acp(convert_string_to_prefix(m.pan));
+    ttd.expirationDate = acp(m.expirationDate);
     if (m.cvdData) {
         set_cvd_in_ttd(*m.cvdData);
     }
@@ -85,7 +64,7 @@ set_amounts_in_ttd(const scapi::AmountEntry& a) {
     // TODO: Throw an exception if transaction is already in progress
     ttd.transactionAmount = a.totalAmount;
     if (a.minus) {
-        shallow_copy_to_ttd(ttd.minus, *a.minus);
+        ttd.minus = acp(*a.minus);
     }
     if (a.supplementaryAmount) {
         switch (a.supplementaryAmount->index()) {
@@ -197,7 +176,7 @@ TtdKeeper::update(const enum TerminalErrorReason t) {
 optional<enum CvdPresence>
 TtdKeeper::update(const enum CvdPresence e) {
     const auto old = ttd.cvdPresence;
-    set_cvd_presence_in_ttd(e);
+    ttd.cvdPresence = acp(e);
     if (old) {
         return *old;
     }
