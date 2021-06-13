@@ -105,7 +105,7 @@ EapiDummy::Read_Record(const byte p1, const byte p2) {
 
 enum EapiResult
 EapiDummy::Final_Application_Selection() {
-    struct FileControlInformation s_Fci = {
+    struct FileControlInformation fci = {
         .DfName = {
             .l_raw = 6,
             .raw = { 0xA0, 0x00, 0x00, 0x00, 0x00, 0x01 }
@@ -134,7 +134,7 @@ EapiDummy::Final_Application_Selection() {
     cr = acp((struct CardResponse){
         .responseData = nullptr,
         .parsed = acp((struct ParsedResponseData){
-            .fci = &s_Fci,
+            .fci = &fci,
             .responseMessageTemplate = nullptr,
             .readRecordResponeMessageTemplate = nullptr,
             .unpredictableNumber = nullptr,
@@ -151,7 +151,7 @@ EapiDummy::Select_Next_Application(const struct Aid& aid) {
 
 enum EapiResult
 EapiDummy::Get_Processing_Options(const byte commandTemplate, const struct DolData& cdaTransactionData) {
-    struct ResponseMessageTemplate s_gpoResponse = [](){
+    struct ResponseMessageTemplate gpoResponse = [](){
         struct ResponseMessageTemplate ret{};
         ret.aip.cardholderVerificationIsSupported = 1;
         ret.aip.sdaSupported = 1;
@@ -166,7 +166,7 @@ EapiDummy::Get_Processing_Options(const byte commandTemplate, const struct DolDa
         .responseData = nullptr,
         .parsed = acp((struct ParsedResponseData){
             .fci = nullptr,
-            .responseMessageTemplate = &s_gpoResponse,
+            .responseMessageTemplate = &gpoResponse,
             .readRecordResponeMessageTemplate = nullptr,
             .unpredictableNumber = nullptr,
         }),
