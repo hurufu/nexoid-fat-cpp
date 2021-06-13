@@ -78,7 +78,7 @@ UnsignedInteger convert_bcd_to_int(const Bcd from) {
 }
 
 template <typename T>
-T* acp(const T&& prototype) {
+T* acp(const T& prototype) {
     auto ret = reinterpret_cast<T*>(dmapi_malloc(sizeof(T)));
     *ret = prototype;
     return ret;
