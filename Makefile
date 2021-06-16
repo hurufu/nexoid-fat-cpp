@@ -62,7 +62,7 @@ LDLIBS              := -lsocket++ -lnng
 
 # Unit tests settings #########################################################
 UT_EXECUTABLE  := ut/ut
-UT_SOURCES     := $(wildcard ut/*.cpp)
+UT_SOURCES     := $(wildcard ut/*.cpp) randapi.cpp
 UT_OBJECTS     := $(UT_SOURCES:.cpp=.o)
 
 VALGRIND_FLAGS := --leak-check=full --track-origins=yes --show-error-list=yes
