@@ -4,10 +4,12 @@ extern "C" {
 }
 
 #include <random>
+#include <algorithm>
 
 using namespace std;
 
 random_device s_random_device;
+auto s_random_byte_generator = bind(uniform_int_distribution<uint8_t>(), ref(s_random_device));
 
 enum ScapiResult
 randapi_Generate_Random_Number(const uint8_t upperLimit, uint8_t* const randomNumber) noexcept try {
@@ -21,6 +23,11 @@ randapi_Generate_Random_Number(const uint8_t upperLimit, uint8_t* const randomNu
 }
 
 enum ScapiResult
-randapi_Generate_Random_Bytes(const size_t size, uint8_t randomBytes[]) noexcept {
+randapi_Generate_Random_Bytes(const size_t size, uint8_t randomBytes[]) noexcept try {
+    generate(randomBytes, randomBytes + size, ref(s_random_byte_generator));
+    return SCAPI_OK;
+} catch (...) {
+    ttd.terminalErrorReason = TE_HARDWARE_ERROR;
+    ttd.terminalErrorIndicator = true;
     return SCAPI_NOK;
 }
