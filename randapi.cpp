@@ -7,11 +7,12 @@ extern "C" {
 
 using namespace std;
 
+random_device s_random_device;
+
 enum ScapiResult
 randapi_Generate_Random_Number(const uint8_t upperLimit, uint8_t* const randomNumber) noexcept try {
-    random_device rd;
     uniform_int_distribution<uint8_t> dist(0, upperLimit);
-    *randomNumber = dist(rd);
+    *randomNumber = dist(s_random_device);
     return SCAPI_OK;
 } catch (...) {
     ttd.terminalErrorReason = TE_HARDWARE_ERROR;
