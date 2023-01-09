@@ -282,10 +282,11 @@ struct ApplicationProfileList* e6 = &(struct ApplicationProfileList){
                     .signature = 1
                 }
             },
+            .terminalFloorLimit = &(union bcd6){ .v = { 0x00, 0x00, 0x00, 0x00, 0x10, 0x0 } },
             .applicationLabelDefault = &(struct string16){ .s = "VISA" },
             .cvmMagneticStripe = (enum CvmMagneticStripe[]){ CVM_MSR_SIGNATURE },
             .applicationProfileSettings = &(union ApplicationProfileSettings){
-                .cvdRequiredForManualEntry = 1,
+                .cvdRequiredForManualEntry = 1, //
                 .merchantReceipt = {
                     .printApproved = 1,
                     .printDeclined = 1,

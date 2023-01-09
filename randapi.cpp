@@ -6,6 +6,7 @@ extern "C" {
 #include "exceptions.hpp"
 #include <random>
 #include <algorithm>
+#include <functional>
 
 using namespace std;
 

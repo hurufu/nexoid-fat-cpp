@@ -7,12 +7,12 @@ WARNINGS            += format format-security
 WARNINGS            += conversion sign-conversion
 WARNINGS            += stack-protector
 GCC_FEATURES        :=
-#GCC_FEATURES        += lto=auto use-linker-plugin
+GCC_FEATURES        += lto=auto use-linker-plugin
 GCC_FEATURES        += trapv
 GCC_FEATURES        += permissive
 GCC_FEATURES        += stack-protector-all
 #GCC_FEATURES        := instrument-functions
-#GCC_FEATURES        += analyzer
+GCC_FEATURES        += analyzer
 
 # Installation configuration ##################################################
 PREFIX          ?= /usr/local
