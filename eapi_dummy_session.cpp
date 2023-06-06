@@ -40,47 +40,7 @@ EapiDummy::Reset_Chip() {
 
 enum EapiResult
 EapiDummy::Select_Pse() {
-    const uint8_t response[] = {
-        0x6F, 0x15, // FCI Template
-            0x84, 0x0E, // DF Name
-                '1','P','A','Y','.','S','Y','S','.','D','D','F','0','1',
-            0xA5, 0x03, // FCI Proprietary Template
-                0x88, 0x01, // SFI
-                    0x01
-    };
-
-    cr = acp((struct CardResponse){
-        .responseData = acp((struct ResponseData){
-            .s = sizeof(response),
-            .c = {}
-        }),
-        .parsed = acp((struct ParsedResponseData){
-            .fci = acp((struct FileControlInformation){
-                .DfName = {
-                    .l_raw = 14,
-                    .raw = {
-                        '1','P','A','Y','.','S','Y','S','.','D','D','F','0','1'
-                    }
-                },
-                .a5 = {
-                    .applicationLabel = nullptr,
-                    .applicationPriorityIndicator = nullptr,
-                    .pdol = nullptr,
-                    .languagePreference = nullptr,
-                    .issuerCodeTableIndex = nullptr,
-                    .applicationPreferredName = nullptr,
-                    .issuerDiscretionaryData = nullptr,
-                    .sfi = acp((unsigned char)0x01),
-                },
-            }),
-            .responseMessageTemplate = nullptr,
-            .readRecordResponeMessageTemplate = nullptr,
-            .unpredictableNumber = nullptr,
-        }),
-        .sw1Sw2 = { .e = I_COMMAND_OK }
-    });
-    memcpy(cr->responseData->c, response, sizeof(response));
-    return EAPI_OK;
+    return EAPI_NOK;
 }
 
 enum EapiResult
@@ -105,43 +65,7 @@ EapiDummy::Read_Record(const byte p1, const byte p2) {
 
 enum EapiResult
 EapiDummy::Final_Application_Selection() {
-    struct FileControlInformation fci = {
-        .DfName = {
-            .l_raw = 6,
-            .raw = { 0xA0, 0x00, 0x00, 0x00, 0x00, 0x01 }
-        },
-        .a5 = {
-            .applicationLabel = acp((struct string16){ "TestApp", {} }),
-            .applicationPriorityIndicator = nullptr,
-            .pdol = acp((struct Dol){
-                .s = 9,
-                .a = {
-                    0x9F, 0x1A, 0x02, // Terminal Country Code
-                    0x9F, 0x33, 0x03, // Terminal Capabilities
-                    0x9F, 0x40, 0x02  // Additional Terminal Capabilities (partial)
-                }
-            }),
-            .languagePreference = acp((struct TerminalSupportedLanguageList){
-                .l = 1,
-                .a = { { .e = LANG_ENGLISH } }
-            }),
-            .issuerCodeTableIndex = nullptr,
-            .applicationPreferredName = nullptr,
-            .issuerDiscretionaryData = nullptr,
-            .sfi = nullptr,
-        }
-    };
-    cr = acp((struct CardResponse){
-        .responseData = nullptr,
-        .parsed = acp((struct ParsedResponseData){
-            .fci = &fci,
-            .responseMessageTemplate = nullptr,
-            .readRecordResponeMessageTemplate = nullptr,
-            .unpredictableNumber = nullptr,
-        }),
-        .sw1Sw2 = { .e = I_COMMAND_OK }
-    });
-    return EAPI_OK;
+    return EAPI_NOK;
 }
 
 enum EapiResult

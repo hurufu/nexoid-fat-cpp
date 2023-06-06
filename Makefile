@@ -12,7 +12,7 @@ GCC_FEATURES        += trapv
 GCC_FEATURES        += permissive
 GCC_FEATURES        += stack-protector-all
 #GCC_FEATURES        := instrument-functions
-GCC_FEATURES        += analyzer
+#GCC_FEATURES        += analyzer
 
 # Installation configuration ##################################################
 PREFIX          ?= /usr/local
@@ -34,7 +34,6 @@ ASN1_MAKEFILE      := $(ASN1_GENERATED_DIR)/Makefile.am.libasncodec
 
 LIBNEXOID_PATH      := nexoid-ed/$(LIBNEXOID_NAME)
 
-CPPFLAGS            += -I/usr/local/include
 CPPFLAGS            += -I.
 CPPFLAGS            += -Inexoid-ed/src
 CPPFLAGS            += -Inexoid-ed/include
@@ -54,6 +53,8 @@ _CFLAGS             += $(addprefix -W,$(WARNINGS))
 CFLAGS              ?= $(_CFLAGS)
 #CFLAGS              += -DASN_EMIT_DEBUG=1
 #CFLAGS              += -DASN_THREAD_SAFE
+
+LDFLAGS             := -pthread -latomic
 
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt

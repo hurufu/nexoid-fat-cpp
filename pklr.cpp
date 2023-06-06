@@ -5,6 +5,7 @@ extern "C" {
 }
 
 #include "utils.hpp"
+#include <cstring>
 
 // FIXME: Remote it!
 extern struct CandidateList* g_CandidateList;
@@ -47,16 +48,17 @@ pklr_Build_Candidate_List(void) {
     };
     cl.entry[0] = {};
     cl.entry[0].ApplicationPriorityIndicator = {};
-    cl.entry[0].ApplicationLabel = { "TestApp", {} };
-    cl.entry[0].ApplicationPreferredName = { "TestApp #1", {} };
+    cl.entry[0].ApplicationLabel = (struct string16){ "TestApp", {} };
+    cl.entry[0].ApplicationPreferredName = (struct string16){ "TestApp #1", {} };
     cl.entry[0].IssuerCodeTableIndex = ISO_CODE_TABLE_1;
     cl.entry[0].TerminalPriorityIndicator = 0;
     cl.entry[0].ApplicationPriorityIndicator.priority = 0;
     cl.entry[0].ApplicationPriorityIndicator.cardholderConfirmationRequired = 0;
     cl.entry[0].DfName = (struct Aid){
-        .l_raw = 6,
-        .raw = { 0xA0, 0x00, 0x00, 0x00, 0x00, 0x01 }
+        .l_raw = 6, {}
     };
+    static const uint8_t tmp[] = { 0xA0, 0x00, 0x00, 0x00, 0x00, 0x01 };
+    memcpy(cl.entry[0].DfName.raw, tmp, sizeof tmp);
     g_CandidateList = &cl;
     ttd.processingStatus.buildingCandidateListUsingListOfAid = 1;
     ep.cd.applicationEffectiveDate = acp((union yymmdd){ 0x15, 0x01, 0x01 });
