@@ -149,7 +149,7 @@ classify_to_variant_index(const CardholderMessage m) {
         case CRDHLDR_DBG_MISSING_PARAMETERS:
             return 23;
     }
-    throw bad_mapping(m, "Unexpected CardholderMessage");
+    throw bad_mapping(m);
 }
 
 static Interaction

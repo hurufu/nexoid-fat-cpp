@@ -52,7 +52,7 @@ decide_what_kind_of_maintenance_is_required(const enum TerminalErrorReason ter) 
         case TER_MAX:
             return PR_NOK;
     }
-    throw bad_mapping(ter, "Unknown TerminalErrorReason");
+    throw bad_mapping(ter);
 }
 
 static const char*
@@ -63,7 +63,7 @@ map_maintenance_type_tostring(const enum ProcedureResult r) {
         case PR_REBOOT: return "Device reboot requested";
         case PR_NOK: return "Nothing can help";
         default:
-            throw bad_mapping(r, "Unknown maintenance type");
+            throw bad_mapping(r);
     }
 }
 

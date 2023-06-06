@@ -63,7 +63,7 @@ static const char* tostring(const ::papi::NexuiRequest::Api r) {
         case NexuiRequest::Api::entry: return "entry";
         case NexuiRequest::Api::ssn: return "ssn";
     }
-    throw bad_mapping(static_cast<int>(r), "papi::NexuiRequest::Api");
+    throw bad_mapping(r);
 }
 
 static inline ::std::ostream&
@@ -124,7 +124,7 @@ NexuiSession::Impl::exch(const vector<unsigned char>& b) {
 NexuiResponse
 NexuiSession::Impl::interaction(const NexuiRequest& req) {
     const auto rq = encode_nexui_request(req);
-    ExchangeLogger l = make_exchange_logger(rq, cout);
+    auto l = make_exchange_logger(rq, cout);
     const auto rs = exch(rq);
     l.rsp = rs; // FIXME: Avoid unnecessary copy just for logging
     return decode_nexui_response(rs);

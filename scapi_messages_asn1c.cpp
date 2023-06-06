@@ -104,7 +104,7 @@ map_nok_reason_to_asn1c(const enum NokReason n) {
         case N_MAX:
             break;
     }
-    throw bad_mapping(n, "No valid mapping from NokReason to NexoNokReason");
+    throw bad_mapping(n);
 }
 
 static PrintableString_t*
@@ -420,7 +420,7 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
         throw runtime_error("Not implemented 2");
     case rsp_PR_NOTHING:
     default:
-        throw bad_mapping(ptr->rsp.present, "Unexpected response, can't map it internally");
+        throw bad_mapping(ptr->rsp.present);
     }
     return ret;
 }
@@ -445,7 +445,7 @@ map_pin_from_asn1c(const struct ScapiCardholderPin p) {
         case ScapiCardholderPin_PR_NOTHING:
             break;
     }
-    throw bad_mapping(p.present, "Unexpected ScapiCardholderPin");
+    throw bad_mapping(p.present);
 }
 
 static scapi::AckEntry
@@ -462,7 +462,7 @@ map_ack_entry_from_asn1c(const struct ScapiDataEntryIntercation* const e) {
         case ScapiDataEntryIntercation_PR_NOTHING:
             break;
     }
-    throw bad_mapping(e->present, "Unexpected ScapiDataEntryIntercation");
+    throw bad_mapping(e->present);
 }
 
 static ::scapi::Response
@@ -484,7 +484,7 @@ map_nng_from_asn1c(const ScapiResponse& rsp) {
     case ScapiResponse_PR_NOTHING:
         break;
     }
-    throw bad_mapping(rsp.present, "Unexpected ScapiResponse, can't map it internally");
+    throw bad_mapping(rsp.present);
 }
 
 static union ExpirationDate
@@ -511,7 +511,7 @@ map_cvd_data_from_asn1c(const struct CvdData* const c) {
             return static_cast<enum CvdPresence>(c->choice.cvdPresence);
         case CvdData_PR_NOTHING:
         default:
-            throw bad_mapping(c->present, "Unexpected CvdData component");
+            throw bad_mapping(c->present);
     }
 }
 
@@ -537,7 +537,7 @@ map_optional_supplementary_amount_from_asn1c(const struct ScapiEventAmountEntry:
         case supplementaryAmount_PR_NOTHING:
             break;
     }
-    throw bad_mapping(a->present, "Unexpected supplementaryAmount component");
+    throw bad_mapping(a->present);
 }
 
 static scapi::AmountEntry
@@ -578,7 +578,7 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
         return scapi::Event(in_place_index<6>);
     case ScapiEvent_PR_NOTHING:
     default:
-        throw bad_mapping(e->present, "Unsupported ScapiEvent");
+        throw bad_mapping(e->present);
     }
 }
 

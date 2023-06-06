@@ -1,6 +1,7 @@
 #pragma once
 
 #include "tostring.hpp"
+#include "utils.hpp"
 
 #include <stdexcept>
 #include <sstream>
@@ -85,13 +86,18 @@ public:
 };
 
 struct bad_mapping : public std::invalid_argument {
-    long from;
+    intmax_t from;
 
     template <typename... Args>
-    bad_mapping(const long f, Args&&... args) :
+    bad_mapping(const intmax_t f, Args&&... args) :
         std::invalid_argument(std::forward<Args>(args)...),
         from(f)
     {}
+
+    template <typename F>
+    bad_mapping(const F f) : bad_mapping(to_underlying(f), typeid(f).name())
+    {}
+
 };
 
 struct bad_variant_mapping : public std::invalid_argument {

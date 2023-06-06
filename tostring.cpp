@@ -17,7 +17,7 @@ tostring(const enum asn_dec_rval_code_e code) {
         case RC_WMORE: return "RC_WMORE";
         case RC_FAIL: return "RC_FAIL";
     }
-    throw bad_mapping(code, "Unexpected ASNC decoder error code");
+    throw bad_mapping(code);
 }
 
 const char*
