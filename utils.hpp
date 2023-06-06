@@ -54,8 +54,7 @@ operator << (std::ostream& os, const std::chrono::time_point<Clock, Duration>& t
     const time_t t = Clock::to_time_t(tp);
     const auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(tp.time_since_epoch()).count();
     struct tm tm = {};
-    return os << std::put_time(localtime_r(&t, &tm), "%F %T.") <<
-        std::setfill('0') << std::setw(3) << (ms - t * 1000);
+    return os << std::put_time(localtime_r(&t, &tm), "%F %T");
 }
 
 template <typename UnsignedInteger, typename Bcd>
