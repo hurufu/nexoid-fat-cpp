@@ -26,7 +26,7 @@ operator << (ostream& os, const buffer& rhs) {
 
 struct NexuiSession::Impl {
     socket interaction_socket;
-    const char* const addr = "ipc:///tmp/nexui";
+    const char* const addr = "tcp://192.168.0.1:5003"; // nexui
     const milliseconds send_timeout = 1s;
     const milliseconds recv_timeout = 1min + 5s;
     const char* const name = "papi_ui";
