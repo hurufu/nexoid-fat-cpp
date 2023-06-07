@@ -59,7 +59,7 @@ LDFLAGS             := -pthread -latomic
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
-LDLIBS              := -lsocket++ -lnng
+LDLIBS              := -l:libsocket++.a -l:libsocket.a -lnng
 
 # Unit tests settings #########################################################
 UT_EXECUTABLE  := ut/ut
