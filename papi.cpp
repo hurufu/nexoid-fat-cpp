@@ -2,6 +2,7 @@
 #include "tostring.hpp"
 #include "ttd_keeper.hpp"
 #include "papi_nexui_nngpp_session.hpp"
+#include "papi_nexui_dummy_session.hpp"
 #include "exceptions.hpp"
 #include "utils.hpp"
 
@@ -69,7 +70,7 @@ map_maintenance_type_tostring(const enum ProcedureResult r) {
 
 extern "C" enum PapiResult
 papi_Proprietary_Startup_Sequence(void) noexcept try {
-    s_nexui = make_unique<nngpp::NexuiSession>();
+    s_nexui = make_unique<dummy::NexuiSession>();
     s_nexui->interaction({ NexuiRequest::Api::output, {"Startup"}});
     if (scapi_Initialize() != SCAPI_OK) {
         cout << system_clock::now() << " C nexoid-fat    "
