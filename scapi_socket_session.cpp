@@ -18,7 +18,7 @@ inet_stream::~inet_stream(void) noexcept {
     try {
         shutdown(LIBSOCKET_READ | LIBSOCKET_WRITE);
     } catch (const ::libsocket::socket_exception& e) {
-        cerr <<  __FILE__ << ':' << __LINE__ << '@' << __func__ << " Internal exception suppressed (errno: " << e.err << ")\n" << e.mesg << endl;
+        clog <<  __FILE__ << ':' << __LINE__ << '@' << __func__ << " Internal exception suppressed (errno: " << e.err << ")\n" << e.mesg << endl;
     }
     destroy();
 }

@@ -235,7 +235,7 @@ mapto_TerminalErrorReason_for_libsocket(const int e) {
 void
 TtdKeeper::handle_exception(const char* const func) noexcept {
     ttd.terminalErrorIndicator = true;
-    ostream& os = cout;
+    ostream& os = clog;
     try {
         os << system_clock::now() << " E nexoid-fat    ";
         if (func) {
