@@ -250,7 +250,7 @@ scapi_Update_Interfaces(const enum InterfaceStatus status) noexcept try {
     const Request req = (UpdateInterfaces){
         .interfaceStatus = status
     };
-    const auto rsp = s_scapi->interaction(req);
+    const auto rsp = s_scapi->interaction(req, 1min);
     if (rsp.index() == 1) {
         return SCAPI_OK;
     } else {

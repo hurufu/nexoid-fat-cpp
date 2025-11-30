@@ -13,7 +13,6 @@ struct CardResponse* cr;
 struct E1KernelData* e1kd = &s_e1kd;
 struct OnlineResponseData ord;
 struct SearchTransactionResultList* sl;
-struct CombinationListAndParameters* ec;
 struct AidPreferenceTable* ee;
 
 enum PrinterStatus g_PrinterStatus = PRINTER_UNAVAILABLE;

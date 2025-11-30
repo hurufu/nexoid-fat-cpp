@@ -53,6 +53,7 @@ Session::Impl::Impl(void) :
     set_opt_recv_timeout(notification_socket, 1 * 60 * 60 * 1000);
     set_opt_recv_timeout(interaction_socket, 3 * 1000);
     set_opt_send_timeout(interaction_socket, 1 * 1000);
+    interaction_socket.dial("tcp://cvend-11e553e2.local:5001"); // fatrq
     notification_socket.listen("tcp://0.0.0.0:5002"); // fatnt
     interaction_socket.dial("tcp://127.0.0.1:5001"); // fatrq
 }
