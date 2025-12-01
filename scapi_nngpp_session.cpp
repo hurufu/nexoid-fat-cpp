@@ -44,15 +44,15 @@ struct Session::Impl {
 
     vector<unsigned char> exch(const vector<unsigned char>&);
     Response interaction(const Request& r, milliseconds);
-    Notification notification(void);
+    Notification notification(const milliseconds rcv_timeout);
 };
 
 Session::Impl::Impl(void) :
     interaction_socket(req::open()),
     notification_socket(pull::open()) {
     set_opt_recv_timeout(notification_socket, 1 * 60 * 60 * 1000);
-    set_opt_recv_timeout(interaction_socket, 3 * 1000);
-    set_opt_send_timeout(interaction_socket, 1 * 1000);
+    set_opt_recv_timeout(interaction_socket, 30 * 1000);
+    set_opt_send_timeout(interaction_socket, 10 * 1000);
     interaction_socket.dial("tcp://cvend-11e553e2.local:5001"); // fatrq
     notification_socket.listen("tcp://0.0.0.0:5002"); // fatnt
 }
@@ -75,8 +75,8 @@ Session::Impl::interaction(const Request& r, const milliseconds rcv_timeout) {
 }
 
 Notification
-Session::Impl::notification(void) {
-    const RecvTimeoutGuard guard(notification_socket, 10 * 1000);
+Session::Impl::notification(const milliseconds rcv_timeout) {
+    const RecvTimeoutGuard guard(notification_socket, integer_cast<nng_duration>(rcv_timeout.count()));
     buffer nntf = notification_socket.recv();
     vector<unsigned char> ntf(nntf.data<unsigned char>(), nntf.data<unsigned char>() + nntf.size());
     return decode_nng_ntf(ntf).ntf;
@@ -94,6 +94,6 @@ Session::interaction(const Request& r, const milliseconds rcv_timeout) {
 }
 
 Notification
-Session::notification(void) {
-    return pimpl->notification();
+Session::notification(const milliseconds rcv_timeout) {
+    return pimpl->notification(rcv_timeout);
 }

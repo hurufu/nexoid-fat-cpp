@@ -16,7 +16,7 @@ namespace scapi::nngpp {
         interaction(const ::scapi::Request&, std::chrono::milliseconds) override;
 
         ::scapi::Notification
-        notification(void) override;
+        notification(std::chrono::milliseconds) override;
     };
 
 }

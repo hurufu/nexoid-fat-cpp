@@ -364,10 +364,10 @@ struct ExceptionFile* e9 = &(struct ExceptionFile){
     .next = NULL
 };
 
-struct CombinationListAndParameters* const ec = &(struct CombinationListAndParameters){
+struct CombinationListAndParameters* ec = &(struct CombinationListAndParameters){
     .terminalAid = { .l_raw = 7, .raw = { 0xA0, 0x00, 0x00, 0x00, 0x03, 0x20, 0x10 } },
     .kernelId = 0x03,
-    .supportingServices = (union ConfiguredServices){
+    .supportingServices = {
         .payment = 1,
         .refund = 1,
         .cancellation = 1

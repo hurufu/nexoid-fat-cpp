@@ -14,7 +14,7 @@ namespace scapi {
         interaction(const ::scapi::Request&, std::chrono::milliseconds = std::chrono::milliseconds(-1)) = 0;
 
         virtual ::scapi::Notification
-        notification(void) = 0;
+        notification(std::chrono::milliseconds = std::chrono::milliseconds(-1)) = 0;
     };
 
 }
