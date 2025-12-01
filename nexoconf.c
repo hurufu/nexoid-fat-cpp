@@ -2,11 +2,11 @@
 
 struct PermanentTerminalSpecificData e0 = {
     .ifdSerialNumber = &(struct string8){ .s = "123456" },
-    .commandKeyBypassPinLabel = &(struct string6){ .s = "NO PIN" },
-    .commandKeyClearLabel = { .s = "CLEAR" },
-    .commandKeyEnterLabel = { .s = "ENTER" },
-    .commandKeyScrollLabel = { .s = "SCROL" },
-    .commandKeyChangeApplicationLabel = { .s = "C APP" }
+    .commandKeyBypassPinLabel = &(struct string6){ .s = {'N','O',' ','P','I','N'} },
+    .commandKeyClearLabel = { .s = {'C','L','E','A','R'} },
+    .commandKeyEnterLabel = { .s = {'E','N','T','E','R'} },
+    .commandKeyScrollLabel = { .s = {'S','C','R','O','L'} },
+    .commandKeyChangeApplicationLabel = { .s = {'C',' ','A','P','P'} }
 };
 
 struct TerminalSpecificData e1 = {
