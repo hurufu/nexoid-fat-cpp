@@ -67,6 +67,7 @@ namespace scapi {
       , ::std::monostate // Reboot
       , AmountEntry
       , CardInserted
+      , ::std::monostate // Timeout
     > Event;
 
     typedef ::std::variant<

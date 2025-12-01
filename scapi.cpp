@@ -321,6 +321,12 @@ scapi_Wait_For_Event(void) noexcept try {
     return SCAPI_NEW_EVENT;
 } catch (...) {
     TtdKeeper::instance().handle_exception(__func__);
+    if (ttd.terminalErrorReason == TER_TIMEOUT) {
+        TtdKeeper::instance().update(scapi::Event(in_place_index<7>));
+        ttd.terminalErrorReason = TE_NONE;
+        ttd.terminalErrorIndicator = false;
+        return SCAPI_NEW_EVENT;
+    }
     return SCAPI_NOK;
 }
 
