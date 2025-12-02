@@ -576,6 +576,8 @@ map_event_from_asn1c(const struct ScapiEvent* const e) {
         return map_amount_entry_from_asn1c(e->choice.amountEntry);
     case ScapiEvent_PR_cardInserted:
         return scapi::Event(in_place_index<6>);
+    case ScapiEvent_PR_oneCtlsCardActivated:
+        return scapi::Event(in_place_index<8>);
     case ScapiEvent_PR_NOTHING:
     default:
         throw bad_mapping(e->present);

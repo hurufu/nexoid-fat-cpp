@@ -59,6 +59,9 @@ namespace scapi {
     struct CardInserted {
     };
 
+    struct OneCtlsCardActivated {
+    };
+
     typedef ::std::variant<
         LanguageSelection
       , ServiceSelection
@@ -68,6 +71,7 @@ namespace scapi {
       , AmountEntry
       , CardInserted
       , ::std::monostate // Timeout
+      , OneCtlsCardActivated
     > Event;
 
     typedef ::std::variant<

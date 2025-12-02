@@ -70,13 +70,19 @@ struct TerminalSpecificData e1 = {
         .l = 5,
         .a = {
             { .e = LANG_POLISH },
+            { .e = LANG_GERMAN },
+            { .e = LANG_FRENCH },
+            { .e = LANG_LATVIAN },
+            { .e = LANG_LITHUANIAN },
             { .e = LANG_ENGLISH },
             { .e = LANG_DANISH },
+            { .e = LANG_DUTCH },
             { .e = LANG_CZECH },
-            { .e = LANG_RUSSIAN },
+            { .e = LANG_UKRAINIAN },
+            { .e = LANG_ALBANIAN },
         }
     },
-    .cardholderDefaultLanguage = { .e = LANG_ENGLISH }
+    .cardholderDefaultLanguage = { .e = LANG_FRENCH }
 };
 
 struct ApplicationProfileSelectionTable* e2 = &(struct ApplicationProfileSelectionTable){
