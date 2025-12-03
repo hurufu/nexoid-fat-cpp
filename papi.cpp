@@ -112,6 +112,14 @@ papi_Specific_Processing_Based_On_Pan(void) noexcept try {
     return PAPI_NOK;
 }
 
+extern "C" enum PapiResult
+papi_Specific_Processing_Based_On_Fci(void) noexcept try {
+    return PAPI_DONE;
+} catch (...) {
+    TtdKeeper::instance().handle_exception(__func__);
+    return PAPI_NOK;
+}
+
 extern "C" enum PapiCvmResult
 papi_Proprietary_Cvm_Condition_Code_Processing(const struct CvRule cvRule) noexcept try {
     return PAPI_CVM_NOT_APPLICABLE;

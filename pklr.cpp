@@ -67,6 +67,32 @@ pklr_Build_Candidate_List(void) {
 }
 
 enum PklrResult
+pklr_Build_Candidate_List_Ctless(void) {
+    static struct CandidateList cl = {
+        .l_entry = 1,
+        .entry = {}
+    };
+    cl.entry[0] = {};
+    cl.entry[0].ApplicationPriorityIndicator = {};
+    cl.entry[0].ApplicationLabel = (struct string16){ "TestApp", {} };
+    cl.entry[0].ApplicationPreferredName = (struct string16){ "TestApp #1", {} };
+    cl.entry[0].IssuerCodeTableIndex = ISO_CODE_TABLE_1;
+    cl.entry[0].TerminalPriorityIndicator = 0;
+    cl.entry[0].ApplicationPriorityIndicator.priority = 0;
+    cl.entry[0].ApplicationPriorityIndicator.cardholderConfirmationRequired = 0;
+    cl.entry[0].DfName = (struct Aid){
+        .l_raw = 6, {}
+    };
+    static const uint8_t tmp[] = { 0xA0, 0x00, 0x00, 0x00, 0x00, 0x01 };
+    memcpy(cl.entry[0].DfName.raw, tmp, sizeof tmp);
+    g_CandidateList = &cl;
+    ttd.processingStatus.buildingCandidateListUsingListOfAid = 1;
+    ep.cd.applicationEffectiveDate = acp((union yymmdd){ 0x15, 0x01, 0x01 });
+    ep.cd.applicationExpirationDate = acp((union yymmdd){ 0x25, 0x12, 0x31 });
+    return PKLR_OK;
+}
+
+enum PklrResult
 pklr_Kernel_E_Processing(void) {
 #   if 1
     return Kernel_E_Processing();
