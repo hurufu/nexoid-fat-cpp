@@ -53,6 +53,7 @@ _CFLAGS             += $(addprefix -W,$(WARNINGS))
 CFLAGS              ?= $(_CFLAGS)
 #CFLAGS              += -DASN_EMIT_DEBUG=1
 #CFLAGS              += -DASN_THREAD_SAFE
+ASMFLAGS            :=
 
 LDFLAGS             := -pthread -latomic -Wl,--unresolved-symbols=ignore-in-object-files
 

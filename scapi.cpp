@@ -24,7 +24,7 @@ using scapi::Session,
       scapi::AckEntry,
       scapi::UpdateInterfaces;
 
-static unique_ptr<Session> s_scapi;
+unique_ptr<Session> s_scapi;
 
 static int
 classify_to_variant_index(const CardholderMessage m) {

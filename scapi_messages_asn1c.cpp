@@ -377,6 +377,9 @@ map_scapi_request(const ::scapi::Request& r) {
 #       endif
         break;
     }
+    case 4:
+        ret.present = ScapiRequest_PR_buildCandidateList;
+        break;
     default:
         throw bad_variant_mapping(r, "Can't encode ScapiRequest"); // FIXME: Memory leak
     }
@@ -433,6 +436,33 @@ map_nak_from_asn1c(const struct ScapiNak& n) {
     };
 }
 
+static vector<CandidateApplication>
+map_candidate_application_list(const ScapiCandidateList_t& cl) {
+    vector<CandidateApplication> ret;
+    assert(cl.list.count >= 0);
+    ret.reserve(static_cast<size_t>(cl.list.count));
+    for (int i = 0; i < cl.list.count; i++) {
+        const ScapiCandidateApplication_t* c = cl.list.array[i];
+        CandidateApplication tmp = {
+            .ApplicationPriorityIndicator = { .u = c->applicationPriorityIndicator.buf[0] },
+            .ApplicationLabel = {},
+            .ApplicationPreferredName = {},
+            .IssuerCodeTableIndex = static_cast<IssuerCodeTableIndex>(c->issuerCodeTableIndex),
+            .EeaProductIdentification = {},
+            .TerminalPriorityIndicator = 0,
+            .AdfName = {},
+            .KernelId = static_cast<Kernel>(c->kernelId),
+            .TerminalAid = {},
+            .ExtendedAid = nullptr
+        };
+        memcpy(tmp.ApplicationLabel.s, c->applicationLabel.buf, c->applicationLabel.size);
+        memcpy(tmp.AdfName.raw, c->adf.buf, c->adf.size);
+        memcpy(tmp.TerminalAid.raw, c->aidTerminal.buf, c->aidTerminal.size);
+        ret.push_back(tmp);
+    }
+    return ret;
+}
+
 static scapi::CardholderPin
 map_pin_from_asn1c(const struct ScapiCardholderPin p) {
     switch (p.present) {
@@ -483,6 +513,8 @@ map_nng_from_asn1c(const ScapiResponse& rsp) {
         throw runtime_error("Not implemented 3");
     case ScapiResponse_PR_NOTHING:
         break;
+    case ScapiResponse_PR_candidateList:
+        return map_candidate_application_list(rsp.choice.candidateList);
     }
     throw bad_mapping(rsp.present);
 }

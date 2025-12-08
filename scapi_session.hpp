@@ -15,6 +15,11 @@ namespace scapi {
 
         virtual ::scapi::Notification
         notification(std::chrono::milliseconds = std::chrono::milliseconds(-1)) = 0;
+
+        // TODO: The idea is to ask SCAP about which methods it implements and then
+        // set pklr accordingly.
+        virtual std::vector<CandidateApplication>
+        build_candidate_list(const ::scapi::BuildCandidateList&, std::chrono::milliseconds = std::chrono::milliseconds(50)) = 0;
     };
 
 }

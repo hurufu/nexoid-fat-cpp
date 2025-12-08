@@ -32,6 +32,9 @@ namespace scapi {
         void* extraData;
     };
 
+    struct BuildCandidateList {
+    };
+
     struct LanguageSelection {
         union ::Iso639_1 selectedLanguage;
     };
@@ -128,12 +131,16 @@ namespace scapi {
       , ::std::vector<Interaction> // output
       , PrintMessage // print
       , ::std::vector<Interaction> // entry
+        /// Extension
+      , BuildCandidateList
     > Request;
 
     typedef ::std::variant<
         Nak // nak
       , ::std::monostate // ack
       , ::std::vector<AckEntry> // ackEntry
+        /// Extension
+      , std::vector<CandidateApplication>
     > Response;
 
     struct Notification {
