@@ -48,6 +48,7 @@ join(const Container& c, const std::string& delimeter = ", ") {
     return ret;
 }
 
+#if __cplusplus < 202002L
 template<typename Clock, typename Duration>
 std::ostream&
 operator << (std::ostream& os, const std::chrono::time_point<Clock, Duration>& tp) {
@@ -55,6 +56,7 @@ operator << (std::ostream& os, const std::chrono::time_point<Clock, Duration>& t
     struct tm tm = {};
     return os << std::put_time(localtime_r(&t, &tm), "%F %T");
 }
+#endif
 
 template <typename UnsignedInteger, typename Bcd>
 Bcd convert_int_to_bcd(const UnsignedInteger from) {
