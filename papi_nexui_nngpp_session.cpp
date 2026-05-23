@@ -2,6 +2,7 @@
 
 #include "exceptions.hpp"
 #include "utils.hpp"
+#include "cmdline.hpp"
 
 #include <nngpp/nngpp.h>
 #include <nngpp/protocol/req0.h>
@@ -26,7 +27,7 @@ operator << (ostream& os, const buffer& rhs) {
 
 struct NexuiSession::Impl {
     socket interaction_socket;
-    const char* const addr = "tcp://192.168.0.1:5003"; // nexui
+    const char* const addr;
     const milliseconds send_timeout = 1s;
     const milliseconds recv_timeout = 1min + 5s;
     const char* const name = "papi_ui";
@@ -105,7 +106,10 @@ NexuiSession::Impl::ExchangeLogger::~ExchangeLogger(void) noexcept try {
     // FIXME: Do something better then suppressing all possible errors in ExchangeLogger destructor
 }
 
-NexuiSession::Impl::Impl(void) : interaction_socket(req::open()) {
+NexuiSession::Impl::Impl(void) :
+    interaction_socket(req::open()),
+    addr(get_cmdline().gui_ipc.c_str())
+{
     set_opt_recv_timeout(interaction_socket, integer_cast<nng_duration>(recv_timeout.count()));
     set_opt_send_timeout(interaction_socket, integer_cast<nng_duration>(send_timeout.count()));
     set_opt_socket_name(interaction_socket, name);

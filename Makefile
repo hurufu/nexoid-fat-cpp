@@ -102,7 +102,7 @@ nexoconf.o: nexoconf.c
 
 .PHONY: run
 run: $(EXECUTABLE)
-	./$< --req-ipc "tcp://192.168.0.1:5001" --ntf-ipc "tcp://0.0.0.0:5002"
+	./$< --req-ipc "tcp://192.168.0.1:5001" --ntf-ipc "tcp://0.0.0.0:5002" --gui-ipc "tcp://192.168.0.1:5003"
 
 .PHONY: clean
 clean: F += $(EXECUTABLE) trace.log tags $(TRACE_LOG) $(NOHUP_OUT)

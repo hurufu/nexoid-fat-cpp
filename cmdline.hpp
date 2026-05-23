@@ -9,6 +9,8 @@ struct CmdlineConfig {
     std::string req_ipc;
     /// Address nexoid-cpp listens on for incoming notifications (--ntf-ipc).
     std::string ntf_ipc;
+    /// Address nexoid-cpp dials to reach the nexui GUI socket (--gui-ipc).
+    std::string gui_ipc;
 };
 
 /// Parse argc/argv into a CmdlineConfig.
