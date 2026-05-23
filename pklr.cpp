@@ -41,6 +41,11 @@ pklr_Offline_Data_Authentication(void) {
 }
 
 enum PklrResult
+pklr_Build_Candidate_List_Ctless(void) {
+    return PKLR_NOK;
+}
+
+enum PklrResult
 pklr_Build_Candidate_List(void) {
     static struct CandidateList cl = {
         .l_entry = 1,

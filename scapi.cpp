@@ -311,7 +311,7 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
 }
 
 extern "C" enum ScapiResult
-scapi_Wait_For_Event(void) noexcept try {
+scapi_Wait_For_Event(bool) noexcept try {
     cout << system_clock::now() << " D nexoid-cpp    "
          << __func__ << " ..." << endl;
     const auto ntf = s_scapi->notification();

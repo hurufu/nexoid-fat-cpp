@@ -126,3 +126,8 @@ papi_Proprietary_Cvm_Support_Check(const struct CvRule cvRule) noexcept try {
     TtdKeeper::instance().handle_exception(__func__);
     return PAPI_CVM_NOT_SUPPORTED;
 }
+
+extern "C" enum PapiResult
+papi_Specific_Processing_Based_On_Fci() {
+    return PAPI_OK;
+}
