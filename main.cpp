@@ -1,5 +1,6 @@
 #include "tostring.hpp"
 #include "utils.hpp"
+#include "cmdline.hpp"
 
 extern "C" {
 
@@ -38,7 +39,14 @@ map_ProcedureResultToLogLevel(const enum ProcedureResult r) noexcept {
     }
 }
 
-int main() {
+int main(int argc, char* argv[]) {
+    try {
+        set_cmdline(parse_cmdline(argc, argv));
+    } catch (const std::invalid_argument& e) {
+        cerr << "nexoid-cpp: " << e.what() << endl;
+        cerr << "Usage: nexoid-cpp --req-ipc <addr> --ntf-ipc <addr>" << endl;
+        return 1;
+    }
     const enum ProcedureResult pRes = Main();
     cout << system_clock::now() << ' '
          << map_ProcedureResultToLogLevel(pRes) << " nexoid-cpp    "
