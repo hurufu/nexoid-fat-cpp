@@ -45,7 +45,7 @@ _CXXFLAGS           += $(addprefix -W,$(WARNINGS))
 _CXXFLAGS           += $(addprefix -f,$(GCC_FEATURES))
 _CXXFLAGS           += $(if $(USE_COLOR),-fdiagnostics-color=always,)
 CXXFLAGS            ?= $(_CXXFLAGS)
-CXXFLAGS            += -std=c++17
+CXXFLAGS            += -std=c++23
 CXXFLAGS            += -fpermissive
 
 _CFLAGS             := -g$(DL) -O$(OL)
