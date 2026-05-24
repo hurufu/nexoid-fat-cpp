@@ -4,11 +4,15 @@ extern "C" {
 #include "nexoid-ed/src/NexoFast.h"
 }
 
+#include "ttd_keeper.hpp"
+#include "scapi_internal.hpp"
 #include "utils.hpp"
 #include <cstring>
 
-// FIXME: Remote it!
+// FIXME: Remove it!
 extern struct CandidateList* g_CandidateList;
+
+using namespace std;
 
 enum PklrResult
 pklr_Process_Read_Record(const uint8_t p1, const uint8_t p2) {
@@ -69,6 +73,23 @@ pklr_Build_Candidate_List(void) {
     ep.cd.applicationEffectiveDate = acp((union yymmdd){ 0x15, 0x01, 0x01 });
     ep.cd.applicationExpirationDate = acp((union yymmdd){ 0x25, 0x12, 0x31 });
     return PKLR_OK;
+}
+
+enum PklrResult
+pklr_Build_Candidate_List_Ctless(void) try {
+    static CandidateList cl;
+    if (g_CandidateList != nullptr)
+        throw logic_error("Candidate List must be fresh");
+    const auto vec = s_scapi->build_candidate_list({});
+    cl.l_entry = vec.size();
+    if (cl.l_entry > elementsof(cl.entry))
+        throw overflow_error("Too many candidates");
+    copy(vec.begin(), vec.end(), cl.entry);
+    g_CandidateList = &cl;
+    return PKLR_OK;
+} catch (...) {
+    TtdKeeper::instance().handle_exception(__func__);
+    return PKLR_NOK;
 }
 
 enum PklrResult

@@ -2,11 +2,11 @@
 
 struct PermanentTerminalSpecificData e0 = {
     .ifdSerialNumber = &(struct string8){ .s = "123456" },
-    .commandKeyBypassPinLabel = &(struct string6){ .s = "NO PIN" },
-    .commandKeyClearLabel = { .s = "CLEAR" },
-    .commandKeyEnterLabel = { .s = "ENTER" },
-    .commandKeyScrollLabel = { .s = "SCROL" },
-    .commandKeyChangeApplicationLabel = { .s = "C APP" }
+    .commandKeyBypassPinLabel = &(struct string6){ .s = {'N','O',' ','P','I','N'} },
+    .commandKeyClearLabel = { .s = {'C','L','E','A','R'} },
+    .commandKeyEnterLabel = { .s = {'E','N','T','E','R'} },
+    .commandKeyScrollLabel = { .s = {'S','C','R','O','L'} },
+    .commandKeyChangeApplicationLabel = { .s = {'C',' ','A','P','P'} }
 };
 
 struct TerminalSpecificData e1 = {
@@ -70,13 +70,19 @@ struct TerminalSpecificData e1 = {
         .l = 5,
         .a = {
             { .e = LANG_POLISH },
+            { .e = LANG_GERMAN },
+            { .e = LANG_FRENCH },
+            { .e = LANG_LATVIAN },
+            { .e = LANG_LITHUANIAN },
             { .e = LANG_ENGLISH },
             { .e = LANG_DANISH },
+            { .e = LANG_DUTCH },
             { .e = LANG_CZECH },
-            { .e = LANG_RUSSIAN },
+            { .e = LANG_UKRAINIAN },
+            { .e = LANG_ALBANIAN },
         }
     },
-    .cardholderDefaultLanguage = { .e = LANG_ENGLISH }
+    .cardholderDefaultLanguage = { .e = LANG_FRENCH }
 };
 
 struct ApplicationProfileSelectionTable* e2 = &(struct ApplicationProfileSelectionTable){
@@ -147,11 +153,12 @@ struct ServiceSettingsTable e4 = {
             .serviceIdentifier = S_CARD_VALIDITY_CHECK,
             .cardholderInitialMessage = CRDHLDR_MSG_WELCOME,
             .serviceSettings = {
-                .msrProcessingModeSupported = 1,
+                .msrProcessingModeSupported = 0,
                 .ServiceProtected = 1,
-                .contactProcessingModeSupported = 1,
-                .contactChipHasPriority = 1,
+                .contactProcessingModeSupported = 0,
+                .contactChipHasPriority = 0,
                 .manualEntryProcessingModeSupported = 1,
+                .ctlsProcessingModeSupported = 1,
             },
             .allowedServiceStartEvents = {
                 .manualEntry = 1,
@@ -171,11 +178,12 @@ struct ServiceSettingsTable e4 = {
             .serviceIdentifier = S_PAYMENT,
             .cardholderInitialMessage = CRDHLDR_MSG_WELCOME,
             .serviceSettings = {
-                .msrProcessingModeSupported = 1,
+                .msrProcessingModeSupported = 0,
                 .ServiceProtected = 0,
-                .contactProcessingModeSupported = 1,
-                .contactChipHasPriority = 1,
+                .contactProcessingModeSupported = 0,
+                .contactChipHasPriority = 0,
                 .manualEntryProcessingModeSupported = 1,
+                .ctlsProcessingModeSupported = 1,
             },
             .allowedServiceStartEvents = {
                 .amountEntry = 1,
@@ -359,5 +367,29 @@ struct ExceptionFile* e9 = &(struct ExceptionFile){
             .value = "47"
         }
     },
+    .next = NULL
+};
+
+struct CombinationListAndParameters* ec = &(struct CombinationListAndParameters){
+    .terminalAid = { .l_raw = 7, .raw = { 0xA0, 0x00, 0x00, 0x00, 0x03, 0x20, 0x10 } },
+    .kernelId = 0x03,
+    .supportingServices = {
+        .payment = 1,
+        .refund = 1,
+        .cancellation = 1
+    },
+    .terminalTransactionQualifiers = &(union TerminalTransactionQualifiers){
+        .kernel3 = {
+            .emvModeSupported = 1,
+            .onlinePinSupported = 1,
+            .signatureSupported = 1,
+            .offlineDataAuthenticationForOnlineAuthSupported = 1,
+            .issuerUpdateProcessingSupported = 1,
+            .consumerDeviceCvmSupported = 1
+        }
+    },
+    .readerCtlessTransactionLimit = &(union bcd6){ .v = { 0x90, 0x00, 0x00, 0x00, 0x00 } },
+    .readerCtlessFloorLimit = &(union bcd6){ .v = { 0x01, 0x00, 0x00, 0x00 } },
+    .readerCvmRequiredLimit = &(union bcd6){ .v = { 0x10, 0x00 } },
     .next = NULL
 };

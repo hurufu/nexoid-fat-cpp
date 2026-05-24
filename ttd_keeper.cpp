@@ -109,6 +109,8 @@ map_event_to_ttd_event_index(const scapi::Event& e) {
         case 4: return E_REBOOT_REQUESTED;
         case 5: return E_AMOUNT_ENTRY;
         case 6: return E_CARD_INSERTED;
+        case 7: return E_TIMEOUT;
+        case 8: return E_ONE_CTLS_CARD_ACTIVATED;
     }
     throw runtime_error("Event can't be mapped");
 }
@@ -133,6 +135,8 @@ TtdKeeper::update(const scapi::Event& e) {
     case E_TERMINATION_REQUESTED:
     case E_REBOOT_REQUESTED:
     case E_CARD_INSERTED:
+    case E_TIMEOUT:
+    case E_ONE_CTLS_CARD_ACTIVATED:
         break;
     case E_AMOUNT_ENTRY:
         set_amounts_in_ttd(get<5>(e));
@@ -235,7 +239,7 @@ mapto_TerminalErrorReason_for_libsocket(const int e) {
 void
 TtdKeeper::handle_exception(const char* const func) noexcept {
     ttd.terminalErrorIndicator = true;
-    ostream& os = cout;
+    ostream& os = clog;
     try {
         os << system_clock::now() << " E nexoid-fat    ";
         if (func) {

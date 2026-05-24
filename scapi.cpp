@@ -24,7 +24,7 @@ using scapi::Session,
       scapi::AckEntry,
       scapi::UpdateInterfaces;
 
-static unique_ptr<Session> s_scapi;
+unique_ptr<Session> s_scapi;
 
 static int
 classify_to_variant_index(const CardholderMessage m) {
@@ -250,7 +250,7 @@ scapi_Update_Interfaces(const enum InterfaceStatus status) noexcept try {
     const Request req = (UpdateInterfaces){
         .interfaceStatus = status
     };
-    const auto rsp = s_scapi->interaction(req);
+    const auto rsp = s_scapi->interaction(req, 1min);
     if (rsp.index() == 1) {
         return SCAPI_OK;
     } else {
@@ -311,16 +311,22 @@ scapi_Data_Entry_Interaction(size_t size, const enum CardholderMessage msg[]) no
 }
 
 extern "C" enum ScapiResult
-scapi_Wait_For_Event(bool) noexcept try {
+scapi_Wait_For_Event(const bool isIdle) noexcept try {
     cout << system_clock::now() << " D nexoid-cpp    "
          << __func__ << " ..." << endl;
-    const auto ntf = s_scapi->notification();
+    const auto ntf = s_scapi->notification(isIdle ? 24h : 10s);
     for (const auto& e : ntf.events) {
         TtdKeeper::instance().update(e);
     }
     return SCAPI_NEW_EVENT;
 } catch (...) {
     TtdKeeper::instance().handle_exception(__func__);
+    if (ttd.terminalErrorReason == TER_TIMEOUT) {
+        TtdKeeper::instance().update(scapi::Event(in_place_index<7>));
+        ttd.terminalErrorReason = TE_NONE;
+        ttd.terminalErrorIndicator = false;
+        return SCAPI_NEW_EVENT;
+    }
     return SCAPI_NOK;
 }
 

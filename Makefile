@@ -53,13 +53,14 @@ _CFLAGS             += $(addprefix -W,$(WARNINGS))
 CFLAGS              ?= $(_CFLAGS)
 #CFLAGS              += -DASN_EMIT_DEBUG=1
 #CFLAGS              += -DASN_THREAD_SAFE
+ASMFLAGS            :=
 
-LDFLAGS             := -pthread -latomic
+LDFLAGS             := -pthread -latomic -Wl,--unresolved-symbols=ignore-in-object-files
 
 TMPDIR              ?= /tmp
 TRACE_LOG           := $(TMPDIR)/$(EXECUTABLE).txt
 NOHUP_OUT           := nohup.out
-LDLIBS              := -lsocket++ -lnng
+LDLIBS              := -l:libsocket++.a -l:libsocket.a -lnng
 
 # Unit tests settings #########################################################
 UT_EXECUTABLE  := ut/ut
