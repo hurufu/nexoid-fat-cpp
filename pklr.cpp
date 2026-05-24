@@ -45,11 +45,6 @@ pklr_Offline_Data_Authentication(void) {
 }
 
 enum PklrResult
-pklr_Build_Candidate_List_Ctless(void) {
-    return PKLR_NOK;
-}
-
-enum PklrResult
 pklr_Build_Candidate_List(void) {
     static struct CandidateList cl = {
         .l_entry = 1,
@@ -63,9 +58,8 @@ pklr_Build_Candidate_List(void) {
     cl.entry[0].TerminalPriorityIndicator = 0;
     cl.entry[0].ApplicationPriorityIndicator.priority = 0;
     cl.entry[0].ApplicationPriorityIndicator.cardholderConfirmationRequired = 0;
-    cl.entry[0].DfName = (struct Aid){
-        .l_raw = 6, {}
-    };
+    cl.entry[0].DfName = {};
+    cl.entry[0].DfName.l_raw = 6;
     static const uint8_t tmp[] = { 0xA0, 0x00, 0x00, 0x00, 0x00, 0x01 };
     memcpy(cl.entry[0].DfName.raw, tmp, sizeof tmp);
     g_CandidateList = &cl;

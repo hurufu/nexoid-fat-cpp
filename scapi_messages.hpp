@@ -10,6 +10,7 @@ extern "C" {
 #include <optional>
 #include <vector>
 #include <string>
+#include <any>
 
 namespace scapi {
 
@@ -29,7 +30,7 @@ namespace scapi {
 
     struct PrintMessage {
         enum ::PrintMessage type;
-        void* extraData;
+        ::std::any extraData;
     };
 
     struct BuildCandidateList {
@@ -65,7 +66,7 @@ namespace scapi {
     struct OneCtlsCardActivated {
     };
 
-    typedef ::std::variant<
+    using Event = ::std::variant<
         LanguageSelection
       , ServiceSelection
       , ManualEntry
@@ -75,7 +76,7 @@ namespace scapi {
       , CardInserted
       , ::std::monostate // Timeout
       , OneCtlsCardActivated
-    > Event;
+    >;
 
     typedef ::std::variant<
         enum ::CardholderMessage // msg
