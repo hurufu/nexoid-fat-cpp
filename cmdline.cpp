@@ -27,7 +27,7 @@ CmdlineConfig parse_cmdline(int argc, char* argv[]) {
         const std::string_view arg(argv[i]);
         if      (arg == "--req-ipc") cfg.req_ipc = require_next(i, "--req-ipc");
         else if (arg == "--ntf-ipc") cfg.ntf_ipc = require_next(i, "--ntf-ipc");
-        else if (arg == "--gui-ipc") cfg.gui_ipc = require_next(i, "--ntf-ipc");
+        else if (arg == "--gui-ipc") cfg.gui_ipc = require_next(i, "--gui-ipc");
         else throw std::invalid_argument("Unknown argument: " + std::string(arg));
     }
 
