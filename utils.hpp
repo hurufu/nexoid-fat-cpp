@@ -11,6 +11,7 @@ extern "C" {
 #include <chrono>
 #include <ctime>
 #include <stdexcept>
+#include <vector>
 
 template <typename L, typename R>
 inline constexpr L
@@ -47,6 +48,20 @@ join(const Container& c, const std::string& delimeter = ", ") {
     }
     return ret;
 }
+
+class stream_state {
+    std::ios_base& ref;
+    const std::ios_base::fmtflags flags;
+public:
+    stream_state(std::ios_base& ios);
+    ~stream_state();
+};
+
+struct as_hex {
+    const std::vector<unsigned char>& buf;
+};
+
+std::ostream& operator<<(std::ostream& os, as_hex v);
 
 #if __cplusplus < 202002L
 template<typename Clock, typename Duration>
