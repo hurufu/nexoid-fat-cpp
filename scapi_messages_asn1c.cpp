@@ -67,6 +67,16 @@ map_optional_integer_as_bcd_from_asn1c(const INTEGER_t* const b) {
     return map_integer_as_bcd_from_asn1c<union bcd6>(b);
 }
 
+
+static scapi::Event
+map_event_from_asn1c(const struct ScapiEvent* const e);
+
+static ::scapi::Notification
+map_nng_ntf_from_asn1c(const ScapiNotification& rsp);
+
+static ::scapi::Response
+map_nng_from_asn1c(const ScapiResponse& rsp);
+
 static optional<bool>
 map_optinal_boolean_from_asn1c(const BOOLEAN_t* const b) {
     if (!b) {
@@ -414,38 +424,20 @@ map_to_asn1c(const ::scapi::socket::Request& r) {
 }
 
 static ::scapi::socket::Response
-map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>>& rsp) {
+map_socket_response_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>>& rsp) {
     const auto ptr = rsp.get();
-    ::scapi::socket::Response ret;
     switch (ptr->rsp.present) {
-    case rsp_PR_registration:
-        ret.emplace<1>();
-        break;
-    case rsp_PR_interaction:
-        ret.emplace<0>();
-        switch (ptr->rsp.choice.interaction.present) {
-            case ScapiResponse_PR_ack:
-                ret.emplace<0>(::scapi::Response(in_place_index<1>));
-                break;
-            case ScapiResponse_PR_nak:
-            case ScapiResponse_PR_ackEntry:
-            case ScapiResponse_PR_ackServiceAuthorised:
-            case ScapiResponse_PR_candidateList:
-            default:
-                throw runtime_error("Not implemented 3");
-        }
-        break;
-    case rsp_PR_notification:
-        ret.emplace<2>();
-        for (int i = 0; i < ptr->rsp.choice.notification.events.list.count; i++) {
-            throw runtime_error("Not implemented 4");
-        }
-        break;
-    case rsp_PR_NOTHING:
-    default:
-        throw bad_mapping(ptr->rsp.present);
+        case rsp_PR_registration:
+            return (scapi::socket::RegistrationAnswer){};
+        case rsp_PR_interaction:
+            return map_nng_from_asn1c(ptr->rsp.choice.interaction);
+        case rsp_PR_notification:
+            return map_nng_ntf_from_asn1c(ptr->rsp.choice.notification);
+        case rsp_PR_NOTHING:
+        default:
+            break;
     }
-    return ret;
+    throw bad_mapping(ptr->rsp.present);
 }
 
 static scapi::Nak
@@ -671,7 +663,7 @@ consume_bytes_cb(const void* const b, const size_t s, void* const dst) {
 }
 
 vector<unsigned char>
-encode(const ::scapi::socket::Request& r) {
+encode_socket(const ::scapi::socket::Request& r) {
     static const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketRequest;
     const auto c = map_to_asn1c(r);
     validate(tp, c.get());
@@ -722,20 +714,8 @@ make_ack() {
     return ret;
 }
 
-static vector<unsigned char> correct_ack() {
-    const auto c = make_ack();
-    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketResponse;
-    validate(tp, c.get());
-    vector<unsigned char> ret;
-    const struct asn_enc_rval_s res = der_encode(tp, c.get(), &consume_bytes_cb, &ret);
-    if (res.encoded < 0) {
-        throw runtime_error("Can't encode using DER");
-    }
-    return ret;
-}
-
 ::scapi::socket::Response
-decode(const vector<unsigned char>& buf) {
+decode_socket(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
     ScapiSocketResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketResponse;
@@ -747,9 +727,6 @@ decode(const vector<unsigned char>& buf) {
     const asn_dec_rval_t r = ber_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> rsp(tmp);
     cout << as_hex{buf} << endl;
-#   if 0
-    cout << "Must have been: " << as_hex{correct_ack()} << endl;
-#   endif
 
 #   endif
     if (asn_fprint(stdout, tp, tmp) != 0) {
@@ -765,7 +742,7 @@ decode(const vector<unsigned char>& buf) {
     }
 #   endif
     validate(tp, rsp.get());
-    return map_from_asn1c(rsp);
+    return map_socket_response_from_asn1c(rsp);
 }
 
 ::scapi::nng::Response

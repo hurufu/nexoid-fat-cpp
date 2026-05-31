@@ -66,15 +66,19 @@ namespace scapi {
     struct OneCtlsCardActivated {
     };
 
+    struct Terminate { };
+    struct Reboot { };
+    struct Timeout { };
+
     using Event = ::std::variant<
         LanguageSelection
       , ServiceSelection
       , ManualEntry
-      , ::std::monostate // Terminate
-      , ::std::monostate // Reboot
+      , Terminate
+      , Reboot
       , AmountEntry
       , CardInserted
-      , ::std::monostate // Timeout
+      , Timeout
       , OneCtlsCardActivated
     >;
 

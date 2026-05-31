@@ -5,10 +5,10 @@
 #include <vector>
 
 ::std::vector<unsigned char>
-encode(const ::scapi::socket::Request&);
+encode_socket(const ::scapi::socket::Request&);
 
 ::scapi::socket::Response
-decode(const ::std::vector<unsigned char>&);
+decode_socket(const ::std::vector<unsigned char>&);
 
 ::scapi::nng::Response
 decode_nng(const ::std::vector<unsigned char>& buf);

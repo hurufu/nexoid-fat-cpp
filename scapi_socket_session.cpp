@@ -40,15 +40,15 @@ Session::exch(const vector<unsigned char> req) {
 
 Session::Session(void)
     : stream("localhost", "50153") {
-        decode(exch(encode(RegistrationRequest{})));
+        decode_socket(exch(encode_socket(RegistrationRequest{})));
 }
 
 ::scapi::Response
 Session::interaction(const ::scapi::Request& r, std::chrono::milliseconds) {
-    return get<0>(decode(exch(encode(Request(r)))));
+    return get<0>(decode_socket(exch(encode_socket(Request(r)))));
 }
 
 ::scapi::Notification
 Session::notification(std::chrono::milliseconds) {
-    return get<2>(decode(exch(encode(NotificationRequest{}))));
+    return get<2>(decode_socket(exch(encode_socket(NotificationRequest{}))));
 }
