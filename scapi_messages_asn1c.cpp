@@ -3,6 +3,7 @@
 #include "utils.hpp"
 #include "ttd_keeper.hpp"
 #include "exceptions.hpp"
+#include "utils.hpp"
 
 #include <ScapiSocketRequest.h>
 #include <ScapiSocketResponse.h>
@@ -386,6 +387,8 @@ map_scapi_request(const ::scapi::Request& r) {
     return ret;
 }
 
+
+
 static unique_ptr<ScapiSocketRequest, asn1c_deleter<&asn_DEF_ScapiSocketRequest>>
 map_to_asn1c(const ::scapi::socket::Request& r) {
     ScapiSocketRequest* const c = reinterpret_cast<ScapiSocketRequest*>(calloc(1, sizeof(ScapiSocketRequest)));
@@ -419,8 +422,25 @@ map_from_asn1c(const unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_Scap
         ret.emplace<1>();
         break;
     case rsp_PR_interaction:
+        ret.emplace<0>();
+        switch (ptr->rsp.choice.interaction.present) {
+            case ScapiResponse_PR_ack:
+                ret.emplace<0>(::scapi::Response(in_place_index<1>));
+                break;
+            case ScapiResponse_PR_nak:
+            case ScapiResponse_PR_ackEntry:
+            case ScapiResponse_PR_ackServiceAuthorised:
+            case ScapiResponse_PR_candidateList:
+            default:
+                throw runtime_error("Not implemented 3");
+        }
+        break;
     case rsp_PR_notification:
-        throw runtime_error("Not implemented 2");
+        ret.emplace<2>();
+        for (int i = 0; i < ptr->rsp.choice.notification.events.list.count; i++) {
+            throw runtime_error("Not implemented 4");
+        }
+        break;
     case rsp_PR_NOTHING:
     default:
         throw bad_mapping(ptr->rsp.present);
@@ -656,9 +676,13 @@ encode(const ::scapi::socket::Request& r) {
     const auto c = map_to_asn1c(r);
     validate(tp, c.get());
     vector<unsigned char> ret;
+#   if 0
     const struct asn_enc_rval_s res = xer_encode(tp, c.get(), XER_F_CANONICAL, &consume_bytes_cb, &ret);
+#   else
+    const struct asn_enc_rval_s res = der_encode(tp, c.get(), &consume_bytes_cb, &ret);
+#   endif
     if (res.encoded < 0) {
-        throw runtime_error("Can't encode using XER");
+        throw runtime_error("Can't encode using DER");
     }
 
     return ret;
@@ -674,13 +698,39 @@ encode_nng(const ::scapi::nng::Request& r) {
     };
     validate(tp, &c);
     vector<unsigned char> ret;
+#   if 0
     const auto res = xer_encode(tp, &c, XER_F_CANONICAL, &consume_bytes_cb, &ret);
+#   else
+    const auto res = der_encode(tp, &c, &consume_bytes_cb, &ret);
+#   endif
     ASN_STRUCT_RESET(*tp, &c);
     if (res.encoded < 0) {
-        throw runtime_error("Can't encode using XER");
+        throw runtime_error("Can't encode using DER");
     }
     cout << system_clock::now() << " D nexoid-fat    "
          << "enc: " << string(ret.begin(), ret.end()) << endl;
+    return ret;
+}
+
+static unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>>
+make_ack() {
+    ScapiSocketResponse* const c = reinterpret_cast<ScapiSocketResponse*>(calloc(1, sizeof(ScapiSocketResponse)));
+    c->rsp.present = rsp_PR_interaction;
+    c->rsp.choice.interaction.present = ScapiResponse_PR_ack;
+    c->rsp.choice.interaction.choice.ack = 0;
+    unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> ret(c);
+    return ret;
+}
+
+static vector<unsigned char> correct_ack() {
+    const auto c = make_ack();
+    const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketResponse;
+    validate(tp, c.get());
+    vector<unsigned char> ret;
+    const struct asn_enc_rval_s res = der_encode(tp, c.get(), &consume_bytes_cb, &ret);
+    if (res.encoded < 0) {
+        throw runtime_error("Can't encode using DER");
+    }
     return ret;
 }
 
@@ -689,15 +739,25 @@ decode(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
     ScapiSocketResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiSocketResponse;
+#if 0
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
     unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> rsp(tmp);
     cout << "Received: \"" << string(buf.begin(), buf.end()) << '"' << endl;
+#   else
+    const asn_dec_rval_t r = ber_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+    unique_ptr<ScapiSocketResponse, asn1c_deleter<&asn_DEF_ScapiSocketResponse>> rsp(tmp);
+    cout << as_hex{buf} << endl;
+#   if 0
+    cout << "Must have been: " << as_hex{correct_ack()} << endl;
+#   endif
+
+#   endif
     if (asn_fprint(stdout, tp, tmp) != 0) {
         throw system_error(errno, generic_category(), "asn_DEF_ScapiSocketRequest printing failed");
     }
     if (RC_OK != r.code) {
         const string str_buf(buf.begin(), buf.end());
-        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for ::scapi::socket::Response");
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "ber_decode failed for ::scapi::socket::Response");
     }
 #   if 0
     if (r.consumed != buf.size()) {
@@ -716,10 +776,14 @@ decode_nng(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
     ScapiNngResponse* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNngResponse;
+#   if 0
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+#   else
+    const asn_dec_rval_t r = ber_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+#endif
     unique_ptr<ScapiNngResponse, asn1c_deleter<&asn_DEF_ScapiNngResponse>> rsp(tmp);
     if (RC_OK != r.code) {
-        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::nng::Response");
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "ber_decode failed for scapi::nng::Response");
     }
     validate(tp, rsp.get());
     return {
@@ -736,10 +800,14 @@ decode_nng_ntf(const vector<unsigned char>& buf) {
     asn_codec_ctx_t ctx = { };
     ScapiNngNotification* tmp = NULL;
     const asn_TYPE_descriptor_t* const tp = &asn_DEF_ScapiNngNotification;
+#   if 0
     const asn_dec_rval_t r = xer_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+#   else
+    const asn_dec_rval_t r = ber_decode(&ctx, tp, reinterpret_cast<void**>(&tmp), buf.data(), buf.size());
+#   endif
     unique_ptr<ScapiNngNotification, asn1c_deleter<&asn_DEF_ScapiNngNotification>> rsp(tmp);
     if (RC_OK != r.code) {
-        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "xer_decode failed for scapi::nng::Notification");
+        throw WithDecodingData<enum asn_dec_rval_code_e>(r.code, r.consumed, str_buf, "ber_decode failed for scapi::nng::Notification");
     }
     validate(tp, rsp.get());
     return {

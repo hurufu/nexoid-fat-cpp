@@ -50,5 +50,5 @@ Session::interaction(const ::scapi::Request& r, std::chrono::milliseconds) {
 
 ::scapi::Notification
 Session::notification(std::chrono::milliseconds) {
-    return get<1>(decode(exch(encode(NotificationRequest{}))));
+    return get<2>(decode(exch(encode(NotificationRequest{}))));
 }

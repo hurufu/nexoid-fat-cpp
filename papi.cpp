@@ -1,5 +1,6 @@
 #include "ttd_keeper.hpp"
 #include "papi_nexui_nngpp_session.hpp"
+#include "papi_nexui_dummy_session.hpp"
 #include "papi_logic.hpp"
 #include "papi_interface.hpp"
 #include <memory>
@@ -11,7 +12,7 @@ static unique_ptr<ProprietaryApi> s_papi;
 
 extern "C" enum PapiResult
 papi_Proprietary_Startup_Sequence(void) noexcept {
-    s_papi = make_unique<ProprietaryLogic>(make_unique<nngpp::NexuiSession>(), TtdKeeper::instance());
+    s_papi = make_unique<ProprietaryLogic>(move(make_unique<dummy::NexuiSession>()), TtdKeeper::instance());
     return s_papi->Proprietary_Startup_Sequence();
 }
 

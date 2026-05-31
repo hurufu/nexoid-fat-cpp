@@ -153,6 +153,9 @@ namespace scapi {
         struct RegistrationRequest {
         };
 
+        struct RegistrationAnswer {
+        };
+
         struct NotificationRequest {
         };
 
@@ -164,6 +167,7 @@ namespace scapi {
 
         typedef ::std::variant<
             ::scapi::Response
+          , RegistrationAnswer
           , ::scapi::Notification
         > Response;
 

@@ -238,7 +238,7 @@ update_ttd_with_data_entry(const vector<AckEntry> v) {
 enum ScapiResult
 scapi_Initialize(void) noexcept try {
     s_scapi = nullptr;
-    s_scapi = make_unique<scapi::nngpp::Session>();
+    s_scapi = make_unique<scapi::socket::Session>();
     return SCAPI_OK;
 } catch (...) {
     TtdKeeper::instance().handle_exception(__func__);

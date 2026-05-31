@@ -25,7 +25,9 @@ namespace scapi::socket {
 
         ::scapi::Notification
         notification(std::chrono::milliseconds) override;
- 
+
+        std::vector<CandidateApplication>
+        build_candidate_list(const ::scapi::BuildCandidateList&, const std::chrono::milliseconds) override;
     };
 
 }

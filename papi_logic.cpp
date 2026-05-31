@@ -10,10 +10,15 @@ using namespace std;
 using namespace chrono;
 
 struct ProprietaryLogic::Impl {
+    Impl(unique_ptr<NexuiSession>, TtdKeeper&);
+    ~Impl() noexcept = default;
     unique_ptr<NexuiSession> nexui;
-    scapi::Session& scapi;
     TtdKeeper& ttd;
 };
+
+ProprietaryLogic::Impl::Impl(unique_ptr<NexuiSession> n, TtdKeeper& t) :
+    nexui(move(n)), ttd(t) {
+}
 
 static NexuiRequest
 create_maintenance_info(const enum TerminalErrorReason ter, const enum NokReason nok) {
@@ -66,7 +71,8 @@ map_maintenance_type_tostring(const enum ProcedureResult r) {
     }
 }
 
-ProprietaryLogic::ProprietaryLogic(unique_ptr<NexuiSession> nexui, TtdKeeper& ttd) {
+ProprietaryLogic::ProprietaryLogic(unique_ptr<NexuiSession> nexui, TtdKeeper& ttd) :
+    pimpl(make_unique<ProprietaryLogic::Impl>(move(nexui), ttd)) {
 }
 
 ProprietaryLogic::~ProprietaryLogic(void) noexcept = default;
